@@ -1,6 +1,14 @@
 # Lemon-Pi
 
+
+
+<img src="https://24hoursoflemons.com/wp-content/uploads/2017/04/24hours_logo.png" alt="drawing" width="200"/>
+meets
+<img src="https://www.raspberrypi.org/wp-content/uploads/2011/10/Raspi-PGB001.png" alt="drawing" width="200"/>
+
 A Raspberry-Pi based dashboard display for endurance car racers.
+
+
 
 Under active hackery, but the basic premise is to solve the following issues
 1. provide a display of the current time
