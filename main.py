@@ -1,19 +1,20 @@
 
-import time
+import time, os
 from threading import Thread
 from gui import Gui
 from gps_reader import GpsReader
-from maf_analyzer import MA
+from maf_analyzer import MafAnalyzer
 from obd_reader import ObdReader
 from lap_tracker import LapTracker
-from display_providers import TemperatureProvider
 from display_providers import TimeProvider
-from display_providers import SpeedProvider
 from track import TrackLocation, read_tracks
+from haversine import haversine
 import logging
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+logging.basicConfig(format='%(asctime)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S',
+                    level=logging.INFO)
 
 logger.info("starting up")
 
@@ -36,36 +37,24 @@ class LocalTimeProvider(TimeProvider):
     def get_seconds(self) -> int:
         return int(time.time()) % 60
 
-
-class LocalTempProvider(TemperatureProvider):
-
-    def get_temp_f(self) -> int:
-        return 185
-
-
-class LocalSpeedProvider(SpeedProvider):
-
-    def __init__(self):
-        self.speed = 25
-        self.incr = +2
-
-    def getSpeed(self) -> int:
-        self.speed += self.incr
-        if self.speed >= 104:
-            self.incr = -1
-        if self.speed < 25:
-            self.incr = +1
-        return self.speed
-
+if not os.path.isdir("logs"):
+    os.mkdir("logs")
+file_handler = logging.FileHandler("logs/lap-logger-{}.csv".format(int(time.time())))
+lap_logger = logging.getLogger("lap-logger")
+lap_logger.addHandler(file_handler)
+MA = MafAnalyzer(lap_logger)
 
 tracks = read_tracks()
 
+# start a background thread to pull in gps data
 gps = GpsReader()
 gps.start()
 
-obd = ObdReader()
+# start a background thread to pull in OBD data
+obd = ObdReader(MA)
 obd.start()
 
+# store the closest track
 closest_track: TrackLocation = None
 
 def await_gps():
@@ -73,13 +62,14 @@ def await_gps():
     while not gps.is_working() or gps.get_lat_long() == (0, 0):
         time.sleep(1)
     global closest_track
-    closest_track = tracks[5]
+    closest_track = min(tracks, key=lambda x: haversine(gps.get_lat_long(), x.start_finish_begin))
     logger.info("closest track selected : {}".format(closest_track))
-    lap_tracker = LapTracker(closest_track)
+    lap_tracker = LapTracker(closest_track, MA)
     gps.register_position_listener(lap_tracker)
     gui.register_lap_provider(lap_tracker)
 
-
+# fire up a transient thread that polls until a location fix happens,
+# and then finds the closest track to our location
 Thread(target=await_gps).start()
 
 gui.register_speed_provider(gps)
