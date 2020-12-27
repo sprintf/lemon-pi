@@ -1,8 +1,6 @@
 from numpy import *
 from haversine import haversine
 
-import secrets
-
 def __perp_xy(a):
     b = empty_like(a)
     b[0] = -a[1]
@@ -71,6 +69,7 @@ def get_point_on_heading(point, heading:float):
 
 
 if __name__ == "__main__":
+
     print("testing")
     # 37.928344,-122.299246,37.928311,-122.299114
     a1 = (37.928344, -122.299246)
@@ -90,9 +89,10 @@ if __name__ == "__main__":
     print(is_between(a1, a2, result))
 
     import gmplot
+    from secrets import gmap_apikey
 
     gmap = gmplot.GoogleMapPlotter(37.928, -122.299, 16)
-    gmap.apikey = secrets.gmap-apikey
+    gmap.apikey = gmap_apikey
 
     gmap.marker(a1[0], a1[1])
     gmap.marker(a2[0], a2[1])

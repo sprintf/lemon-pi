@@ -5,7 +5,7 @@ import logging
 
 from threading import Thread
 from display_providers import TemperatureProvider
-from maf_analyzer import MA
+from updaters import MafUpdater
 
 logger = logging.getLogger(__name__)
 
@@ -16,11 +16,12 @@ class ObdReader(Thread, TemperatureProvider):
         obd.commands.MAF: 0.1,
     }
 
-    def __init__(self):
+    def __init__(self, maf_listener: MafUpdater):
         Thread.__init__(self)
         self.working = False
         self.temp_f = 0
         self.last_update_time = {}
+        self.maf_listener = maf_listener
 
         for key in ObdReader.refresh_rate.keys():
             self.last_update_time[key] = 0.0
@@ -79,7 +80,7 @@ class ObdReader(Thread, TemperatureProvider):
             self.temp_f = int(response.value.to('degF').magnitude)
         elif cmd == obd.commands.MAF:
             # grab the value in grams per second
-            MA.update_maf(response.value.to('gps').magnitude, response.time)
+            self.maf_listener.update_maf(response.value.to('gps').magnitude, response.time)
         else:
             raise RuntimeWarning("no handler for {}".format(cmd))
 

@@ -1,8 +1,9 @@
 .DS_Store
 .idea
 __pycache__
+logs
 venv
 traces
 secrets.py
 mymap.html
-output.html
+python-OBD

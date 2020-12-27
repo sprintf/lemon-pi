@@ -2,9 +2,12 @@ from guizero import App, Text, Box
 
 from display_providers import *
 
+import platform
+
 class Gui:
 
     def __init__(self):
+        self.font = self.__identify_font(platform.system())
         self.app = App("OBD Stuff",
                        bg="black",
                        width=800,
@@ -46,61 +49,61 @@ class Gui:
     def create_temp_widget(self, parent):
         result = Box(parent, width=212, height=112)
         result.set_border(4, "darkgreen")
-        Text(result, "TEMP", size="24", font="arial", color="white")
-        Text(result, "???", size="64", font="arial", color="white")
+        Text(result, "TEMP", size="24", color="white")
+        Text(result, "???", size="64", font=self.font, color="white")
         return result
 
     def create_time_widget(self, parent):
         result = Box(parent, width=212, height=112)
         result.set_border(4, "darkgreen")
-        Text(result, "TIME", size="24", font="arial", color="white")
-        Text(result, "hh", size="64", font="arial", color="white", align="left")
-        Text(result, ":", size="32", font="arial", color="white", align="left")
-        Text(result, "mm", size="64", font="arial", color="white", align="left")
-        # Text(result, "ss", size="64", font="arial", color="grey", align="left")
+        Text(result, "TIME", size="24", font=self.font, color="white")
+        Text(result, "hh", size="64", font=self.font, color="white", align="left")
+        Text(result, ":", size="32", font=self.font, color="white", align="left")
+        Text(result, "mm", size="64", font=self.font, color="white", align="left")
+        # Text(result, "ss", size="64", font=self.font, color="grey", align="left")
         return result
 
     def create_speed_widget(self, parent):
         result = Box(parent, width=212, height=200)
         result.set_border(4, "darkgreen")
-        Text(result, "???", size="64", font="arial", color="white", align="left")
-        Text(result, "mph", size="16", color="white", align="left")
+        Text(result, "???", size="64", font=self.font, color="white", align="left")
+        Text(result, "mph", size="16", color="white", font=self.font, align="left")
         return result
 
     def create_lap_widget(self, parent):
         result = Box(parent, width=212, height=260)
         result.set_border(4, "darkgreen")
-        Text(result, "LAP", size="24", font="arial", color="white")
-        Text(result, "---", size="32", font="arial", color="white")
-        Text(result, "mm:ss", size="32", font="arial", color="white")
+        Text(result, "LAP", size="24", font=self.font, color="white")
+        Text(result, "---", size="32", font=self.font, color="white")
+        Text(result, "mm:ss", size="32", font=self.font, color="white")
         Box(result, width=200, height=20)
-        Text(result, "Last Lap", size="16", font="arial", color="white")
-        Text(result, "mm:ss", size="32", font="arial", color="white")
+        Text(result, "Last Lap", size="16", font=self.font, color="white")
+        Text(result, "mm:ss", size="32", font=self.font, color="white")
         return result
 
     def create_fuel_widget(self, parent):
         result = Box(parent)
         result.set_border(4, "darkgreen")
-        Text(result, "FUEL", size='24', color="lightgreen")
+        Text(result, "FUEL", size='24', color="lightgreen", font=self.font)
         total_box = Box(result, height=100, width=212)
-        Text(total_box, "Total\nUsed", size='16', color="lightgreen", align="left")
-        Text(total_box, "--.--", size='32', color="lightgreen", align="left")
-        Text(total_box, "L", size='16', color="lightgreen", align="left")
+        Text(total_box, "Total\nUsed", size='16', color="lightgreen", font=self.font, align="left")
+        Text(total_box, "--.--", size='32', color="lightgreen", font=self.font, align="left")
+        Text(total_box, "L", size='16', color="lightgreen", font=self.font, align="left")
 
         last_hour_box = Box(result, height=100, width=200)
-        Text(last_hour_box, "Last\nHour", size='16', color="lightgreen", align="left")
-        Text(last_hour_box, "--.--", size='32', color="lightgreen", align="left")
-        Text(last_hour_box, "gph", size='16', color="lightgreen", align="left")
+        Text(last_hour_box, "Last\nHour", size='16', color="lightgreen", font=self.font, align="left")
+        Text(last_hour_box, "--.--", size='32', color="lightgreen", font=self.font, align="left")
+        Text(last_hour_box, "gph", size='16', color="lightgreen", font=self.font, align="left")
 
         last_lap_box = Box(result, height=100, width=200)
-        Text(last_lap_box, "Last\nLap", size='16', color="lightgreen", align="left")
-        Text(last_lap_box, "--.--", size='32', color="lightgreen", align="left")
-        Text(last_lap_box, "ml", size='16', color="lightgreen", align="left")
+        Text(last_lap_box, "Last\nLap", size='16', color="lightgreen", font=self.font, align="left")
+        Text(last_lap_box, "--.--", size='32', color="lightgreen", font=self.font, align="left")
+        Text(last_lap_box, "ml", size='16', color="lightgreen", font=self.font, align="left")
 
         remaining_box = Box(result, height=100, width=200)
-        Text(remaining_box, "Remaining", size='16', color="lightgreen", align="left")
-        Text(remaining_box, "--.--", size='32', color="lightgreen", align="left")
-        Text(remaining_box, "%", size='32', color="lightgreen", align="left")
+        Text(remaining_box, "Remaining", size='16', color="lightgreen", font=self.font, align="left")
+        Text(remaining_box, "--.--", size='32', color="lightgreen", font=self.font, align="left")
+        Text(remaining_box, "%", size='32', color="lightgreen", font=self.font, align="left")
 
         return result
 
@@ -159,6 +162,14 @@ class Gui:
         last_hour_box.children[1].value = "{:02.2f}".format(provider.get_fuel_used_last_hour_gallons())
         last_lap_box.children[1].value = "{:02d}".format(provider.get_fuel_used_last_lap_ml())
         remaining_box.children[1].value = "{:02d}".format(provider.get_fuel_percent_remaining())
+
+    def __identify_font(self, platform):
+        if platform == "Darwin":
+            return "arial"
+        elif platform == "Linux":
+            return "droid"
+        else:
+            Exception("no font defined for {}".format(platform))
 
 
 
