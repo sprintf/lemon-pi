@@ -75,7 +75,7 @@ class ObdReader(Thread, TemperatureProvider):
         return result
 
     def process_result(self, cmd, response: OBDResponse):
-        logger.info("processing {} at {}".format(cmd, response))
+        logger.debug("processing {} at {}".format(cmd, response))
         if cmd == obd.commands.COOLANT_TEMP:
             self.temp_f = int(response.value.to('degF').magnitude)
         elif cmd == obd.commands.MAF:
