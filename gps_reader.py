@@ -51,7 +51,7 @@ class GpsReader(Thread, SpeedProvider, PositionProvider):
                                     self.working = True
                                 # todo : get this so its accurate
                                 # timestamp = float((session.fix.time - datetime(1970,1,1)).total_seconds())
-                            time.sleep(0.2)
+                            time.sleep(0.1)
                     except KeyError:
                         # this happens when elevation is not included, we don't care
                         pass
