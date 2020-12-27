@@ -167,7 +167,7 @@ class Gui:
         if platform == "Darwin":
             return "arial"
         elif platform == "Linux":
-            return "droid"
+            return "freesans"
         else:
             Exception("no font defined for {}".format(platform))
 
