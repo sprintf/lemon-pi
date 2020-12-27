@@ -17,10 +17,10 @@ class Gui:
         col3 = Box(self.app, align="left", width=266, height=480)
 
         self.time_widget = self.create_time_widget(col1)
-        Box(col1, height=64, width=200)
+        Box(col1, height=64, width=208)
         self.lap_display = self.create_lap_widget(col1)
         self.temp_widget = self.create_temp_widget(col2)
-        Box(col2, height=64, width=200)
+        Box(col2, height=64, width=208)
         self.speed_heading_widget = self.create_speed_widget(col2)
         self.fuel_display = self.create_fuel_widget(col3)
 
@@ -47,58 +47,58 @@ class Gui:
         self.fuel_display.repeat(1000, self.__updateFuel, args=[provider])
 
     def create_temp_widget(self, parent):
-        result = Box(parent, width=200, height=112)
+        result = Box(parent, width=212, height=112)
         result.set_border(4, "darkgreen")
-        Text(result, "TEMP", size="32", color="white")
+        Text(result, "TEMP", size="24", color="white")
         Text(result, "???", size="64", font=self.font, color="white")
         return result
 
     def create_time_widget(self, parent):
-        result = Box(parent, width=200, height=112)
+        result = Box(parent, width=212, height=112)
         result.set_border(4, "darkgreen")
-        Text(result, "TIME", size="32", color="white")
+        Text(result, "TIME", size="24", font=self.font, color="white")
         Text(result, "hh", size="64", font=self.font, color="white", align="left")
-        Text(result, ":", size="64", font=self.font, color="white", align="left")
+        Text(result, ":", size="32", font=self.font, color="white", align="left")
         Text(result, "mm", size="64", font=self.font, color="white", align="left")
         # Text(result, "ss", size="64", font=self.font, color="grey", align="left")
         return result
 
     def create_speed_widget(self, parent):
-        result = Box(parent, width=200, height=200)
+        result = Box(parent, width=212, height=200)
         result.set_border(4, "darkgreen")
         Text(result, "???", size="64", font=self.font, color="white", align="left")
         Text(result, "mph", size="16", color="white", font=self.font, align="left")
         return result
 
     def create_lap_widget(self, parent):
-        result = Box(parent, width=200, height=260)
+        result = Box(parent, width=212, height=260)
         result.set_border(4, "darkgreen")
-        Text(result, "LAP", size="32", font=self.font, color="white")
+        Text(result, "LAP", size="24", font=self.font, color="white")
         Text(result, "---", size="32", font=self.font, color="white")
         Text(result, "mm:ss", size="32", font=self.font, color="white")
-        Box(result, width=200, height=24)
-        Text(result, "Last Lap", size="32", font=self.font, color="white")
+        Box(result, width=200, height=20)
+        Text(result, "Last Lap", size="16", font=self.font, color="white")
         Text(result, "mm:ss", size="32", font=self.font, color="white")
         return result
 
     def create_fuel_widget(self, parent):
         result = Box(parent)
         result.set_border(4, "darkgreen")
-        Text(result, "FUEL", size='32', color="lightgreen", font=self.font)
-        total_box = Box(result, height=100, width=200)
+        Text(result, "FUEL", size='24', color="lightgreen", font=self.font)
+        total_box = Box(result, height=100, width=212)
         Text(total_box, "Total\nUsed", size='16', color="lightgreen", font=self.font, align="left")
         Text(total_box, "--.--", size='32', color="lightgreen", font=self.font, align="left")
-        Text(total_box, "L", size='32', color="lightgreen", font=self.font, align="left")
+        Text(total_box, "L", size='16', color="lightgreen", font=self.font, align="left")
 
         last_hour_box = Box(result, height=100, width=200)
         Text(last_hour_box, "Last\nHour", size='16', color="lightgreen", font=self.font, align="left")
         Text(last_hour_box, "--.--", size='32', color="lightgreen", font=self.font, align="left")
-        Text(last_hour_box, "gph", size='32', color="lightgreen", font=self.font, align="left")
+        Text(last_hour_box, "gph", size='16', color="lightgreen", font=self.font, align="left")
 
         last_lap_box = Box(result, height=100, width=200)
         Text(last_lap_box, "Last\nLap", size='16', color="lightgreen", font=self.font, align="left")
         Text(last_lap_box, "--.--", size='32', color="lightgreen", font=self.font, align="left")
-        Text(last_lap_box, "ml", size='32', color="lightgreen", font=self.font, align="left")
+        Text(last_lap_box, "ml", size='16', color="lightgreen", font=self.font, align="left")
 
         remaining_box = Box(result, height=100, width=200)
         Text(remaining_box, "Remaining", size='16', color="lightgreen", font=self.font, align="left")
