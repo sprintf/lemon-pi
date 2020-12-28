@@ -1,8 +1,10 @@
 from guizero import App, Text, Box
 
 from display_providers import *
-
+import logging
 import platform
+
+logger = logging.getLogger(__name__)
 
 class Gui:
 
@@ -16,6 +18,10 @@ class Gui:
         col2 = Box(self.app, align="left", width=266, height=480)
         col3 = Box(self.app, align="left", width=266, height=480)
 
+        # these are invisible displays used to show special case data when the car is pitting
+        col4 = Box(self.app, align="left", width=col3.width, height=col3.height, visible=False)
+        col5 = Box(self.app, align="left", width=col3.width, height=col3.height, visible=False)
+
         self.time_widget = self.create_time_widget(col1)
         Box(col1, height=64, width=208)
         self.lap_display = self.create_lap_widget(col1)
@@ -24,7 +30,27 @@ class Gui:
         self.speed_heading_widget = self.create_speed_widget(col2)
         self.fuel_display = self.create_fuel_widget(col3)
 
+        self.stint_ending_display = self.create_stint_end_instructions(col4)
+        self.stint_starting_display = self.create_stint_start_instructions(col5)
+
+    def handle_keyboard(self, event_data):
+        logger.info("Key Pressed : {}".format(event_data.key))
+        if event_data.key == "s":
+            # imitate start/finish behavior
+            self.app.children[2].hide()
+            self.app.children[3].show()
+            self.app.children[4].hide()
+        if event_data.key == "f":
+            self.app.children[2].hide()
+            self.app.children[3].hide()
+            self.app.children[4].show()
+        if event_data.key == "h":
+            self.app.children[2].show()
+            self.app.children[3].hide()
+            self.app.children[4].hide()
+
     def display(self):
+        self.app.when_key_pressed = self.handle_keyboard
         self.app.display()
 
     def register_temp_provider(self, provider: TemperatureProvider):
@@ -105,6 +131,33 @@ class Gui:
         Text(remaining_box, "--.--", size='32', color="lightgreen", font=self.font, align="left")
         Text(remaining_box, "%", size='32', color="lightgreen", font=self.font, align="left")
 
+        return result
+
+    def create_stint_end_instructions(self, parent):
+        result = Box(parent)
+        result.set_border(4, "darkgreen")
+        Text(result, "INSTRUCTIONS", size='24', color="lightgreen", font=self.font)
+        Text(result, "1. Loosen Belts", size='32', color="white", font=self.font)
+        Text(result, "2. Undo Belts", size='32', color="white", font=self.font)
+        Text(result, "3. Disc. Radio", size='32', color="white", font=self.font)
+        Text(result, "4. Stop in Pit", size='32', color="white", font=self.font)
+        Text(result, "5. No handbrake", size='32', color="white", font=self.font)
+        Text(result, "6. Kill engine", size='32', color="white", font=self.font)
+        Text(result, "7. Wheel Off", size='32', color="white", font=self.font)
+        Text(result, "8. Get Out!", size='32', color="white", font=self.font)
+        return result
+
+    def create_stint_start_instructions(self, parent):
+        result = Box(parent)
+        result.set_border(4, "darkgreen")
+        Text(result, "INSTRUCTIONS", size='24', color="lightgreen", font=self.font)
+        Text(result, "1. Adjust Seat", size='32', color="white", font=self.font)
+        Text(result, "2. Wheel on", size='32', color="white", font=self.font)
+        Text(result, "3. Belts", size='32', color="white", font=self.font)
+        Text(result, "4. Radio", size='32', color="white", font=self.font)
+        Text(result, "5. Mirrors", size='32', color="white", font=self.font)
+        Text(result, "6. Water", size='32', color="white", font=self.font)
+        Text(result, "Gloves / Hans?", size='32', color="white", font=self.font)
         return result
 
     def __updateTemp(self, provider: TemperatureProvider):

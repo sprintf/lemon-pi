@@ -1,50 +1,41 @@
 
-import csv
+import yaml
+import re
 from haversine import haversine, Unit
-from numpy import arctan2,random,sin,cos,degrees
+from geometry import calc_intersect_heading
+from target import Target
 
 class TrackLocation:
 
-    def __init__(self, name, x1: float, y1: float, x2: float, y2: float, dir):
+    def __init__(self, name, lat1: float, long1: float, lat2: float, long2: float, dir):
         self.name = name
-        self.start_finish_begin = (x1, y1)
-        self.start_finish_end = (x2, y2)
-        self.direction = dir
-        self.target_heading = self.calc_start_finish_heading()
+        start_finish_begin = (lat1, long1)
+        start_finish_end = (lat2, long2)
+        direction = dir
+        target_heading = calc_intersect_heading(start_finish_begin, start_finish_end, direction)
+        self.start_finish:Target = Target(start_finish_begin, start_finish_end, target_heading)
+        self.pit_in:Target = None
 
-        print("{} {}".format(self.track_width(), self.target_heading))
+        print("{} {}".format(self.track_width(), target_heading))
 
     def track_width(self):
-        return haversine(self.start_finish_begin, self.start_finish_end, unit=Unit.FEET)
-        # x1, y1 = self.start_finish_begin
-        # x2, y2 = self.start_finish_end
-        # xdiff = abs(x1 - x2)
-        # ydiff = abs(y1 - y2)
-        # return math.sqrt((xdiff * xdiff) + (ydiff * ydiff))
+        return haversine(self.start_finish.lat_long1, self.start_finish.lat_long2, unit=Unit.FEET)
 
     def get_target_heading(self):
         return self.target_heading
 
-    def start_finish_midpoint(self):
-        lat1, long1 = self.start_finish_begin
-        lat2, long2 = self.start_finish_end
-        return ((lat1 + lat2) / 2, (long1 + long2) / 2)
+    def get_start_finish_target(self) -> Target:
+        return self.start_finish
 
-    def calc_start_finish_heading(self):
-        a = self.start_finish_begin
-        b = self.start_finish_end
-        lat = 0
-        lon = 1
+    def is_pit_defined(self) -> bool:
+        return self.pit_in is not None
 
-        dL = b[lon] - a[lon]
-        X = cos(b[lat]) * sin(dL)
-        Y = cos(a[lat]) * sin(b[lat]) - sin(a[lat]) * cos(b[lat]) * cos(dL)
-        line_heading = degrees(arctan2(X, Y))
-        # todo : based on "S", "SW", etc this might be +90 or +180
-        rotation = 90
-        if "E" in self.direction or "N" in self.direction:
-            rotation = -90
-        return (line_heading + rotation) % 360
+    def get_pit_in_target(self) -> Target:
+        return self.pit_in
+
+    def set_pit_in_coords(self, lat_long1, lat_long2, direction):
+        pit_in_heading = calc_intersect_heading(lat_long1, lat_long2, direction)
+        self.pit_in = Target(lat_long1, lat_long2, pit_in_heading)
 
     def __repr__(self):
         return self.name
@@ -52,12 +43,21 @@ class TrackLocation:
 
 def read_tracks():
     track_list = []
-    with open("resources/tracks.csv") as csvfile:
-        tracks = csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC)
-        # skip the header
-        next(tracks)
-        for track in tracks:
-            track_list.append(TrackLocation(track[0], track[1], track[2], track[3], track[4], track[5]))
+    with open("resources/tracks.yaml") as yamlfile:
+        tracks = yaml.load(yamlfile, Loader=yaml.FullLoader)
+        for track in tracks["tracks"]:
+            sf = track["start_finish_coords"]
+            points = re.findall("[-+]?\d+.\d+", sf)
+            assert len(points) == 4, "expected 4 points"
+            track_data = TrackLocation(track["name"], float(points[0]), float(points[1]), float(points[2]),
+                                     float(points[3]), track["start_finish_direction"])
+            if "pit_entry_coords" in track:
+                pi = track["pit_entry_coords"]
+                points = re.findall("[-+]?\d+.\d+", pi)
+                assert len(points) == 4, "expected 4 points"
+                track_data.set_pit_in_coords((float(points[0]), float(points[1])),
+                                             (float(points[2]), float(points[3])), track["pit_entry_direction"])
+            track_list.append(track_data)
     return track_list
 
 if __name__ == "__main__":

@@ -68,6 +68,23 @@ def get_point_on_heading(point, heading:float):
     return math.degrees(lat2), math.degrees(lon2)
 
 
+def calc_intersect_heading(lat_long1, lat_long2, direction):
+    a = lat_long1
+    b = lat_long2
+    lat = 0
+    lon = 1
+
+    dL = b[lon] - a[lon]
+    X = cos(b[lat]) * sin(dL)
+    Y = cos(a[lat]) * sin(b[lat]) - sin(a[lat]) * cos(b[lat]) * cos(dL)
+    line_heading = degrees(arctan2(X, Y))
+    # todo : based on "S", "SW", etc this might be +90 or +180
+    rotation = 90
+    if "E" in direction or "N" in direction:
+        rotation = -90
+    return (line_heading + rotation) % 360
+
+
 if __name__ == "__main__":
 
     print("testing")

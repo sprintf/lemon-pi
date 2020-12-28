@@ -20,3 +20,5 @@ We also use GPS, which allows us to detect when the car crosses the start/finish
 At a future time, we hope to add onboard digital communications that can relay all this information to the pits each time the car goes past.
 
 Currently, this is all being developed on Mac. Once closer to working we will convert it over to R-pi.
+
+[Raspberry Pi specific instructions](README-rpi.md)

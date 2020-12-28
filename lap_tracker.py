@@ -1,6 +1,7 @@
 from track import TrackLocation
 from updaters import PositionUpdater, LapUpdater
 from display_providers import LapProvider
+from target import Target
 
 from haversine import haversine, Unit
 import geometry
@@ -14,7 +15,6 @@ class LapTracker(PositionUpdater, LapProvider):
     def __init__(self, track: TrackLocation, listener: LapUpdater):
         self.track = track
         self.listener = listener
-        self.start_finish_midpoint = track.start_finish_midpoint()
         self.on_track = False
         self.lap_start_time = 0.0
         self.last_pos = (0, 0)
@@ -28,7 +28,7 @@ class LapTracker(PositionUpdater, LapProvider):
 
         logger.debug("updating position to {} {}".format(lat, long))
         self.last_pos = (lat, long)
-        if self.__crossed_start_line__(lat, long, heading):
+        if self.__crossed_line(lat, long, heading, self.track.start_finish):
             # de-bounce hitting start finish line twice ... a better
             # approach might be to ensure car travels so far away from line
             if time - self.lap_start_time > 10:
@@ -46,38 +46,33 @@ class LapTracker(PositionUpdater, LapProvider):
                         self.listener.update_lap(self.lap_count, self.last_lap_time)
                 self.lap_start_time = time
 
-    def __crossed_start_line__(self, lat, long, heading):
+        elif self.track.is_pit_defined() and \
+            self.__crossed_line__(self, lat, long, heading, self.track.pit_in):
+            logger.info("entered pits")
 
-        if self.angular_difference(self.track.get_target_heading(), heading) > 15:
+    def __crossed_line(self, lat, long, heading, target:Target):
+        if self.angular_difference(target.target_heading(), heading) > 15:
             return False
 
-        # distance to start/finish is
-        #  less than 100 feet  (say, 0.002)
-        #  and prev vector doesn't match this vector
-        dist = int(haversine(self.start_finish_midpoint, (lat, long), unit=Unit.FEET))
-
-        logger.debug("distance to start/finish = {} feet".format(dist))
-
+        dist = int(haversine(target.midpoint, (lat, long), unit=Unit.FEET))
+        logger.debug("distance to target = {} feet".format(dist))
         if dist < 100:
-            logger.debug("close to start/finish!!")
-
+            # grab a point that we're heading towards
             point_ahead = geometry.get_point_on_heading((lat, long), heading)
 
-            # work out heading from car to line
-            intersect = geometry.seg_intersect_lat_long(self.track.start_finish_begin, self.track.start_finish_end,
-                                   (lat, long), point_ahead)
+            # work out the intersect from car to line
+            intersect = geometry.seg_intersect_lat_long(target.lat_long1, target.lat_long2,
+                                                        (lat, long), point_ahead)
 
-            # is this point on the s/f line?
-            if geometry.is_between(self.track.start_finish_begin, self.track.start_finish_end, intersect):
-                logger.debug("on track to hit line")
-                logger.debug("distance to line = {} feet".format(int(haversine(intersect, (lat, long), unit=Unit.FEET))))
+            # is this intersect point on the target line?
+            if geometry.is_between(target.lat_long1, target.lat_long2, intersect):
+                logger.debug("on track to hit target")
 
-                # lets get the heading from out current position to the intersect
+                # lets get the heading from our current position to the intersect
                 target_heading = geometry.heading_between_lat_long((lat, long), intersect)
-                if (abs(heading- target_heading) > 170):
+                if (abs(heading - target_heading) > 170):
                     logger.info("GONE PASSED start/finish line!!!!")
                     return True
-
         return False
 
     def angular_difference(self, h1, h2):
