@@ -2,8 +2,8 @@
 import yaml
 import re
 from haversine import haversine, Unit
-from geometry import calc_intersect_heading
 from target import Target
+
 
 class TrackLocation:
 
@@ -11,18 +11,17 @@ class TrackLocation:
         self.name = name
         start_finish_begin = (lat1, long1)
         start_finish_end = (lat2, long2)
-        direction = dir
-        target_heading = calc_intersect_heading(start_finish_begin, start_finish_end, direction)
-        self.start_finish:Target = Target(start_finish_begin, start_finish_end, target_heading)
+        self.start_finish:Target = Target("start/finish", start_finish_begin, start_finish_end, dir)
         self.pit_in:Target = None
 
-        print("{} {}".format(self.track_width(), target_heading))
+        print("{} : width = {} heading = {}".format(name, self.track_width_feet(),
+                                                    int(self.start_finish.target_heading)))
 
-    def track_width(self):
-        return haversine(self.start_finish.lat_long1, self.start_finish.lat_long2, unit=Unit.FEET)
+    def track_width_feet(self):
+        return int(haversine(self.start_finish.lat_long1, self.start_finish.lat_long2, unit=Unit.FEET))
 
     def get_target_heading(self):
-        return self.target_heading
+        return self.start_finish.target_heading
 
     def get_start_finish_target(self) -> Target:
         return self.start_finish
@@ -34,14 +33,14 @@ class TrackLocation:
         return self.pit_in
 
     def set_pit_in_coords(self, lat_long1, lat_long2, direction):
-        pit_in_heading = calc_intersect_heading(lat_long1, lat_long2, direction)
-        self.pit_in = Target(lat_long1, lat_long2, pit_in_heading)
+        self.pit_in = Target("pit-in", lat_long1, lat_long2, direction)
+        print("{} : pit-in heading = {}".format(self.name, int(self.pit_in.target_heading)))
 
     def __repr__(self):
         return self.name
 
 
-def read_tracks():
+def read_tracks() -> [TrackLocation]:
     track_list = []
     with open("resources/tracks.yaml") as yamlfile:
         tracks = yaml.load(yamlfile, Loader=yaml.FullLoader)

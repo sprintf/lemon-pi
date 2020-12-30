@@ -1,8 +1,12 @@
 from gps import *
 
+from haversine import haversine
+from dateutil import parser
+from datetime import datetime, timezone, timedelta
 from display_providers import SpeedProvider, PositionProvider
 from updaters import PositionUpdater
 from threading import Thread
+from events import EventHandler, MovingEvent, NotMovingEvent, CarStoppedEvent
 import logging
 import time
 
@@ -29,29 +33,38 @@ class GpsReader(Thread, SpeedProvider, PositionProvider):
                 while True:
                     try:
                         data = session.next()
-                        if data['class'] == 'TPV':
-                            # print('lat lon = {} {} speed = {} time = {} track = {}'.
-                            #       format(session.fix.latitude,
-                            #              session.fix.longitude,
-                            #              session.fix.speed,
-                            #              session.fix.time,
-                            #              session.fix.track))
 
-                            if session.fix.status != STATUS_NO_FIX:
-                                # assuming its coming in m/s
-                                if not math.isnan(session.fix.speed):
-                                    self.speed_mph = int(session.fix.speed * 2.237)
-                                if not math.isnan(session.fix.track):
-                                    self.heading = session.fix.track
-                                if not math.isnan(session.fix.latitude):
-                                    self.lat = session.fix.latitude
-                                    self.long = session.fix.longitude
-                                    if self.position_listener:
-                                        self.position_listener.update_position(self.lat, self.long, self.heading, time.time(), self.speed_mph)
-                                    self.working = True
-                                # todo : get this so its accurate
-                                # timestamp = float((session.fix.time - datetime(1970,1,1)).total_seconds())
-                            time.sleep(0.1)
+                        if session.fix.time and str(session.fix.time) != "nan":
+                            logger.debug("{} {} {} {}".format(session.fix.time, data['class'], session.fix.latitude, session.fix.longitude ))
+                            lag: timedelta = datetime.now(tz=timezone.utc) - \
+                                             parser.isoparse(session.fix.time).astimezone()
+
+                            if lag.total_seconds() > 1:
+                                logger.warning("GPS Data time lag = {}  (skipping)".format(lag.total_seconds()))
+                                continue
+
+                        if session.fix.status == STATUS_NO_FIX:
+                            logger.warning("no fix...awaiting")
+                            time.sleep(0.5)
+                            continue
+
+                        if data['class'] == 'TPV':
+                            # assuming its coming in m/s
+                            if not math.isnan(session.fix.speed):
+                                self.speed_mph = int(session.fix.speed * 2.237)
+                                if self.speed_mph < 3:
+                                    NotMovingEvent.emit(speed=self.speed_mph, lat_long=(session.fix.latitude, session.fix.longitude))
+                                else:
+                                    MovingEvent.emit(speed=self.speed_mph, lat_long=(session.fix.latitude, session.fix.longitude))
+                            if not math.isnan(session.fix.track):
+                                self.heading = session.fix.track
+                            if not math.isnan(session.fix.latitude):
+                                self.lat = session.fix.latitude
+                                self.long = session.fix.longitude
+                                if self.position_listener:
+                                    self.position_listener.update_position(self.lat, self.long, self.heading, time.time(), self.speed_mph)
+                                self.working = True
+                            #time.sleep(0.1)
                     except KeyError:
                         # this happens when elevation is not included, we don't care
                         pass

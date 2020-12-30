@@ -1,12 +1,15 @@
 from guizero import App, Text, Box
 
 from display_providers import *
+from events import LeaveTrackEvent
+from events import EventHandler, StateChangeSettingOffEvent, StateChangePittedEvent
+
 import logging
 import platform
 
 logger = logging.getLogger(__name__)
 
-class Gui:
+class Gui(EventHandler):
 
     def __init__(self):
         self.font = self.__identify_font(platform.system())
@@ -32,6 +35,22 @@ class Gui:
 
         self.stint_ending_display = self.create_stint_end_instructions(col4)
         self.stint_starting_display = self.create_stint_start_instructions(col5)
+
+        LeaveTrackEvent.register_handler(self)
+
+    def handle_event(self, event, **kwargs):
+        if event == LeaveTrackEvent:
+            self.app.children[2].hide()
+            self.app.children[3].show()
+            self.app.children[4].hide()
+        if event == StateChangePittedEvent:
+            self.app.children[2].hide()
+            self.app.children[3].hide()
+            self.app.children[4].show()
+        if event == StateChangeSettingOffEvent:
+            self.app.children[2].show()
+            self.app.children[3].hide()
+            self.app.children[4].hide()
 
     def handle_keyboard(self, event_data):
         logger.info("Key Pressed : {}".format(event_data.key))

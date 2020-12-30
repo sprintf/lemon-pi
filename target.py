@@ -3,14 +3,15 @@
 # it is defined as being two lat_longs defining the endpoints
 # of a line. And a heading that indicates a tangent to the
 # direction of travel when passing the point.
-
+from geometry import calc_intersect_heading
 
 class Target:
 
-    def __init__(self, lat_long1, lat_long2, heading):
-        self.lat_long1 = lat_long1
-        self.lat_long2 = lat_long2
-        self.target_heading = heading
+    def __init__(self, name, lat_long1, lat_long2, direction):
+        self.name = name
+        self.lat_long1 = min(lat_long1, lat_long2)
+        self.lat_long2 = max(lat_long1, lat_long2)
+        self.target_heading = calc_intersect_heading(self.lat_long1, self.lat_long2, direction)
         self.midpoint = self._calc_midpoint_()
 
     def _calc_midpoint_(self):

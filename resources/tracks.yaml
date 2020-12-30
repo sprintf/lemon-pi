@@ -3,18 +3,26 @@ tracks:
   -  name: "Sonoma Raceway"
      start_finish_coords: "(38.161340,-122.454911),(38.161589,-122.454658)"
      start_finish_direction: "NW"
+     pit_entry_coords: "(38.158549,-122.452756),(38.158343,-122.452689)"
+     pit_entry_direction: "W"
 
   -  name: "Thunderhill"
      start_finish_coords: "(39.538475,-122.331300),(39.538480,-122.331113)"
      start_finish_direction: "S"
+     pit_entry_coords: "(39.541604,-122.331588),(39.541502,-122.331592)"
+     pit_entry_direction: "W"
 
   -  name: "Laguna Seca"
      start_finish_coords: "(36.586308,-121.756908),(36.586158,-121.756649)"
      start_finish_direction: "SW"
+     pit_entry_coords: "(36.588199,-121.754397),(36.588241,-121.754311)"
+     pit_entry_direction: "NW"
 
   -  name: "Buttonwillow"
      start_finish_coords: "(35.489031,-119.544530),(35.488713,-119.544510)"
      start_finish_direction: "E"
+     pit_entry_coords: "(35.488943,-119.547690),(35.489060,-119.547604)"
+     pit_entry_direction: "SE"
 
 
   -  name: "Arlington Test Track"

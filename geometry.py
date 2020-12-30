@@ -68,6 +68,18 @@ def get_point_on_heading(point, heading:float):
     return math.degrees(lat2), math.degrees(lon2)
 
 
+DirectionMap = {
+    "N" : 0,
+    "NE" : 45,
+    "E" : 90,
+    "SE" : 135,
+    "S" : 180,
+    "SW" : 225,
+    "W" : 270,
+    "NW" : 315
+}
+
+
 def calc_intersect_heading(lat_long1, lat_long2, direction):
     a = lat_long1
     b = lat_long2
@@ -78,11 +90,25 @@ def calc_intersect_heading(lat_long1, lat_long2, direction):
     X = cos(b[lat]) * sin(dL)
     Y = cos(a[lat]) * sin(b[lat]) - sin(a[lat]) * cos(b[lat]) * cos(dL)
     line_heading = degrees(arctan2(X, Y))
-    # todo : based on "S", "SW", etc this might be +90 or +180
-    rotation = 90
-    if "E" in direction or "N" in direction:
-        rotation = -90
-    return (line_heading + rotation) % 360
+
+    # print("got line_heading = {} want {}".format(line_heading, direction))
+
+    line_heading += 360
+    choice1 = (line_heading + 90)
+    choice2 = (line_heading - 90)
+    suggestion = DirectionMap[direction]
+
+    # print("suggested angle is close to {}".format(suggestion))
+    # print("choices are {} or {}".format(choice1 % 360, choice2 % 360))
+
+    # print("diff 1 / 2 = {} {}".format(abs(suggestion - choice1), abs(suggestion - choice2)))
+
+    if abs(suggestion - choice1 % 360)  < abs(suggestion - choice2 % 360):
+        # print("choosing 1")
+        return choice1 % 360
+    else:
+        # print("choosing 2")
+        return choice2 % 360
 
 
 if __name__ == "__main__":

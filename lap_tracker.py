@@ -2,6 +2,7 @@ from track import TrackLocation
 from updaters import PositionUpdater, LapUpdater
 from display_providers import LapProvider
 from target import Target
+from events import LeaveTrackEvent, CompleteLapEvent
 
 from haversine import haversine, Unit
 import geometry
@@ -21,6 +22,7 @@ class LapTracker(PositionUpdater, LapProvider):
         self.last_pos_time = 0.0
         self.lap_count = 999
         self.last_lap_time = 0
+        self.last_pit_in_time = 0
 
     def update_position(self, lat:float, long:float, heading:float, time:float, speed:int) -> None:
         if (lat, long) == self.last_pos:
@@ -32,8 +34,11 @@ class LapTracker(PositionUpdater, LapProvider):
             # de-bounce hitting start finish line twice ... a better
             # approach might be to ensure car travels so far away from line
             if time - self.lap_start_time > 10:
+                CompleteLapEvent.emit()
                 if not self.on_track:
                     logger.info("entering track")
+                    # this isn't true for a multi-driver day, but we'll keep each
+                    # drivers view as their own
                     self.lap_count = 0
                     self.on_track = True
                     if self.listener:
@@ -47,11 +52,17 @@ class LapTracker(PositionUpdater, LapProvider):
                 self.lap_start_time = time
 
         elif self.track.is_pit_defined() and \
-            self.__crossed_line__(self, lat, long, heading, self.track.pit_in):
-            logger.info("entered pits")
+            self.__crossed_line(lat, long, heading, self.track.pit_in):
+            # de-bounce so that we don't re-enter the pits repeatedly
+            # we could move the time into the target object,
+            if time - self.last_pit_in_time > 30:
+                self.on_track = False
+                LeaveTrackEvent.emit()
+                logger.info("entered pits")
+                self.last_pit_in_time = time
 
     def __crossed_line(self, lat, long, heading, target:Target):
-        if self.angular_difference(target.target_heading(), heading) > 15:
+        if self.angular_difference(target.target_heading, heading) > 15:
             return False
 
         dist = int(haversine(target.midpoint, (lat, long), unit=Unit.FEET))
@@ -71,7 +82,8 @@ class LapTracker(PositionUpdater, LapProvider):
                 # lets get the heading from our current position to the intersect
                 target_heading = geometry.heading_between_lat_long((lat, long), intersect)
                 if (abs(heading - target_heading) > 170):
-                    logger.info("GONE PASSED start/finish line!!!!")
+                    logger.info("GONE PASSED {} line!!!!".format(target.name))
+                    logger.info("my heading = {}, target heading = {}".format(heading, target.target_heading))
                     return True
         return False
 

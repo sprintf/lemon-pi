@@ -6,6 +6,7 @@ import logging
 from threading import Thread
 from display_providers import TemperatureProvider
 from updaters import MafUpdater
+from events import OBDConnectedEvent, OBDDisconnectedEvent
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +49,7 @@ class ObdReader(Thread, TemperatureProvider):
             except Exception as e:
                 print("bad stuff in OBD land %s", e)
                 self.working = False
+                OBDDisconnectedEvent()
                 time.sleep(10)
 
     def connect(self):
@@ -61,6 +63,7 @@ class ObdReader(Thread, TemperatureProvider):
             return None
 
         result = obd.OBD(usb, protocol="3")
+        OBDConnectedEvent.emit()
         result.print_commands()
 
         cmds = result.query(obd.commands.PIDS_A)
