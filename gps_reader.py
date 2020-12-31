@@ -1,21 +1,20 @@
 from gps import *
 
-from haversine import haversine
 from dateutil import parser
 from datetime import datetime, timezone, timedelta
 from display_providers import SpeedProvider, PositionProvider
 from updaters import PositionUpdater
 from threading import Thread
-from events import EventHandler, MovingEvent, NotMovingEvent, CarStoppedEvent
+from events import EventHandler, MovingEvent, NotMovingEvent, CarStoppedEvent, ExitApplicationEvent
 import logging
 import time
 
 logger = logging.getLogger(__name__)
 
-class GpsReader(Thread, SpeedProvider, PositionProvider):
+class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
 
     def __init__(self, log_to_file=False):
-        Thread.__init__(self)
+        Thread.__init__(self, daemon=True)
         self.speed_mph = 999
         self.heading = 0
         self.working = False
@@ -23,14 +22,20 @@ class GpsReader(Thread, SpeedProvider, PositionProvider):
         self.long = 0.0
         self.position_listener = None
         self.log = log_to_file
+        self.finished = False
+        ExitApplicationEvent.register_handler(self)
+
+    def handle_event(self, event, **kwargs):
+        if event == ExitApplicationEvent:
+            self.finished = True
 
     def run(self) -> None:
-        while True:
+        while not self.finished:
             try:
                 logger.info("connecting to GPS...")
                 session = gps(mode=WATCH_ENABLE)
 
-                while True:
+                while not self.finished:
                     try:
                         data = session.next()
 

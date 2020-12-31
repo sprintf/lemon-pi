@@ -52,6 +52,8 @@ LeaveTrackEvent = Event("LeaveTrack")
 # a lap has been completed
 CompleteLapEvent = Event("CompleteLap")
 
+# a request to exit the application
+ExitApplicationEvent = Event("ExitApplication")
 
 ### State Change Events
 

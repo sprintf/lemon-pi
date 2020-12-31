@@ -6,7 +6,7 @@ import logging
 from threading import Thread
 from display_providers import TemperatureProvider
 from updaters import MafUpdater
-from events import OBDConnectedEvent, OBDDisconnectedEvent
+from events import OBDConnectedEvent, OBDDisconnectedEvent, ExitApplicationEvent
 
 logger = logging.getLogger(__name__)
 
@@ -23,19 +23,25 @@ class ObdReader(Thread, TemperatureProvider):
         self.temp_f = 0
         self.last_update_time = {}
         self.maf_listener = maf_listener
+        self.finished = False
+        ExitApplicationEvent.register_handler(self)
 
         for key in ObdReader.refresh_rate.keys():
             self.last_update_time[key] = 0.0
 
+    def handle_event(self, event, **kwargs):
+        if event == ExitApplicationEvent:
+            self.finished = True
+
     def run(self) -> None:
-        while True:
+        while not self.finished:
             try:
                 connection = self.connect()
                 if connection is None:
                     time.sleep(10)
                     continue
 
-                while connection.status() == obd.OBDStatus.CAR_CONNECTED:
+                while connection.status() == obd.OBDStatus.CAR_CONNECTED and not self.finished:
                     now = time.time()
                     for cmd in ObdReader.refresh_rate.keys() :
                         if now - self.last_update_time[cmd] > ObdReader.refresh_rate[cmd]:

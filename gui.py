@@ -1,8 +1,7 @@
-from guizero import App, Text, Box
+from guizero import App, Text, Box, PushButton
 
 from display_providers import *
-from events import LeaveTrackEvent
-from events import EventHandler, StateChangeSettingOffEvent, StateChangePittedEvent, CompleteLapEvent
+from events import *
 
 import logging
 import platform
@@ -12,7 +11,7 @@ logger = logging.getLogger(__name__)
 class Gui(EventHandler):
 
     WIDTH = 800
-    HEIGHT = 460
+    HEIGHT = 480
     COL_WIDTH = 266
 
     def __init__(self):
@@ -37,6 +36,10 @@ class Gui(EventHandler):
         self.speed_heading_widget = self.create_speed_widget(col2)
         self.fuel_display = self.create_fuel_widget(col3)
 
+        # add a quit button
+        Box(col2, height=24, width=208)
+        pb = PushButton(col2, text="EXIT", command=self.quit)
+
         self.stint_ending_display = self.create_stint_end_instructions(col4)
         self.stint_starting_display = self.create_stint_start_instructions(col5)
 
@@ -44,6 +47,10 @@ class Gui(EventHandler):
         StateChangePittedEvent.register_handler(self)
         StateChangeSettingOffEvent.register_handler(self)
         CompleteLapEvent.register_handler(self)
+
+    def quit(self):
+        self.app.destroy()
+        ExitApplicationEvent.emit()
 
     def handle_event(self, event, **kwargs):
         if event == LeaveTrackEvent:
@@ -83,6 +90,9 @@ class Gui(EventHandler):
 
     def display(self):
         self.app.when_key_pressed = self.handle_keyboard
+        # on raspberry pi we go full screen
+        if platform.system() == "Linux":
+            self.app.set_full_screen()
         self.app.display()
 
     def register_temp_provider(self, provider: TemperatureProvider):
@@ -158,9 +168,9 @@ class Gui(EventHandler):
         Text(last_lap_box, "ml", size='16', color="lightgreen", font=self.font, align="left")
 
         remaining_box = Box(result, height=100, width=200)
-        Text(remaining_box, "Remaining", size='16', color="lightgreen", font=self.font, align="left")
+        Text(remaining_box, "Rem.", size='16', color="lightgreen", font=self.font, align="left")
         Text(remaining_box, "--.--", size='32', color="lightgreen", font=self.font, align="left")
-        Text(remaining_box, "%", size='32', color="lightgreen", font=self.font, align="left")
+        Text(remaining_box, "%", size='16', color="lightgreen", font=self.font, align="left")
 
         return result
 
