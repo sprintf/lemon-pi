@@ -27,6 +27,8 @@ class StateMachine(EventHandler):
         CompleteLapEvent.register_handler(self)
 
     def handle_event(self, event, speed=0, lat_long=None):
+        # upon power on we assume we're in the pit, so this
+        # isn't a completely reliable state
         if self.state == State.PARKED_IN_PIT:
             if event == MovingEvent:
                 self.state = State.LEAVING_PIT
