@@ -2,7 +2,7 @@ from guizero import App, Text, Box
 
 from display_providers import *
 from events import LeaveTrackEvent
-from events import EventHandler, StateChangeSettingOffEvent, StateChangePittedEvent
+from events import EventHandler, StateChangeSettingOffEvent, StateChangePittedEvent, CompleteLapEvent
 
 import logging
 import platform
@@ -11,15 +11,19 @@ logger = logging.getLogger(__name__)
 
 class Gui(EventHandler):
 
+    WIDTH = 800
+    HEIGHT = 460
+    COL_WIDTH = 266
+
     def __init__(self):
         self.font = self.__identify_font(platform.system())
-        self.app = App("OBD Stuff",
+        self.app = App("Lemon-Pi",
                        bg="black",
-                       width=800,
-                       height=480)
-        col1 = Box(self.app, align="left", width=266, height=480)
-        col2 = Box(self.app, align="left", width=266, height=480)
-        col3 = Box(self.app, align="left", width=266, height=480)
+                       width=Gui.WIDTH,
+                       height=Gui.HEIGHT)
+        col1 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT)
+        col2 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT)
+        col3 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT)
 
         # these are invisible displays used to show special case data when the car is pitting
         col4 = Box(self.app, align="left", width=col3.width, height=col3.height, visible=False)
@@ -37,6 +41,9 @@ class Gui(EventHandler):
         self.stint_starting_display = self.create_stint_start_instructions(col5)
 
         LeaveTrackEvent.register_handler(self)
+        StateChangePittedEvent.register_handler(self)
+        StateChangeSettingOffEvent.register_handler(self)
+        CompleteLapEvent.register_handler(self)
 
     def handle_event(self, event, **kwargs):
         if event == LeaveTrackEvent:
@@ -48,6 +55,12 @@ class Gui(EventHandler):
             self.app.children[3].hide()
             self.app.children[4].show()
         if event == StateChangeSettingOffEvent:
+            self.app.children[2].show()
+            self.app.children[3].hide()
+            self.app.children[4].hide()
+
+        # go back to the fuel display if we complete a lap and it is not showing.
+        if event == CompleteLapEvent and not self.app.children[2].visible:
             self.app.children[2].show()
             self.app.children[3].hide()
             self.app.children[4].hide()
@@ -83,7 +96,6 @@ class Gui(EventHandler):
 
     def register_lap_provider(self, provider: LapProvider):
         self.time_widget.repeat(500, self.__updateLap, args=[provider])
-        # todo : we may need to update the timer more often
 
     def register_speed_provider(self, provider: SpeedProvider):
         self.speed_heading_widget.repeat(200, self.__updateSpeed, args=[provider])
@@ -199,7 +211,6 @@ class Gui(EventHandler):
     def __updateTime(self, provider: TimeProvider):
         self.time_widget.children[1].value = "{:02d}".format(provider.get_hours())
         self.time_widget.children[3].value = "{:02d}".format(provider.get_minutes())
-        # self.time_widget.children[4].value = self.__pad(str(provider.getSeconds()))
 
     def __update_time_beat(self):
         beat : Text = self.time_widget.children[2]

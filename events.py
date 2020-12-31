@@ -18,8 +18,6 @@ class Event:
 
     def __init__(self, name=""):
         self.name = name
-        self.last_event = None
-        self.last_event_count = 0
         self.handlers = []
 
     def register_handler(self, handler:EventHandler):
@@ -33,7 +31,7 @@ class Event:
             Event.last_event_count += 1
         else:
             if Event.last_event_count > 0:
-                logger.info("suppressed ({}) {}".format(Event.last_event_count, Event.last_event))
+                logger.info("suppressed ({}) {}".format(Event.last_event_count, Event.last_event.name))
             logger.info("emitting {}".format(self.name))
             Event.last_event_count = 0
         Event.last_event = self

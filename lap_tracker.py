@@ -11,6 +11,18 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
+def angular_difference(h1, h2):
+    diff = abs(h1 - h2)
+    if diff > 180:
+        if h1 < 180:
+            h1 = h1 + 360
+        else:
+            h2 = h2 + 360
+        diff = abs(h1 - h2)
+    return diff
+
+
 class LapTracker(PositionUpdater, LapProvider):
 
     def __init__(self, track: TrackLocation, listener: LapUpdater):
@@ -62,7 +74,7 @@ class LapTracker(PositionUpdater, LapProvider):
                 self.last_pit_in_time = time
 
     def __crossed_line(self, lat, long, heading, target:Target):
-        if self.angular_difference(target.target_heading, heading) > 15:
+        if angular_difference(target.target_heading, heading) > 20:
             return False
 
         dist = int(haversine(target.midpoint, (lat, long), unit=Unit.FEET))
@@ -81,19 +93,11 @@ class LapTracker(PositionUpdater, LapProvider):
 
                 # lets get the heading from our current position to the intersect
                 target_heading = geometry.heading_between_lat_long((lat, long), intersect)
-                if (abs(heading - target_heading) > 170):
+                if (abs(heading - target_heading) > 160):
                     logger.info("GONE PASSED {} line!!!!".format(target.name))
                     logger.info("my heading = {}, target heading = {}".format(heading, target.target_heading))
                     return True
         return False
-
-    def angular_difference(self, h1, h2):
-        if h1 > 180:
-            h1 = h1 - 180
-        if h2 > 180:
-            h2 = h2 - 180
-        logger.debug("angular diff = {}".format(abs(h1 - h2)))
-        return abs(h1 - h2)
 
     def get_lap_count(self) -> int:
         return self.lap_count
