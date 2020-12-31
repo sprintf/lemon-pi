@@ -77,7 +77,7 @@ def await_gps():
 
 # fire up a transient thread that polls until a location fix happens,
 # and then finds the closest track to our location
-Thread(target=await_gps).start()
+Thread(target=await_gps, daemon=True).start()
 
 gui.register_speed_provider(gps)
 gui.register_time_provider(LocalTimeProvider())
