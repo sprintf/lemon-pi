@@ -4,12 +4,12 @@ import logging
 import time
 
 from display_providers import FuelProvider
-from updaters import MafUpdater, LapUpdater
+from updaters import FuelUsageUpdater, LapUpdater
 
 logger = logging.getLogger(__name__)
 
 
-class MafAnalyzer(MafUpdater, LapUpdater, FuelProvider):
+class MafAnalyzer(FuelUsageUpdater, LapUpdater, FuelProvider):
 
     def __init__(self, lap_logger):
         self.lap_logger = lap_logger
@@ -71,17 +71,8 @@ class MafAnalyzer(MafUpdater, LapUpdater, FuelProvider):
         return 100 - (int)((self.total_fuel_used_ml / full_tank_ml) * 100)
 
     # get a value in grams per second at a certain time
-    def update_maf(self, value, time):
-        # 10.8 to 1 is the IS300 air/fuel mix,
-        # so we divide by 10.8 to get grams of fuel per second
-        fuel_grams_per_second = value / 10.8
-        # todo : weight a liter of '91 grade gas ... allegedly it weights about 750 grams
-        ml_per_second = fuel_grams_per_second * (1000/750)
+    def update_fuel(self, ml_per_second:float, time:float):
         self.buffer_values.append((ml_per_second, time))
-
-        # print("adding {}".format(ml_per_second))
-        # print("len values = {}".format(len(self.buffer_values)))
-        # print(" time series length = {}".format(self.buffer_values[-1][1] - self.buffer_values[0][1]))
 
         # if we have a minute's worth of data, then accrue it
         if len(self.buffer_values) > 20 and \
