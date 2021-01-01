@@ -12,13 +12,33 @@ from state_machine import StateMachine
 from movement_listener import MovementListener
 from haversine import haversine
 import logging
+from logging.handlers import RotatingFileHandler
+from datetime import datetime
+
+today = datetime.today().strftime('%Y-%m-%d')
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(format='%(asctime)s %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S',
-                    level=logging.INFO)
 
-logger.info("starting up")
+# this enables console logging, but we're going to use
+# rotating file based logging
+# logging.basicConfig(format='%(asctime)s %(message)s',
+#                     datefmt='%Y-%m-%d %H:%M:%S',
+#                     level=logging.INFO)
+
+if not os.path.isdir("logs"):
+    os.mkdir("logs")
+file_handler = logging.FileHandler("logs/lap-logger-{}.csv".format(today))
+lap_logger = logging.getLogger("lap-logger")
+lap_logger.addHandler(file_handler)
+
+handler = RotatingFileHandler("logs/lemon-pi.log",
+                              maxBytes=10000000,
+                              backupCount=10)
+handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
+handler.setLevel(logging.INFO)
+logging.getLogger().addHandler(handler)
+
+logger.info("Lemon-Pi : starting up")
 
 # main control thread
 # responsibilities
@@ -43,12 +63,6 @@ class LocalTimeProvider(TimeProvider):
     def get_seconds(self) -> int:
         return int(time.time()) % 60
 
-
-if not os.path.isdir("logs"):
-    os.mkdir("logs")
-file_handler = logging.FileHandler("logs/lap-logger-{}.csv".format(int(time.time())))
-lap_logger = logging.getLogger("lap-logger")
-lap_logger.addHandler(file_handler)
 MA = MafAnalyzer(lap_logger)
 
 tracks:[TrackLocation] = read_tracks()
