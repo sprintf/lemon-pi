@@ -1,28 +1,40 @@
 import obd
 from obd import OBDResponse
-import time, sys
+import time
 import logging
 
 from threading import Thread
 from display_providers import TemperatureProvider
-from updaters import MafUpdater
+from updaters import FuelUsageUpdater
 from events import OBDConnectedEvent, OBDDisconnectedEvent, ExitApplicationEvent
 
 logger = logging.getLogger(__name__)
 
+
+##
+##  useful reading : https://www.autoserviceprofessional.com/articles/6237-fuel-trim-how-it-works-and-how-to-make-it-work-for-you
+##
+## Fuel mass = Air mass x (short-term fuel trim x long-term fuel trim) divided by (equivalence ratio x 14.64)
+##
+## Although, I add the short and long term fuel trims together as it makes more sense (to me)
+##
 class ObdReader(Thread, TemperatureProvider):
 
     refresh_rate = {
         obd.commands.COOLANT_TEMP: 10,
+        obd.commands.LONG_FUEL_TRIM_1: 10,
+        obd.commands.SHORT_FUEL_TRIM_1: 0.1,
         obd.commands.MAF: 0.1,
     }
 
-    def __init__(self, maf_listener: MafUpdater):
+    def __init__(self, fuel_listener: FuelUsageUpdater):
         Thread.__init__(self)
         self.working = False
         self.temp_f = 0
+        self.short_term_fuel_trim = 0.0
+        self.long_term_fuel_trim = 0.0
         self.last_update_time = {}
-        self.maf_listener = maf_listener
+        self.fuel_listener = fuel_listener
         self.finished = False
         ExitApplicationEvent.register_handler(self)
 
@@ -55,7 +67,7 @@ class ObdReader(Thread, TemperatureProvider):
             except Exception as e:
                 print("bad stuff in OBD land %s", e)
                 self.working = False
-                OBDDisconnectedEvent()
+                OBDDisconnectedEvent.emit()
                 time.sleep(10)
 
     def connect(self):
@@ -88,8 +100,14 @@ class ObdReader(Thread, TemperatureProvider):
         if cmd == obd.commands.COOLANT_TEMP:
             self.temp_f = int(response.value.to('degF').magnitude)
         elif cmd == obd.commands.MAF:
-            # grab the value in grams per second
-            self.maf_listener.update_maf(response.value.to('gps').magnitude, response.time)
+            fuel_usage = self.calc_fuel_rate(response.value.to('gps').magnitude)
+            self.fuel_listener.update_fuel(fuel_usage, response.time)
+        elif cmd == obd.commands.SHORT_FUEL_TRIM_1:
+            if response.value:
+                self.short_term_fuel_trim = response.value.magnitude
+        elif cmd == obd.commands.LONG_FUEL_TRIM_1:
+            if response.value:
+                self.long_term_fuel_trim = response.value.magnitude
         else:
             raise RuntimeWarning("no handler for {}".format(cmd))
 
@@ -99,6 +117,24 @@ class ObdReader(Thread, TemperatureProvider):
     def is_working(self) -> bool:
         return self.working
 
+    def calc_fuel_rate(self, maf_value):
+        raw_fuel_mass = maf_value / 14.64
+        trim_adjustment = raw_fuel_mass * ((self.short_term_fuel_trim + self.long_term_fuel_trim) / 100)
+        adjusted_fuel_mass = raw_fuel_mass + trim_adjustment
+        # todo : weight a liter of '91 grade gas ... allegedly it weights about 750 grams
+        ml_per_second = adjusted_fuel_mass * (1000/750)
+        return ml_per_second
+
 if __name__ == "__main__":
-    ObdReader().run()
+
+    logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S',
+                        level=logging.INFO)
+
+    class OBDLogger(FuelUsageUpdater):
+
+        def update_fuel(self, ml_per_second:float, time:float):
+            print("Fuel: {:.2f} ml per sec".format(ml_per_second))
+
+    ObdReader(OBDLogger()).run()
 
