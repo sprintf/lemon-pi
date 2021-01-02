@@ -4,6 +4,9 @@ import re
 from haversine import haversine, Unit
 from target import Target
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 class TrackLocation:
 
@@ -14,7 +17,7 @@ class TrackLocation:
         self.start_finish:Target = Target("start/finish", start_finish_begin, start_finish_end, dir)
         self.pit_in:Target = None
 
-        print("{} : width = {} heading = {}".format(name, self.track_width_feet(),
+        logger.debug("{} : width = {} heading = {}".format(name, self.track_width_feet(),
                                                     int(self.start_finish.target_heading)))
 
     def track_width_feet(self):
@@ -34,7 +37,7 @@ class TrackLocation:
 
     def set_pit_in_coords(self, lat_long1, lat_long2, direction):
         self.pit_in = Target("pit-in", lat_long1, lat_long2, direction)
-        print("{} : pit-in heading = {}".format(self.name, int(self.pit_in.target_heading)))
+        logger.debug("{} : pit-in heading = {}".format(self.name, int(self.pit_in.target_heading)))
 
     def __repr__(self):
         return self.name
