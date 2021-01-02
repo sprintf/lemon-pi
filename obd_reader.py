@@ -65,7 +65,7 @@ class ObdReader(Thread, TemperatureProvider):
                     # I think we need MAF as fast as poss
                     #time.sleep(1)
             except Exception as e:
-                print("bad stuff in OBD land %s", e)
+                logger.exception("bad stuff in OBD land %s", e)
                 self.working = False
                 OBDDisconnectedEvent.emit()
                 time.sleep(10)
@@ -82,7 +82,7 @@ class ObdReader(Thread, TemperatureProvider):
 
         result = obd.OBD(usb, protocol="3")
         OBDConnectedEvent.emit()
-        result.print_commands()
+        # result.print_commands()
 
         cmds = result.query(obd.commands.PIDS_A)
         logger.debug("available PIDS_A commands {}".format(cmds.value))
