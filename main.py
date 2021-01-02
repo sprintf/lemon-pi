@@ -6,6 +6,7 @@ from gps_reader import GpsReader
 from maf_analyzer import MafAnalyzer
 from obd_reader import ObdReader
 from lap_tracker import LapTracker
+from wifi import WifiManager
 from display_providers import TimeProvider
 from track import TrackLocation, read_tracks
 from state_machine import StateMachine
@@ -42,9 +43,12 @@ logger.info("Lemon-Pi : starting up")
 
 # main control thread
 # responsibilities
+#  0. disable wifi (to save battery)
 #  1. launch UI
 #  2. fire up OBD thread
 #  3. fire up GPS thread
+
+WifiManager().disable_wifi()
 
 state_machine = StateMachine()
 movement_listener = MovementListener()
