@@ -8,6 +8,7 @@ from threading import Thread
 from events import EventHandler, MovingEvent, NotMovingEvent, CarStoppedEvent, ExitApplicationEvent
 import logging
 import time
+import subprocess
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,7 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
         self.position_listener = None
         self.log = log_to_file
         self.finished = False
+        self.time_synced = False
         ExitApplicationEvent.register_handler(self)
 
     def handle_event(self, event, **kwargs):
@@ -41,12 +43,21 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
 
                         if session.fix.time and str(session.fix.time) != "nan":
                             logger.debug("{} {} {} {}".format(session.fix.time, data['class'], session.fix.latitude, session.fix.longitude ))
-                            lag: timedelta = datetime.now(tz=timezone.utc) - \
-                                             parser.isoparse(session.fix.time).astimezone()
+                            gps_datetime = parser.isoparse(session.fix.time).astimezone()
+                            lag: timedelta = abs(datetime.now(tz=timezone.utc) - \
+                                                 gps_datetime)
 
                             if lag.total_seconds() > 1:
-                                logger.warning("GPS Data time lag = {}  (skipping)".format(lag.total_seconds()))
+                                if lag.total_seconds() > 30 and not self.time_synced:
+                                    logger.info("setting clock from GPS...")
+                                    epoch = int(gps_datetime.timestamp())
+                                    subprocess.run(['sudo', 'date', '-u', '-s' '@{}'.format(epoch)])
+                                    self.time_synced = True
+                                    logger.info("time corrected to {}".format(datetime.now()))
+                                else:
+                                    logger.warning("GPS Data time lag = {}  (skipping)".format(lag.total_seconds()))
                                 continue
+                            self.time_synced = True
 
                         if session.fix.status == STATUS_NO_FIX:
                             logger.warning("no fix...awaiting")
