@@ -63,11 +63,13 @@ StateChangeSettingOffEvent = Event("StateChangeSettingOff")
 # the car is parked in the pits
 StateChangePittedEvent = Event("StateChangePitted")
 
-### OBD connected
+### OBD Events
 OBDConnectedEvent = Event("OBD-Connected")
-
-### OBD disconnected
 OBDDisconnectedEvent = Event("OBD-Disconnected")
+
+### GPS Events
+GPSConnectedEvent = Event("GPS-Connected")
+GPSDisconnectedEvent = Event("GPS-Disconnected")
 
 ### Refuel event
 RefuelEvent = Event("Refuel")

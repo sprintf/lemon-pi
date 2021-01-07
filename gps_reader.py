@@ -5,7 +5,7 @@ from datetime import datetime, timezone, timedelta
 from display_providers import SpeedProvider, PositionProvider
 from updaters import PositionUpdater
 from threading import Thread
-from events import EventHandler, MovingEvent, NotMovingEvent, CarStoppedEvent, ExitApplicationEvent
+from events import *
 import logging
 import time
 import subprocess
@@ -60,6 +60,8 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
                             self.time_synced = True
 
                         if session.fix.status == STATUS_NO_FIX:
+                            # losing a gps fix doesn't emit a GPSDisconnected event ..
+                            # we can look into whether it should or not once we have empirical information
                             logger.warning("no fix...awaiting")
                             time.sleep(0.5)
                             continue
@@ -79,7 +81,9 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
                                 self.long = session.fix.longitude
                                 if self.position_listener:
                                     self.position_listener.update_position(self.lat, self.long, self.heading, time.time(), self.speed_mph)
-                                self.working = True
+                                if not self.working:
+                                    self.working = True
+                                    GPSConnectedEvent.emit()
                             #time.sleep(0.1)
                     except KeyError:
                         # this happens when elevation is not included, we don't care
@@ -87,6 +91,7 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
             except Exception as e:
                 logger.exception("issue with GPS, reconnecting.")
                 self.working = False
+                GPSDisconnectedEvent.emit()
                 time.sleep(10)
 
     def get_speed(self) -> int:
