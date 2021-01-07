@@ -1,4 +1,4 @@
-from guizero import App, Text, Box, PushButton
+from guizero import App, Text, Box, PushButton, Picture
 
 from display_providers import *
 from events import *
@@ -32,13 +32,16 @@ class Gui(EventHandler):
         Box(col1, height=64, width=208)
         self.lap_display = self.create_lap_widget(col1)
         self.temp_widget = self.create_temp_widget(col2)
-        Box(col2, height=64, width=208)
+        Box(col2, height=38, width=208)
         self.speed_heading_widget = self.create_speed_widget(col2)
         self.fuel_display = self.create_fuel_widget(col3)
 
         # add a quit button
-        Box(col2, height=24, width=208)
-        pb = PushButton(col2, text="EXIT", command=self.quit)
+        Box(col2, height=12, width=208)
+        pb = PushButton(col2, image="resources/images/exitbutton.gif", command=self.quit)
+        Box(col2, height=12, width=208)
+        #adding widget for obd/gps icons
+        self.gps_obd_icon_widget = self.create_gps_obd_icon_widget(col2)
 
         self.stint_ending_display = self.create_stint_end_instructions(col4)
         self.stint_starting_display = self.create_stint_start_instructions(col5)
@@ -112,6 +115,18 @@ class Gui(EventHandler):
 
     def register_fuel_provider(self, provider: FuelProvider):
         self.fuel_display.repeat(1000, self.__updateFuel, args=[provider])
+
+    ##obd/gps widget - no functionality yet, but the alternate images are ready to go
+    def create_gps_obd_icon_widget(self, parent):
+        result = Box(parent, width=208, height=48)
+        result.set_border(1, "darkgreen")
+        Picture(result, image="resources/images/gps_ok.gif", align="left")
+        Picture(result, image="resources/images/obd_off.gif", align="right")
+
+        ##hidden icon alternatives
+        Picture(result, image="resources/images/gps_off.gif", align="left", visible=False)
+        Picture(result, image="resources/images/obd_ok.gif", align="right", visible=False)
+
 
     def create_temp_widget(self, parent):
         result = Box(parent, width=212, height=112)
