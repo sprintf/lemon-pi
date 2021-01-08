@@ -8,6 +8,21 @@ import platform
 
 logger = logging.getLogger(__name__)
 
+
+class ToggleImage(Picture):
+
+    def __init__(self, parent, on_image, off_image, **kwargs):
+        Picture.__init__(self, parent, image=off_image, **kwargs)
+        self.on_image = on_image
+        self.off_image = off_image
+
+    def on(self):
+        self.image = self.on_image
+
+    def off(self):
+        self.image = self.off_image
+
+
 class Gui(EventHandler):
 
     WIDTH = 800
@@ -40,8 +55,9 @@ class Gui(EventHandler):
         Box(col2, height=12, width=208)
         pb = PushButton(col2, image="resources/images/exitbutton.gif", command=self.quit)
         Box(col2, height=12, width=208)
-        #adding widget for obd/gps icons
-        self.gps_obd_icon_widget = self.create_gps_obd_icon_widget(col2)
+
+        #adding obd + gps images
+        (self.gps_image, self.obd_image) = self.create_gps_obd_images(col2)
 
         self.stint_ending_display = self.create_stint_end_instructions(col4)
         self.stint_starting_display = self.create_stint_start_instructions(col5)
@@ -50,6 +66,10 @@ class Gui(EventHandler):
         StateChangePittedEvent.register_handler(self)
         StateChangeSettingOffEvent.register_handler(self)
         CompleteLapEvent.register_handler(self)
+        OBDConnectedEvent.register_handler(self)
+        OBDDisconnectedEvent.register_handler(self)
+        GPSConnectedEvent.register_handler(self)
+        GPSDisconnectedEvent.register_handler(self)
 
     def quit(self):
         self.app.destroy()
@@ -75,6 +95,18 @@ class Gui(EventHandler):
             self.app.children[3].hide()
             self.app.children[4].hide()
 
+        if event == OBDConnectedEvent:
+            self.obd_image.on()
+
+        if event == OBDDisconnectedEvent:
+            self.obd_image.off()
+
+        if event == GPSConnectedEvent:
+            self.gps_image.on()
+
+        if event == GPSDisconnectedEvent:
+            self.gps_image.off()
+
     def handle_keyboard(self, event_data):
         logger.info("Key Pressed : {}".format(event_data.key))
         if event_data.key == "s":
@@ -90,6 +122,14 @@ class Gui(EventHandler):
             self.app.children[2].show()
             self.app.children[3].hide()
             self.app.children[4].hide()
+        if event_data.key == 'g':
+            self.gps_image.on()
+        if event_data.key == 'G':
+            self.gps_image.off()
+        if event_data.key == 'o':
+            self.obd_image.on()
+        if event_data.key == 'O':
+            self.obd_image.off()
 
     def display(self):
         self.app.when_key_pressed = self.handle_keyboard
@@ -116,17 +156,11 @@ class Gui(EventHandler):
     def register_fuel_provider(self, provider: FuelProvider):
         self.fuel_display.repeat(1000, self.__updateFuel, args=[provider])
 
-    ##obd/gps widget - no functionality yet, but the alternate images are ready to go
-    def create_gps_obd_icon_widget(self, parent):
+    def create_gps_obd_images(self, parent):
         result = Box(parent, width=208, height=48)
         result.set_border(1, "darkgreen")
-        Picture(result, image="resources/images/gps_ok.gif", align="left")
-        Picture(result, image="resources/images/obd_off.gif", align="right")
-
-        ##hidden icon alternatives
-        Picture(result, image="resources/images/gps_off.gif", align="left", visible=False)
-        Picture(result, image="resources/images/obd_ok.gif", align="right", visible=False)
-
+        return (ToggleImage(result, "resources/images/gps_ok.gif", "resources/images/gps_off.gif", align="left"),
+                ToggleImage(result, "resources/images/obd_ok.gif", "resources/images/obd_off.gif", align="right"))
 
     def create_temp_widget(self, parent):
         result = Box(parent, width=212, height=112)
