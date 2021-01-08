@@ -5,6 +5,8 @@ from events import *
 
 import logging
 import platform
+from python_settings import settings
+
 
 logger = logging.getLogger(__name__)
 
@@ -31,10 +33,14 @@ class Gui(EventHandler):
 
     def __init__(self):
         self.font = self.__identify_font(platform.system())
-        self.app = App("Lemon-Pi",
+        self.root = App("Lemon-Pi",
                        bg="black",
                        width=Gui.WIDTH,
                        height=Gui.HEIGHT)
+
+        self.splash = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, visible=True)
+        self.app = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, visible=False)
+
         col1 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT)
         col2 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT)
         col3 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT)
@@ -70,6 +76,10 @@ class Gui(EventHandler):
         OBDDisconnectedEvent.register_handler(self)
         GPSConnectedEvent.register_handler(self)
         GPSDisconnectedEvent.register_handler(self)
+
+    def present_main_app(self):
+        self.splash.destroy()
+        self.app.visible = True
 
     def quit(self):
         self.app.destroy()
@@ -132,11 +142,13 @@ class Gui(EventHandler):
             self.obd_image.off()
 
     def display(self):
-        self.app.when_key_pressed = self.handle_keyboard
+        self.root.when_key_pressed = self.handle_keyboard
         # on raspberry pi we go full screen
         if platform.system() == "Linux":
-            self.app.set_full_screen()
-        self.app.display()
+            self.root.set_full_screen()
+        self.root.after(int(settings.SPLASH_SCREEN_DELAY), self.present_main_app)
+        self.root.display()
+        # don't put any code here ... the display loop never returns
 
     def register_temp_provider(self, provider: TemperatureProvider):
         # might need to store in order to cancel

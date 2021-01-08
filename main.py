@@ -41,6 +41,9 @@ logging.getLogger().addHandler(handler)
 
 logger.info("Lemon-Pi : starting up")
 
+if not "SETTINGS_MODULE" in os.environ:
+    os.environ["SETTINGS_MODULE"] = "config.settings"
+
 # main control thread
 # responsibilities
 #  0. disable wifi (to save battery)
