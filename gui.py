@@ -39,6 +39,10 @@ class Gui(EventHandler):
                        height=Gui.HEIGHT)
 
         self.splash = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, visible=True)
+        Box(self.splash, width=Gui.WIDTH, height=100)
+        Picture(self.splash, image="resources/images/perplexuslogoslpash.gif")
+        Text(self.splash, "Powered by Normtronix", size="24", font=self.font, color="white")
+
         self.app = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, visible=False)
 
         col1 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT)
@@ -52,18 +56,20 @@ class Gui(EventHandler):
         self.time_widget = self.create_time_widget(col1)
         Box(col1, height=64, width=208)
         self.lap_display = self.create_lap_widget(col1)
+        perplexus_logo = Picture(col2, image="resources/images/perplexuslogoclean.gif")
+        Box(col2, height=24, width=208)
         self.temp_widget = self.create_temp_widget(col2)
-        Box(col2, height=38, width=208)
+        Box(col2, height=24, width=208)
         self.speed_heading_widget = self.create_speed_widget(col2)
         self.fuel_display = self.create_fuel_widget(col3)
 
-        # add a quit button
-        Box(col2, height=12, width=208)
-        pb = PushButton(col2, image="resources/images/exitbutton.gif", command=self.quit)
-        Box(col2, height=12, width=208)
+        Box(col2, height=24, width=208)
 
-        #adding obd + gps images
+        # adding obd + gps images
         (self.gps_image, self.obd_image) = self.create_gps_obd_images(col2)
+        # add a quit button
+        pb = PushButton(col2, image="resources/images/exitbutton.gif", command=self.quit)
+        Box(col2, height=24, width=208)
 
         self.stint_ending_display = self.create_stint_end_instructions(col4)
         self.stint_starting_display = self.create_stint_start_instructions(col5)
@@ -82,7 +88,7 @@ class Gui(EventHandler):
         self.app.visible = True
 
     def quit(self):
-        self.app.destroy()
+        self.root.destroy()
         ExitApplicationEvent.emit()
 
     def handle_event(self, event, **kwargs):
@@ -170,7 +176,7 @@ class Gui(EventHandler):
 
     def create_gps_obd_images(self, parent):
         result = Box(parent, width=208, height=48)
-        result.set_border(1, "darkgreen")
+        #result.set_border(4, "darkgreen")
         return (ToggleImage(result, "resources/images/gps_ok.gif", "resources/images/gps_off.gif", align="left"),
                 ToggleImage(result, "resources/images/obd_ok.gif", "resources/images/obd_off.gif", align="right"))
 
@@ -192,7 +198,7 @@ class Gui(EventHandler):
         return result
 
     def create_speed_widget(self, parent):
-        result = Box(parent, width=212, height=200)
+        result = Box(parent, width=212, height=100)
         result.set_border(4, "darkgreen")
         Text(result, "???", size="64", font=self.font, color="white", align="left")
         Text(result, "mph", size="16", color="white", font=self.font, align="left")
