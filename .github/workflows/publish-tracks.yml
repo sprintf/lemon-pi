@@ -17,6 +17,6 @@ jobs:
         uses: google-github-actions/upload-cloud-storage@main
         with: 
           credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
-          path: /resources/tracks.yaml
+          path: resources/tracks.yaml
           destination: perplexus/public/tracks-updated.yaml
 
