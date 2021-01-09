@@ -71,15 +71,13 @@ class LapProvider():
 
 class FuelProvider:
 
-    # fuel used in milliliters
-    # there's 66244 millilitres in 17.5 gallons
     def get_fuel_used_ml(self) -> int:
         pass
 
     def get_fuel_used_last_lap_ml(self) -> int:
         pass
 
-    def get_fuel_used_last_hour_gallons(self) -> float:
+    def get_fuel_used_last_hour_ml(self) -> int:
         pass
 
     def get_fuel_percent_remaining(self) -> int:

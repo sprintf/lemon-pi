@@ -21,8 +21,8 @@ class MafAnalyzer(FuelUsageUpdater, LapUpdater, FuelProvider):
         self.fuel_used_last_lap = 0.0
         self.fuel_used_this_lap = 0.0
         self.fuel_used_by_minute = []
-        self.cached_gph = None
-        self.cached_gph_time = 0.0
+        self.cached_fuel_usage = None
+        self.cached_fuel_usage_time = 0.0
 
     def update_lap(self, lap_count: int, last_lap_time: float):
         if lap_count > 0:
@@ -37,10 +37,10 @@ class MafAnalyzer(FuelUsageUpdater, LapUpdater, FuelProvider):
     def get_fuel_used_last_lap_ml(self) -> int:
         return int(self.fuel_used_last_lap)
 
-    def get_fuel_used_last_hour_gallons(self) -> float:
+    def get_fuel_used_last_hour_ml(self) -> int:
         # return a known good value
-        if time.time() - self.cached_gph_time < 60:
-            return self.cached_gph
+        if time.time() - self.cached_fuel_usage_time < 60:
+            return self.cached_fuel_usage
 
         # we maintain a window of per minute fuel consumption
         # here we pull out the last 60 and sum them
@@ -57,12 +57,9 @@ class MafAnalyzer(FuelUsageUpdater, LapUpdater, FuelProvider):
         logger.debug("total used = {} ml".format(total_used))
         ml_per_hour = total_used * (60/len(self.fuel_used_by_minute))
         logger.debug("minutes = {}".format(len(self.fuel_used_by_minute)))
-        # convert ml into US gallons
-        hourly_gallons_used = ml_per_hour * 0.000264172
-        logger.debug("estimated per hour = {} gph".format(hourly_gallons_used))
-        self.cached_gph = hourly_gallons_used
-        self.cached_gph_time = time.time()
-        return hourly_gallons_used
+        self.cached_fuel_usage = ml_per_hour
+        self.cached_fuel_usage_time = time.time()
+        return ml_per_hour
 
     def get_fuel_percent_remaining(self) -> int:
         if self.total_fuel_used_ml == 0:
