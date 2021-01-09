@@ -22,3 +22,26 @@ At a future time, we hope to add onboard digital communications that can relay a
 Currently, this is all being developed on Mac. Once closer to working we will convert it over to R-pi.
 
 [Raspberry Pi specific instructions](README-rpi.md)
+
+# Hardware
+
+Raspberry Pi Model 3. $35 [Adafruit Link](https://www.adafruit.com/product/3055?src=raspberrypi)
+
+ELEcrow 5" HDMI display. $42.99 [Amazon Link](https://www.amazon.com/gp/product/B013JECYF2/ref=ppx_yo_dt_b_asin_title_o01_s00?ie=UTF8&psc=1)
+
+GPS USB Receiver  $12.99 [Amazon Link](https://www.amazon.com/gp/product/B01MTU9KTF/ref=ppx_yo_dt_b_asin_title_o07_s00?ie=UTF8&psc=1)
+
+OBD USB $16 [Amazon Link](https://www.amazon.com/gp/product/B07MNX424C/ref=ppx_yo_dt_b_asin_title_o04_s00?ie=UTF8&psc=1) 
+
+All the above plug-and-play with the Raspberry Pi.
+
+# Power Considerations
+
+The Raspberry Pi needs a good 2amp power supply. Many USB cables will struggle, and many USB power sources are not rated for this.
+I had to buy [these cables](https://www.amazon.com/gp/product/B08FBWFZG4/ref=ppx_yo_dt_b_asin_title_o08_s00?ie=UTF8&psc=1) from Amazon to get rid of the flashing low power indicator.
+
+Since this is designed for a racing application, we do not want to power it from the main car battery, because during pit stops it is required the kill switch completely disconnects the car battery. We don't want the device needing to reboot, and we want it to keep track of what's been going on (laps completed, historic fuel usage) through a whole day of racing.
+The solution is to power the Raspberry Pi from a USB battery pack. [This is the one](https://www.amazon.com/gp/product/B06ZYKMY3G/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1) we use to power both the Raspberry Pi and the onboard Go-Pro camera.
+
+
+
