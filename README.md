@@ -1,6 +1,6 @@
+![Python application](https://github.com/sprintf/lemon-pi/workflows/Python%20application/badge.svg?branch=main)
+
 # Lemon-Pi
-
-
 
 <img src="https://24hoursoflemons.com/wp-content/uploads/2017/04/24hours_logo.png" alt="drawing" width="128"/> meets <img src="https://www.raspberrypi.org/wp-content/uploads/2011/10/Raspi-PGB001.png" alt="drawing" width="128"/>
 
