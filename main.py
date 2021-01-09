@@ -7,7 +7,7 @@ from maf_analyzer import MafAnalyzer
 from obd_reader import ObdReader
 from lap_tracker import LapTracker
 from wifi import WifiManager
-from display_providers import TimeProvider
+from display_providers import LocalTimeProvider
 from track import TrackLocation, read_tracks
 from state_machine import StateMachine
 from movement_listener import MovementListener
@@ -57,18 +57,6 @@ state_machine = StateMachine()
 movement_listener = MovementListener()
 
 gui = Gui()
-
-
-class LocalTimeProvider(TimeProvider):
-
-    def get_hours(self) -> int:
-        return int(time.time() / 3600 - 8) % 12
-
-    def get_minutes(self) -> int:
-        return int(time.time() / 60) % 60
-
-    def get_seconds(self) -> int:
-        return int(time.time()) % 60
 
 MA = MafAnalyzer(lap_logger)
 
