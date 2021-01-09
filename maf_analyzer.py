@@ -2,6 +2,8 @@
 import numpy as np
 import logging
 import time
+from python_settings import settings
+
 
 from display_providers import FuelProvider
 from updaters import FuelUsageUpdater, LapUpdater
@@ -65,9 +67,8 @@ class MafAnalyzer(FuelUsageUpdater, LapUpdater, FuelProvider):
     def get_fuel_percent_remaining(self) -> int:
         if self.total_fuel_used_ml == 0:
             return -1
-        # todo : set fuel full tank in settings somewhere
-        # todo : upon reset functionality wipe out all history
-        full_tank_ml = 66244
+        # there's 3785 millilitres in a gallon
+        full_tank_ml = int(settings.FUEL_CAPACITY_US_GALLONS * 3785)
         return 100 - (int)((self.total_fuel_used_ml / full_tank_ml) * 100)
 
     # get a value in grams per second at a certain time
