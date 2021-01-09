@@ -1,0 +1,22 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Publish Tracks
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - id: upload-file
+        uses: google-github-actions/upload-cloud-storage@main
+        with: 
+          credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+          path: /resources/tracks.yaml
+          destination: perplexus/public/tracks-updated.yaml
+
