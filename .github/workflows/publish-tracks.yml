@@ -19,5 +19,5 @@ jobs:
         with: 
           credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
           path: resources/tracks.yaml
-          destination: perplexus/public/tracks-updated.yaml
+          destination: perplexus/public
 
