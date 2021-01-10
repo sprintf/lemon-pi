@@ -126,6 +126,12 @@ class Gui(EventHandler):
 
     def handle_keyboard(self, event_data):
         logger.info("Key Pressed : {}".format(event_data.key))
+
+        # check if we got a CTRL-C
+        if ord(event_data.key) == 3:
+            self.quit()
+            return
+
         if event_data.key == "s":
             # imitate start/finish behavior
             self.app.children[2].hide()
