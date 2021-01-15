@@ -37,8 +37,9 @@ def run():
     # wait for incoming messages, and log them as they arrive
     while True:
         # pluck incoming messages off the queue
-        item = radio.receive_queue.pop()
+        item = radio.receive_queue.get()
         logger.info("received : {}".format(item.__repr__()))
+        radio.receive_queue.task_done()
 
 
 if __name__ == "__main__":
