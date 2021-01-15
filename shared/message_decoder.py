@@ -40,9 +40,9 @@ class MessageDecoder:
     def __do_decrypt(self, base64_payload):
         if self.key and len(self.key):
             encrypted_payload = base64.b64decode(base64_payload)
-            return (b"".join(self.cipher.decrypt_ecb_cts(encrypted_payload))).encode("UTF-8")
+            return (b"".join(self.cipher.decrypt_ecb_cts(encrypted_payload))).decode("UTF-8")
         else:
-            return base64.b64decode(base64_payload).encode("UTF-8")
+            return base64.b64decode(base64_payload).decode("UTF-8")
 
 if __name__ == "__main__":
     raw = "radio_rx  4C50697879675965642B4B69585A645551393635532F58697A35696967613154617269783437624E6646304F6C3379662B76495946524435312F39376B71716D614966426B6879304A2F77394F53545674346337413D3D"

@@ -29,7 +29,7 @@ class MessageEncoder:
         return b"LPi" + base64_payload
 
     def __do_encrypt(self, payload):
-        if self.key and len(self.key):
+        if self.cipher:
             encrypted_payload = b"".join(self.cipher.encrypt_ecb_cts(payload.encode("UTF-8")))
             base64_payload = base64.b64encode(encrypted_payload)
             return base64_payload

@@ -64,7 +64,7 @@ class RadioMetrics:
 
 class Radio(Thread):
 
-    def __init__(self, sender:str, key:str, **kwargs):
+    def __init__(self, sender:str, key:str, ping_freq=45, **kwargs):
         Thread.__init__(self, daemon=True)
         self.encoder = MessageEncoder(sender, key)
         self.decoder = MessageDecoder(key)
@@ -72,6 +72,7 @@ class Radio(Thread):
         self.protocol = None
         self.metrics = RadioMetrics()
         self.last_transmit = 0
+        self.ping_freq = ping_freq
         if kwargs.get("port"):
             self.ser = serial.Serial(kwargs['port'], baudrate=57600)
         else:
@@ -184,8 +185,8 @@ class Radio(Thread):
             last_status_log_time = time.time()
             while (1):
                 sleep = random.randint(-10, 10)
-                time.sleep(45 + sleep)
-                if time.time() - self.last_transmit > 30:
+                time.sleep(self.ping_freq + sleep)
+                if time.time() - self.last_transmit > (self.ping_freq / 2):
                     self.send_message(protocol, PingMessage())
                 if time.time() - last_status_log_time > 60:
                     logger.info("Status : {}".format(self.metrics.__repr__()))
@@ -219,7 +220,7 @@ if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
                         level=logging.INFO)
-    radio = Radio("car-181", "")
+    radio = Radio("car-181", "", ping_freq=15)
     radio.receive_loop()
 
 
