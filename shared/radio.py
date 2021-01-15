@@ -146,20 +146,21 @@ class Radio(Thread):
             # 4c5069 is "LPi" our prefix
             if data.startswith("radio_rx  4C5069"):
                 try:
-                    message = self.radio.decoder.decode(bytearray.fromhex(data[10:]))
+                    message:RadioMessageBase = self.radio.decoder.decode(bytearray.fromhex(data[10:]))
+                    logger.info("lag = {:.1f}s".format(time.time() - message.ts))
                     logger.info("received " + message.__repr__())
                     self.radio.metrics.received += 1
                     # put this message onto a queue to go to the
                     # rest of the system
                     self.radio.receive_queue.put(message)
                 except LPiNoiseException:
-                    logger.info("received RPi noise")
+                    logger.info("received RPi noise : {}".format(data))
                     self.radio.metrics.recognized_noise += 1
                 except NoiseException:
                     logger.info("received noise")
                     self.radio.metrics.noise += 1
             # turn off the blue light
-            self.send_cmd("sys set pindig GPIO10 0", delay=1)
+            self.send_cmd("sys set pindig GPIO10 0", delay=0)
 
             if not self.transmitting:
                 logger.debug("turning on receive")
@@ -200,7 +201,7 @@ class Radio(Thread):
         self.send_queue.task_done()
 
     def send_message(self, protocol, msg:RadioMessageBase):
-        logger.info("turning off receive")
+        logger.debug("turning off receive")
         protocol.write_line("radio rxstop")
         protocol.transmitting = True
         protocol.write_line("sys set pindig GPIO11 1")
@@ -218,7 +219,7 @@ if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
                         level=logging.INFO)
-    radio = Radio("car-181", "whodunnit")
+    radio = Radio("car-181", "")
     radio.receive_loop()
 
 
