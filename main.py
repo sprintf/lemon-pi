@@ -22,9 +22,9 @@ logger = logging.getLogger(__name__)
 
 # this enables console logging, but we're going to use
 # rotating file based logging
-# logging.basicConfig(format='%(asctime)s %(message)s',
-#                     datefmt='%Y-%m-%d %H:%M:%S',
-#                     level=logging.INFO)
+logging.basicConfig(format='%(asctime)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S',
+                    level=logging.WARN)
 
 if not os.path.isdir("logs"):
     os.mkdir("logs")

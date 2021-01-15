@@ -86,6 +86,7 @@ class ObdReader(Thread, TemperatureProvider):
         if usb == "":
             return None
 
+        # TODO : this should move into settings now we have them
         result = obd.OBD(usb, protocol="3")
         OBDConnectedEvent.emit()
         # result.print_commands()
