@@ -208,7 +208,7 @@ class Radio(Thread):
         protocol.write_line("sys set pindig GPIO11 1")
         payload = self.encoder.encode(msg).hex()
         # print(payload)
-        logger.debug("sending message")
+        logger.info("sending {}".format(payload))
         protocol.write_line("radio tx %s" % payload)
         self.metrics.send_attempt += 1
         self.last_transmit = time.time()
