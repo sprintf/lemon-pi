@@ -11,12 +11,12 @@ logger = logging.getLogger(__name__)
 if not os.path.isdir("logs"):
     os.mkdir("logs")
 
-handler = RotatingFileHandler("logs/lemon-pit.log",
-                              maxBytes=10000000,
-                              backupCount=10)
-handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
-handler.setLevel(logging.INFO)
-logging.getLogger().addHandler(handler)
+# handler = RotatingFileHandler("logs/lemon-pit.log",
+#                               maxBytes=10000000,
+#                               backupCount=10)
+# handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
+# handler.setLevel(logging.INFO)
+# logging.getLogger().addHandler(handler)
 
 logger.info("Lemon-Pit : starting up")
 
@@ -43,4 +43,7 @@ def run():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S',
+                        level=logging.DEBUG)
     run()

@@ -160,6 +160,11 @@ class Radio(Thread):
                 except NoiseException:
                     logger.info("received noise")
                     self.radio.metrics.noise += 1
+            else:
+                # temp code
+                #         payload = str(int(time.time())).encode("UTF-8").hex()
+                sent_time = int(bytes(bytearray.fromhex(data[10:])).decode("UTF-8"))
+                logger.info("lag = {:.1f}s".format(time.time() - sent_time))
             # turn off the blue light
             self.send_cmd("sys set pindig GPIO10 0", delay=0)
 
@@ -206,7 +211,8 @@ class Radio(Thread):
         protocol.write_line("radio rxstop")
         protocol.transmitting = True
         protocol.write_line("sys set pindig GPIO11 1")
-        payload = self.encoder.encode(msg).hex()
+        #payload = self.encoder.encode(msg).hex()
+        payload = str(int(time.time())).encode("UTF-8").hex()
         # print(payload)
         logger.info("sending {}".format(payload))
         protocol.write_line("radio tx %s" % payload)
