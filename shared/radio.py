@@ -9,6 +9,7 @@ import logging
 from queue import Queue
 from threading import Thread
 from serial.threaded import LineReader, ReaderThread
+from serial.serialutil import PARITY_NONE, STOPBITS_ONE, EIGHTBITS
 
 from shared.message_encoder import MessageEncoder
 from shared.message_decoder import (
@@ -77,9 +78,11 @@ class Radio(Thread):
         self.last_transmit = 0
         self.ping_freq = ping_freq
         if kwargs.get("port"):
-            self.ser = serial.Serial(kwargs['port'], baudrate=57600)
+            self.ser = serial.Serial(kwargs['port'], baudrate=57600,
+                                     stopbits=STOPBITS_ONE, parity=PARITY_NONE, bytesize=EIGHTBITS)
         else:
-            self.ser = serial.Serial(self.choose_port(), baudrate=57600)
+            self.ser = serial.Serial(self.choose_port(), baudrate=57600,
+                                     stopbits=STOPBITS_ONE, parity=PARITY_NONE, bytesize=EIGHTBITS)
         self.send_queue = Queue()
         self.send_thread = Thread(target=self.__send_outbound_messages__, daemon=True).start()
         self.receive_queue = Queue()
@@ -111,6 +114,7 @@ class Radio(Thread):
             LineReader.__init__(self)
             self.radio = None
             self.transmitting = False
+            self.initialized = False
 
         def set_radio(self, radio):
             self.radio = radio
@@ -127,6 +131,7 @@ class Radio(Thread):
             self.send_cmd('radio set pwr 10')
             self.send_cmd('radio rx 0')
             self.send_cmd("sys set pindig GPIO10 0")
+            self.initialized = True
 
         def handle_line(self, data):
             logger.debug("got data %s" % data)
@@ -166,9 +171,9 @@ class Radio(Thread):
             # turn off the blue light
             self.send_cmd("sys set pindig GPIO10 0", delay=0)
 
-            if not self.transmitting:
+            if self.initialized and not self.transmitting:
                 logger.debug("turning on receive")
-                self.send_cmd('radio rx 0')
+                #self.send_cmd('radio rx 0')
 
         def connection_lost(self, exc):
             if exc:
@@ -176,6 +181,7 @@ class Radio(Thread):
             logger.info("port closed")
 
         def send_cmd(self, cmd, delay=.5):
+            logger.debug("sending cmd {}".format(cmd))
             self.transport.write(('%s\r\n' % cmd).encode('UTF-8'))
             time.sleep(delay)
 
@@ -221,8 +227,8 @@ class Radio(Thread):
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
-                        level=logging.INFO)
-    radio = Radio("car-181", "", ping_freq=15)
+                        level=logging.DEBUG)
+    radio = Radio("car-181", "", ping_freq=30)
     radio.receive_loop()
 
 
