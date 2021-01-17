@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package shared.generated;
+
+message Ping {
+
+  int32 seq_num = 1;
+
+  int32 timestamp = 2;
+
+  string sender = 3;
+
+}

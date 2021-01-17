@@ -1,19 +1,22 @@
 
 import json
 from enum import Enum
+from shared.generated.ping_pb2 import Ping
+
+
+class ProtobufEnum(Enum):
+   Ping = 0
+
 
 class UnknownRadioMessage(Exception):
     pass
 
 
-def create_instance(cmd:str):
-    if cmd == 'ping':
-        return PingMessage()
-    elif cmd == "DM":
-        return DriverMessage('')
-    elif cmd == 'status':
-        return RaceStatusMessage(RaceStatus.UNKNOWN)
+def create_instance(msg:ProtobufEnum):
+    if msg == ProtobufEnum.Ping:
+        return Ping()
     raise UnknownRadioMessage()
+
 
 
 class RadioMessageBase:

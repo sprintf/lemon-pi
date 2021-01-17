@@ -3,6 +3,8 @@ import time
 import base64
 import blowfish
 
+from google.protobuf.message import Message
+from shared.radio_message import ProtobufEnum
 from shared.radio_message import RadioMessageBase
 
 class MessageTooLongException(Exception):
@@ -16,22 +18,24 @@ class MessageEncoder:
         self.key = key
         self.cipher = blowfish.Cipher(key.encode("UTF-8")) if len(key) else None
 
-    def encode(self, msg:RadioMessageBase) -> [bytes]:
+    def encode(self, msg:Message) -> [bytes]:
         self.seq += 1
-        msg.seq = self.seq
+        msg.seq_num = self.seq
         msg.sender = self.sender
-        msg.ts = int(time.time())
-        payload = msg.to_json()
+        msg.timestamp = int(time.time())
+        payload = msg.SerializeToString()
         base64_payload = self.__do_encrypt(payload)
         # IDEA : if it's too long take out the sender and the timestamp?
         if len(base64_payload) > 240:
             raise MessageTooLongException()
-        return b"LPi" + base64_payload
+        print(type(msg).__name__)
+        name = type(msg).__name__
+        return b"LP" + bytes([ProtobufEnum[name].value]) + base64_payload
 
     def __do_encrypt(self, payload):
         if self.cipher:
-            encrypted_payload = b"".join(self.cipher.encrypt_ecb_cts(payload.encode("UTF-8")))
-            base64_payload = base64.b64encode(encrypted_payload)
-            return base64_payload
+            encrypted_payload = b"".join(self.cipher.encrypt_ecb_cts(payload))
+            # base64_payload = base64.b64encode(encrypted_payload)
+            return encrypted_payload
         else:
-            return base64.b64encode(payload.encode("UTF-8"))
+            return payload

@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
 import sys
+import os
 import glob
 import time
 import random
 import serial
 import logging
+import subprocess
 from queue import Queue
 from threading import Thread
 from serial.threaded import LineReader, ReaderThread
@@ -17,6 +19,9 @@ from shared.message_decoder import (
     NoiseException,
     LPiNoiseException
 )
+
+from google.protobuf.message import Message
+from shared.generated import ping_pb2
 
 #
 # Radio Logic
@@ -80,6 +85,27 @@ class Radio(Thread):
         self.send_queue = Queue()
         self.send_thread = Thread(target=self.__send_outbound_messages__, daemon=True).start()
         self.receive_queue = Queue()
+
+    def init(self):
+        # generate the necessary protobufs
+        # -I=$SRC_DIR --python_out=$DST_DIR $SRC_DIR/addressbook.proto
+        logger.info("running in {}".format(os.getcwd()))
+        if os.getcwd().endswith("shared"):
+            os.chdir("../")
+        if not os.path.isdir("shared/generated"):
+            os.mkdir("shared/generated")
+        # todo check genstamp / mod time of output dir
+        logger.info("running in {}".format(os.getcwd()))
+        logger.info("generating protobufs")
+        result = subprocess.run(["protoc",
+                                 "--python_out=shared/generated",
+                                 "-I=shared/protos",
+                                 "ping.proto"], stdout=subprocess.PIPE)
+        print(result.stdout)
+        print(result.returncode)
+        print(result.stderr)
+        logger.info("done")
+
 
     def run(self):
         try:
@@ -145,7 +171,7 @@ class Radio(Thread):
             # turn on the blue light ... we're getting data
             self.send_cmd("sys set pindig GPIO10 1", delay=0)
             # 4c5069 is "LPi" our prefix
-            if data.startswith("radio_rx  4C5069"):
+            if data.startswith("radio_rx  4C50"):
                 try:
                     message:RadioMessageBase = self.radio.decoder.decode(bytearray.fromhex(data[10:]))
                     logger.info("lag = {:.1f}s".format(time.time() - message.ts))
@@ -160,11 +186,6 @@ class Radio(Thread):
                 except NoiseException:
                     logger.info("received noise")
                     self.radio.metrics.noise += 1
-            else:
-                # temp code
-                #         payload = str(int(time.time())).encode("UTF-8").hex()
-                sent_time = int(bytes(bytearray.fromhex(data[10:])).decode("UTF-8"))
-                logger.info("lag = {:.1f}s".format(time.time() - sent_time))
             # turn off the blue light
             self.send_cmd("sys set pindig GPIO10 0", delay=0)
 
@@ -192,7 +213,7 @@ class Radio(Thread):
                 sleep = random.randint(-10, 10)
                 time.sleep(self.ping_freq + sleep)
                 if time.time() - self.last_transmit > (self.ping_freq / 2):
-                    self.send_message(protocol, PingMessage())
+                    self.send_message(protocol, ping_pb2.Ping())
                 if time.time() - last_status_log_time > 60:
                     logger.info("Status : {}".format(self.metrics.__repr__()))
                     self.metrics.reset()
@@ -206,14 +227,12 @@ class Radio(Thread):
         self.send_message(self.protocol, msg)
         self.send_queue.task_done()
 
-    def send_message(self, protocol, msg:RadioMessageBase):
+    def send_message(self, protocol, msg:Message):
         logger.debug("turning off receive")
         protocol.write_line("radio rxstop")
         protocol.transmitting = True
         protocol.write_line("sys set pindig GPIO11 1")
-        #payload = self.encoder.encode(msg).hex()
-        payload = str(int(time.time())).encode("UTF-8").hex()
-        # print(payload)
+        payload = self.encoder.encode(msg).hex()
         logger.info("sending {}".format(payload))
         protocol.write_line("radio tx %s" % payload)
         self.metrics.send_attempt += 1
@@ -227,6 +246,7 @@ if __name__ == "__main__":
                         datefmt='%Y-%m-%d %H:%M:%S',
                         level=logging.INFO)
     radio = Radio("car-181", "", ping_freq=15)
+    radio.init()
     radio.receive_loop()
 
 
