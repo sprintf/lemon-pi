@@ -212,15 +212,15 @@ class Radio(Thread):
 
     def send_message(self, protocol, msg:Message):
         logger.debug("turning off receive")
-        protocol.write_line("radio rxstop")
+        protocol.send_cmd("radio rxstop")
         protocol.transmitting = True
-        protocol.write_line("sys set pindig GPIO11 1")
+        protocol.send_cmd("sys set pindig GPIO11 1")
         payload = self.encoder.encode(msg).hex()
         logger.info("sending {}".format(payload))
-        protocol.write_line("radio tx %s" % payload)
+        protocol.send_cmd("radio tx %s" % payload)
         self.metrics.send_attempt += 1
         self.last_transmit = time.time()
-        protocol.write_line("sys set pindig GPIO11 0")
+        protocol.send_cmd("sys set pindig GPIO11 0")
         logger.debug("message sent")
 
 
