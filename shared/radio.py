@@ -138,6 +138,7 @@ class Radio(Thread):
 
             if data == "ok" or data == 'busy':
                 return
+
             if data == "radio_err":
                 self.radio.metrics.errors += 1
                 self.transmitting = False
@@ -212,15 +213,15 @@ class Radio(Thread):
 
     def send_message(self, protocol, msg:Message):
         logger.debug("turning off receive")
-        protocol.send_cmd("radio rxstop")
+        protocol.send_cmd("radio rxstop", delay=0.1)
         protocol.transmitting = True
-        protocol.send_cmd("sys set pindig GPIO11 1")
+        protocol.send_cmd("sys set pindig GPIO11 1", delay=0.1)
         payload = self.encoder.encode(msg).hex()
         logger.info("sending {}".format(payload))
         protocol.send_cmd("radio tx %s" % payload)
         self.metrics.send_attempt += 1
         self.last_transmit = time.time()
-        protocol.send_cmd("sys set pindig GPIO11 0")
+        protocol.send_cmd("sys set pindig GPIO11 0", delay=0.1)
         logger.debug("message sent")
 
 
