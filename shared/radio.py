@@ -173,8 +173,8 @@ class Radio(Thread):
             # 4c5069 is "LPi" our prefix
             if data.startswith("radio_rx  4C50"):
                 try:
-                    message:RadioMessageBase = self.radio.decoder.decode(bytearray.fromhex(data[10:]))
-                    logger.info("lag = {:.1f}s".format(time.time() - message.ts))
+                    message:Message = self.radio.decoder.decode(bytearray.fromhex(data[10:]))
+                    logger.info("lag = {:.1f}s".format(time.time() - message.timestamp))
                     logger.info("received " + message.__repr__())
                     self.radio.metrics.received += 1
                     # put this message onto a queue to go to the
