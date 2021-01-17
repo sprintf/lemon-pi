@@ -45,6 +45,12 @@ pip3 install -r requirements.txt
 sudo apt-get install libatlas-base-dev
 ```
 
+8. Install protobuf 
+
+```sh
+sudo apt-get install protobuf-compiler
+```
+
 8. launch the lemon-pi application
 
 ```sh
