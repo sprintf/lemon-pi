@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
 
 import sys
-import os
 import glob
 import time
 import random
 import serial
 import logging
-import subprocess
 from queue import Queue
 from threading import Thread
 from serial.threaded import LineReader, ReaderThread
 
-from shared.radio_message import *
 from shared.message_encoder import MessageEncoder
 from shared.message_decoder import (
     MessageDecoder,
@@ -20,8 +17,9 @@ from shared.message_decoder import (
     LPiNoiseException
 )
 
+from shared.generated.messages_pb2 import Ping
+
 from google.protobuf.message import Message
-from shared.generated import ping_pb2
 
 #
 # Radio Logic
@@ -85,27 +83,6 @@ class Radio(Thread):
         self.send_queue = Queue()
         self.send_thread = Thread(target=self.__send_outbound_messages__, daemon=True).start()
         self.receive_queue = Queue()
-
-    def init(self):
-        # generate the necessary protobufs
-        # -I=$SRC_DIR --python_out=$DST_DIR $SRC_DIR/addressbook.proto
-        logger.info("running in {}".format(os.getcwd()))
-        if os.getcwd().endswith("shared"):
-            os.chdir("../")
-        if not os.path.isdir("shared/generated"):
-            os.mkdir("shared/generated")
-        # todo check genstamp / mod time of output dir
-        logger.info("running in {}".format(os.getcwd()))
-        logger.info("generating protobufs")
-        result = subprocess.run(["protoc",
-                                 "--python_out=shared/generated",
-                                 "-I=shared/protos",
-                                 "ping.proto"], stdout=subprocess.PIPE)
-        print(result.stdout)
-        print(result.returncode)
-        print(result.stderr)
-        logger.info("done")
-
 
     def run(self):
         try:
@@ -213,13 +190,13 @@ class Radio(Thread):
                 sleep = random.randint(-10, 10)
                 time.sleep(self.ping_freq + sleep)
                 if time.time() - self.last_transmit > (self.ping_freq / 2):
-                    self.send_message(protocol, ping_pb2.Ping())
+                    self.send_message(protocol, Ping())
                 if time.time() - last_status_log_time > 60:
                     logger.info("Status : {}".format(self.metrics.__repr__()))
                     self.metrics.reset()
                     last_status_log_time = time.time()
 
-    def send_async(self, msg:RadioMessageBase):
+    def send_async(self, msg:Message):
         self.send_queue.put(msg)
 
     def __send_outbound_messages__(self):
@@ -246,7 +223,6 @@ if __name__ == "__main__":
                         datefmt='%Y-%m-%d %H:%M:%S',
                         level=logging.INFO)
     radio = Radio("car-181", "", ping_freq=15)
-    radio.init()
     radio.receive_loop()
 
 
