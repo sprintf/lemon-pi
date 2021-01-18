@@ -1,7 +1,7 @@
 
-from gps_reader import GpsReader
+from car.gps_reader import GpsReader
 import logging
-from movement_listener import MovementListener
+from car.movement_listener import MovementListener
 
 if __name__ == "__main__":
 

@@ -1,7 +1,7 @@
 import unittest
 from freezegun import freeze_time
 
-from display_providers import LocalTimeProvider
+from car.display_providers import LocalTimeProvider
 
 
 class MyTestCase(unittest.TestCase):

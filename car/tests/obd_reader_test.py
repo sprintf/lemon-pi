@@ -1,6 +1,6 @@
 import unittest
 
-from obd_reader import ObdReader
+from car.obd_reader import ObdReader
 
 
 class ObdReaderTest(unittest.TestCase):

@@ -1,7 +1,7 @@
 
 
 import unittest
-from lap_tracker import angular_difference
+from car.lap_tracker import angular_difference
 
 
 class TestAngularDifference(unittest.TestCase):

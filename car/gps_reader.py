@@ -2,10 +2,10 @@ from gps import *
 
 from dateutil import parser
 from datetime import datetime, timezone, timedelta
-from display_providers import SpeedProvider, PositionProvider
-from updaters import PositionUpdater
+from car.display_providers import SpeedProvider, PositionProvider
+from car.updaters import PositionUpdater
 from threading import Thread
-from events import *
+from car.events import *
 import logging
 import time
 import subprocess
