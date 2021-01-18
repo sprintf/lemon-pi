@@ -8,6 +8,7 @@ from threading import Thread
 from display_providers import TemperatureProvider
 from updaters import FuelUsageUpdater
 from events import OBDConnectedEvent, OBDDisconnectedEvent, ExitApplicationEvent
+from usb_detector import UsbDetector, UsbDevice
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +53,7 @@ class ObdReader(Thread, TemperatureProvider):
             try:
                 connection = self.connect()
                 if connection is None:
-                    time.sleep(10)
+                    time.sleep(30)
                     continue
 
                 while connection.status() == obd.OBDStatus.CAR_CONNECTED and not self.finished:
@@ -73,23 +74,18 @@ class ObdReader(Thread, TemperatureProvider):
                 time.sleep(10)
 
     def connect(self):
-        ports = obd.scan_serial()
-        usb = ""
-        logger.info("ports = " + str(ports))
-        for port in ports:
-            if self.is_rpi:
-                if port.find('USB0'):
-                    usb = port
-            else:  # mac / darwin
-                if port.find('usbserial') > 0:
-                    usb = port
-        if usb == "":
+        port = UsbDetector.get(UsbDevice.OBD)
+        if not port:
             return None
 
-        # TODO : this should move into settings now we have them
-        result = obd.OBD(usb, protocol="3")
+        # TODO : move the protocol into settings
+        result = obd.OBD(port, protocol="3")
+        status = result.status()
+        if status == obd.OBDStatus.NOT_CONNECTED or \
+           status == obd.OBDStatus.ELM_CONNECTED:
+            result.close()
+            return None
         OBDConnectedEvent.emit()
-        # result.print_commands()
 
         cmds = result.query(obd.commands.PIDS_A)
         logger.debug("available PIDS_A commands {}".format(cmds.value))
@@ -143,5 +139,6 @@ if __name__ == "__main__":
         def update_fuel(self, ml_per_second:float, time:float):
             print("Fuel: {:.2f} ml per sec".format(ml_per_second))
 
+    UsbDetector.init()
     ObdReader(OBDLogger()).run()
 

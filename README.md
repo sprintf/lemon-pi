@@ -43,5 +43,7 @@ I had to buy [these cables](https://www.amazon.com/gp/product/B08FBWFZG4/ref=ppx
 Since this is designed for a racing application, we do not want to power it from the main car battery, because during pit stops it is required the kill switch completely disconnects the car battery. We don't want the device needing to reboot, and we want it to keep track of what's been going on (laps completed, historic fuel usage) through a whole day of racing.
 The solution is to power the Raspberry Pi from a USB battery pack. [This is the one](https://www.amazon.com/gp/product/B06ZYKMY3G/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1) we use to power both the Raspberry Pi and the onboard Go-Pro camera.
 
+It is not possible to run two or three USB devices connected to the Pi as well as having the screen powered.  We are now running power for the screen from a separate source, and are not piggy-backing the screen to the Pi. This has the downside of losing the touch capability of the screen, but does mean the battery can power the Pi for well over 8 hours.
+
 
 
