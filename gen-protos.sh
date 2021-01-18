@@ -22,8 +22,3 @@ if [ ${needs_building} -eq 1 ] ; then
 else
   echo "no generation needed"
 fi
-
-#         result = subprocess.run(["protoc",
-#                                 "--python_out=shared/generated",
-#                                 "-I=shared/protos",
-#                                 "ping.proto"], stdout=subprocess.PIPE)
