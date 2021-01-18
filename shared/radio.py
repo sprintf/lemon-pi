@@ -86,7 +86,7 @@ class Radio(Thread):
             self.ser = serial.Serial(self.choose_port(), baudrate=57600,
                                      stopbits=STOPBITS_ONE, parity=PARITY_NONE, bytesize=EIGHTBITS)
         self.send_queue = Queue()
-        self.send_thread = Thread(target=self.__send_outbound_messages__, daemon=True).start()
+        self.send_thread = Thread(target=self.__send_outbound_messages__, daemon=True)
         self.receive_queue = Queue()
 
     def run(self):
@@ -98,6 +98,11 @@ class Radio(Thread):
 
     def choose_port(self) -> str:
         return UsbDetector.get(UsbDevice.LORA)
+
+    def __radio_ready__(self):
+        logger.info("radio is ready!")
+        self.send_thread.start()
+        logger.info("send thread started")
 
     class PrintLines(LineReader):
 
@@ -114,20 +119,28 @@ class Radio(Thread):
             logger.info("connection made")
             self.transport = transport
             self.send_cmd('sys get ver')
-
-            self.send_cmd('radio get mod')
             self.send_cmd('radio get freq')
             self.send_cmd('radio get sf')
             self.send_cmd('mac pause')
             self.send_cmd('radio set pwr 12')
-            self.send_cmd('radio rx 0')
-            self.send_cmd("sys set pindig GPIO10 0")
-            self.initialized = True
+            self.send_cmd('sys set pindig GPIO10 0')
+            # this responds with 'lora' when we get this we mark ourselves as initialized
+            self.send_cmd('radio get mod')
 
         def handle_line(self, data):
             logger.debug("got data %s" % data)
 
-            if data == "ok" or data == 'busy':
+            # special response from 'radio get mod' which is the last response to the
+            # initialization sequence
+            if data == "lora":
+                self.initialized = True
+                self.send_cmd('radio rx 0')
+                self.radio.__radio_ready__()
+                return
+
+            # we see invalid_param messages when there is insufficient delay between
+            # commands we send to the radio
+            if data == "ok" or data == 'busy' or 'invalid_param':
                 return
 
             if data == "radio_err":
@@ -143,7 +156,7 @@ class Radio(Thread):
                 return
 
             # turn on the blue light ... we're getting data
-            self.send_cmd("sys set pindig GPIO10 1", delay=0)
+            self.send_cmd("sys set pindig GPIO10 1")
             # 4c5069 is "LPi" our prefix
             if data.startswith("radio_rx  4C50"):
                 try:
@@ -161,7 +174,7 @@ class Radio(Thread):
                     logger.info("received noise")
                     self.radio.metrics.noise += 1
             # turn off the blue light
-            self.send_cmd("sys set pindig GPIO10 0", delay=0)
+            self.send_cmd("sys set pindig GPIO10 0")
 
             if self.initialized and not self.transmitting:
                 logger.debug("turning on receive")
@@ -172,7 +185,9 @@ class Radio(Thread):
                 logger.exception(exc)
             logger.info("port closed")
 
-        def send_cmd(self, cmd, delay=.5):
+        # todo : might be worth putting this 0.1 into config. The laptop handles 0.1 ok
+        # but will the pi ... and will all pis?
+        def send_cmd(self, cmd, delay=0.1):
             logger.debug("sending cmd {}".format(cmd))
             self.transport.write(('%s\r\n' % cmd).encode('UTF-8'))
             time.sleep(delay)

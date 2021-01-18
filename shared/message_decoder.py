@@ -33,9 +33,14 @@ class MessageDecoder:
             payload = self.__do_decrypt(encrypted_payload)
             instance.ParseFromString(payload)
             return instance
+        except RuntimeWarning:
+            # this means the protobuf was wrong
+            raise LPiNoiseException()
         except ValueError:
+            # this means the decryption failed
             raise LPiNoiseException()
         except DecodeError:
+            # another protobuf error we may see
             raise LPiNoiseException()
 
     def __do_decrypt(self, encrypted_payload):
