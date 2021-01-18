@@ -3,7 +3,7 @@
 # it is defined as being two lat_longs defining the endpoints
 # of a line. And a heading that indicates a tangent to the
 # direction of travel when passing the point.
-from geometry import calc_intersect_heading
+from car.geometry import calc_intersect_heading
 
 class Target:
 

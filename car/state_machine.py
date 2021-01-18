@@ -1,7 +1,7 @@
 
 from enum import Enum
 
-from events import *
+from car.events import *
 
 
 # define a few different states the car can be in at the track

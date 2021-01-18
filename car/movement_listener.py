@@ -1,5 +1,5 @@
 
-from events import EventHandler, MovingEvent, NotMovingEvent, CarStoppedEvent
+from car.events import EventHandler, MovingEvent, NotMovingEvent, CarStoppedEvent
 from haversine import haversine, Unit
 import logging
 import time

@@ -5,8 +5,8 @@ import time
 from python_settings import settings
 
 
-from display_providers import FuelProvider
-from updaters import FuelUsageUpdater, LapUpdater
+from car.display_providers import FuelProvider
+from car.updaters import FuelUsageUpdater, LapUpdater
 
 logger = logging.getLogger(__name__)
 

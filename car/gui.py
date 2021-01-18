@@ -1,7 +1,7 @@
 from guizero import App, Text, Box, PushButton, Picture
 
-from display_providers import *
-from events import *
+from car.display_providers import *
+from car.events import *
 
 import logging
 import platform

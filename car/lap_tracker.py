@@ -1,11 +1,11 @@
-from track import TrackLocation
-from updaters import PositionUpdater, LapUpdater
-from display_providers import LapProvider
-from target import Target
-from events import LeaveTrackEvent, CompleteLapEvent
+from car.track import TrackLocation
+from car.updaters import PositionUpdater, LapUpdater
+from car.display_providers import LapProvider
+from car.target import Target
+from car.events import LeaveTrackEvent, CompleteLapEvent
 
 from haversine import haversine, Unit
-import geometry
+from car import geometry
 import time
 import logging
 
@@ -109,13 +109,13 @@ class LapTracker(PositionUpdater, LapProvider):
         return self.last_lap_time
 
 import csv
-from track import read_tracks
+from car.track import read_tracks
 
 if __name__ == "__main__":
     tracks = read_tracks()
 
     tracker = LapTracker(tracks[1], None)
-    with open("traces/trace-1608347418.csv") as csvfile:
+    with open("../traces/trace-1608347418.csv") as csvfile:
         points = csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC)
         x = 0
         for point in points:

@@ -1,16 +1,16 @@
 
 import time, os
 from threading import Thread
-from gui import Gui
-from gps_reader import GpsReader
-from maf_analyzer import MafAnalyzer
-from obd_reader import ObdReader
-from lap_tracker import LapTracker
-from wifi import WifiManager
-from display_providers import LocalTimeProvider
-from track import TrackLocation, read_tracks
-from state_machine import StateMachine
-from movement_listener import MovementListener
+from car.gui import Gui
+from car.gps_reader import GpsReader
+from car.maf_analyzer import MafAnalyzer
+from car.obd_reader import ObdReader
+from car.lap_tracker import LapTracker
+from car.wifi import WifiManager
+from car.display_providers import LocalTimeProvider
+from car.track import TrackLocation, read_tracks
+from car.state_machine import StateMachine
+from car.movement_listener import MovementListener
 from shared.usb_detector import UsbDetector
 from haversine import haversine
 import logging
@@ -27,13 +27,13 @@ logging.basicConfig(format='%(asctime)s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.WARN)
 
-if not os.path.isdir("logs"):
-    os.mkdir("logs")
+if not os.path.isdir("../logs"):
+    os.mkdir("../logs")
 file_handler = logging.FileHandler("logs/lap-logger-{}.csv".format(today))
 lap_logger = logging.getLogger("lap-logger")
 lap_logger.addHandler(file_handler)
 
-handler = RotatingFileHandler("logs/lemon-pi.log",
+handler = RotatingFileHandler("../logs/lemon-pi.log",
                               maxBytes=10000000,
                               backupCount=10)
 handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))

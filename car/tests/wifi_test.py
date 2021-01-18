@@ -1,6 +1,6 @@
 import unittest
 
-from wifi import WifiManager
+from car.wifi import WifiManager
 
 class WifiTest(unittest.TestCase):
 
