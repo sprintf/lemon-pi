@@ -140,7 +140,7 @@ class Radio(Thread):
 
             # we see invalid_param messages when there is insufficient delay between
             # commands we send to the radio
-            if data == "ok" or data == 'busy' or 'invalid_param':
+            if data == "ok" or data == 'busy' or data == 'invalid_param':
                 return
 
             if data == "radio_err":
@@ -152,6 +152,7 @@ class Radio(Thread):
             if data == "radio_tx_ok":
                 self.radio.metrics.sent += 1
                 self.transmitting = False
+                logger.debug("turning on radio receive after tx")
                 self.send_cmd('radio rx 0')
                 return
 
@@ -177,8 +178,8 @@ class Radio(Thread):
             self.send_cmd("sys set pindig GPIO10 0")
 
             if self.initialized and not self.transmitting:
-                logger.debug("turning on receive")
-                #self.send_cmd('radio rx 0')
+                logger.debug("turning on rx after recieve")
+                self.send_cmd('radio rx 0')
 
         def connection_lost(self, exc):
             if exc:
