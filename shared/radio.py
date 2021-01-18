@@ -128,7 +128,7 @@ class Radio(Thread):
             self.send_cmd('radio get freq')
             self.send_cmd('radio get sf')
             self.send_cmd('mac pause')
-            self.send_cmd('radio set pwr 10')
+            self.send_cmd('radio set pwr 12')
             self.send_cmd('radio rx 0')
             self.send_cmd("sys set pindig GPIO10 0")
             self.initialized = True
@@ -228,7 +228,7 @@ class Radio(Thread):
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
-                        level=logging.DEBUG)
+                        level=logging.INFO)
     radio = Radio("car-181", "", ping_freq=30)
     radio.receive_loop()
 
