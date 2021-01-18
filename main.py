@@ -11,7 +11,7 @@ from display_providers import LocalTimeProvider
 from track import TrackLocation, read_tracks
 from state_machine import StateMachine
 from movement_listener import MovementListener
-from usb_detector import UsbDetector
+from shared.usb_detector import UsbDetector
 from haversine import haversine
 import logging
 from logging.handlers import RotatingFileHandler
@@ -23,9 +23,9 @@ logger = logging.getLogger(__name__)
 
 # this enables console logging, but we're going to use
 # rotating file based logging
-# logging.basicConfig(format='%(asctime)s %(message)s',
-#                     datefmt='%Y-%m-%d %H:%M:%S',
-#                     level=logging.INFO)
+logging.basicConfig(format='%(asctime)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S',
+                    level=logging.WARN)
 
 if not os.path.isdir("logs"):
     os.mkdir("logs")

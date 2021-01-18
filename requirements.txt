@@ -1,3 +1,4 @@
+blowfish==0.6.1
 freezegun==1.0.0
 gps==3.19
 guizero==1.1.1
@@ -5,6 +6,7 @@ haversine==2.3.0
 numpy==1.19.4
 obd==0.7.1
 Pint==0.7.2
+protobuf==3.14.0
 pyserial==3.5
 python-dateutil==2.8.1
 python-settings==0.2.2
