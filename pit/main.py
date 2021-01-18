@@ -5,7 +5,7 @@ from logging.handlers import RotatingFileHandler
 from python_settings import settings
 
 from shared.radio import Radio
-
+from shared.usb_detector import UsbDetector
 
 logger = logging.getLogger(__name__)
 if not os.path.isdir("logs"):
@@ -30,6 +30,9 @@ if not "SETTINGS_MODULE" in os.environ:
 
 
 def run():
+    # detect USB devices (should just be Lora)
+    UsbDetector.init()
+
     # start the radio thread
     radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY)
     radio.start()

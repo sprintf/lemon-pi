@@ -8,7 +8,7 @@ from threading import Thread
 from display_providers import TemperatureProvider
 from updaters import FuelUsageUpdater
 from events import OBDConnectedEvent, OBDDisconnectedEvent, ExitApplicationEvent
-from usb_detector import UsbDetector, UsbDevice
+from shared.usb_detector import UsbDetector, UsbDevice
 
 logger = logging.getLogger(__name__)
 

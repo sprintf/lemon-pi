@@ -38,6 +38,7 @@ from google.protobuf.message import Message
 #  The +- 10s is randomized so that it's unlikely two radios will ever stay in sync
 #  The ping includes the identity of the sender, so it is possible to display all the
 #  radios that are talking in a group
+from shared.usb_detector import UsbDetector, UsbDevice
 
 logger = logging.getLogger(__name__)
 
@@ -77,12 +78,10 @@ class Radio(Thread):
         self.metrics = RadioMetrics()
         self.last_transmit = 0
         self.ping_freq = ping_freq
-        if kwargs.get("port"):
-            self.ser = serial.Serial(kwargs['port'], baudrate=57600,
-                                     stopbits=STOPBITS_ONE, parity=PARITY_NONE, bytesize=EIGHTBITS)
-        else:
-            self.ser = serial.Serial(self.choose_port(), baudrate=57600,
-                                     stopbits=STOPBITS_ONE, parity=PARITY_NONE, bytesize=EIGHTBITS)
+        # TODO this should move into an init function that also gets called on disconnect
+        # so we can survive the radio being plugged and unplugged
+        self.ser = serial.Serial(self.choose_port(), baudrate=57600,
+                                 stopbits=STOPBITS_ONE, parity=PARITY_NONE, bytesize=EIGHTBITS)
         self.send_queue = Queue()
         self.send_thread = Thread(target=self.__send_outbound_messages__, daemon=True).start()
         self.receive_queue = Queue()
@@ -95,18 +94,7 @@ class Radio(Thread):
             time.sleep(10)
 
     def choose_port(self) -> str:
-        possible_ports = []
-        if sys.platform.startswith('darwin'):
-            possible_ports += [port for port in glob.glob('/dev/tty.usbserial*')]
-        if len(possible_ports) == 0:
-            raise Exception("no serial port found for Lora")
-        elif len(possible_ports) == 1:
-            logger.info("choosing {}".format(possible_ports))
-            return possible_ports[0]
-        else:
-            choice = possible_ports[random.randint(0, len(possible_ports) - 1)]
-            logger.warning("randomly/hopefully choosing {} for Lora device".format(choice))
-            return choice
+        return UsbDetector.get(UsbDevice.LORA)
 
     class PrintLines(LineReader):
 
@@ -229,6 +217,7 @@ if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
                         level=logging.INFO)
+    UsbDetector.init()
     radio = Radio("car-181", "", ping_freq=30)
     radio.receive_loop()
 
