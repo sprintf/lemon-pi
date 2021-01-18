@@ -7,8 +7,7 @@ from shared.message_decoder import (
     NoiseException,
     LPiNoiseException
 )
-
-from shared.radio_message import *
+from shared.generated.messages_pb2 import Ping
 
 
 class DecoderTestCase(unittest.TestCase):
@@ -20,7 +19,7 @@ class DecoderTestCase(unittest.TestCase):
 
     def test_decoding_message_from_other_team(self):
         e = MessageEncoder("pit", "team-2")
-        msg = e.encode(PingMessage())
+        msg = e.encode(Ping())
         m = MessageDecoder("team-1")
         with self.assertRaises(LPiNoiseException):
             m.decode(msg)

@@ -1,21 +1,16 @@
 import unittest
 
-from shared.message_encoder import (
-    MessageEncoder,
-    MessageTooLongException
-)
+from shared.message_encoder import MessageEncoder
 from shared.message_decoder import MessageDecoder
-from shared.radio_message import *
 
-from google.protobuf.message import Message
-from shared.generated import ping_pb2
+from shared.generated.messages_pb2 import Ping
 
 
 class EncoderTestCase(unittest.TestCase):
 
     def test_encoding(self):
         e = MessageEncoder("car-180", "letmein")
-        orig = ping_pb2.Ping()
+        orig = Ping()
         payload = e.encode(orig)
 
         m = MessageDecoder("letmein")
