@@ -42,6 +42,7 @@ class StateMachine(EventHandler):
         if self.state == State.ON_TRACK:
             if event == LeaveTrackEvent:
                 self.state = State.LEAVING_TRACK
+                # todo : emit a Pitting Message -> can send over radio
                 return
 
         if self.state == State.LEAVING_TRACK:

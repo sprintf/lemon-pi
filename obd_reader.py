@@ -8,7 +8,7 @@ from threading import Thread
 from display_providers import TemperatureProvider
 from updaters import FuelUsageUpdater
 from events import OBDConnectedEvent, OBDDisconnectedEvent, ExitApplicationEvent
-from usb_detector import UsbDetector, UsbDevice
+from shared.usb_detector import UsbDetector, UsbDevice
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +78,7 @@ class ObdReader(Thread, TemperatureProvider):
         if not port:
             return None
 
+        # TODO : move the protocol into settings
         result = obd.OBD(port, protocol="3")
         status = result.status()
         if status == obd.OBDStatus.NOT_CONNECTED or \

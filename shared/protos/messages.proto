@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+package shared.generated;
+
+// common fields ...
+// ALL messages should include:
+//   seq_num
+//   timestamp
+//   sender
+//
+// These will be auto-populated on send
+
+// a ping message, sent sporadically from both car and pit
+message Ping {
+
+  int32 seq_num = 1;
+
+  int32 timestamp = 2;
+
+  string sender = 3;
+
+}
+
+// a text message from the pits to the driver
+message DriverMessage {
+
+  int32 seq_num = 1;
+
+  int32 timestamp = 2;
+
+  string sender = 3;
+
+  string text = 4;
+
+}
+
+// the race status. Only sent when it changes
+
+message RaceStatus {
+
+  int32 seq_num = 1;
+
+  int32 timestamp = 2;
+
+  string sender = 3;
+
+  enum RaceFlagStatus {
+    UNKNOWN = 0;
+    GREEN = 1;
+    YELLOW = 2;
+    RED = 3;
+    BLACK = 4;
+  }
+
+  RaceFlagStatus flagStatus = 4;
+}
+
+// this message doesn't have the key fields because it's an embedded part of
+// other messages
+message Opponent {
+  string car_number = 1;
+
+  int64 gap_seconds = 2;
+}
+
+// the position of a car in the race. Usually only sent to our car
+message RacePosition {
+  int32 seq_num = 1;
+
+  int32 timestamp = 2;
+
+  string sender = 3;
+
+  string car_number = 4;
+
+  int32 position = 5;
+
+  Opponent car_ahead = 6;
+}
+
+message CarTelemetry {
+  int32 seq_num = 1;
+
+  int32 timestamp = 2;
+
+  string sender = 3;
+
+  int32 coolant_temp = 4;
+
+  int32 last_lap_time = 5;
+
+  int32 last_lap_fuel_usage = 6;
+
+  int32 fuel_remaining_percent = 7;
+}
+
