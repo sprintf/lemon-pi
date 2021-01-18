@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import sys
-import glob
 import time
 import random
 import serial
@@ -121,6 +119,8 @@ class Radio(Thread):
             self.send_cmd('sys get ver')
             self.send_cmd('radio get freq')
             self.send_cmd('radio get sf')
+            # wait for up to a minute on commands : this creates few errors on read
+            self.send_cmd('radio set wdt 60000')
             self.send_cmd('mac pause')
             self.send_cmd('radio set pwr 12')
             self.send_cmd('sys set pindig GPIO10 0')
