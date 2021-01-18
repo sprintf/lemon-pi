@@ -6,16 +6,19 @@ from car.gps_reader import GpsReader
 from car.maf_analyzer import MafAnalyzer
 from car.obd_reader import ObdReader
 from car.lap_tracker import LapTracker
+from car.radio_interface import RadioInterface
 from car.wifi import WifiManager
 from car.display_providers import LocalTimeProvider
 from car.track import TrackLocation, read_tracks
 from car.state_machine import StateMachine
 from car.movement_listener import MovementListener
+from shared.radio import Radio
 from shared.usb_detector import UsbDetector
 from haversine import haversine
 import logging
 from logging.handlers import RotatingFileHandler
 from datetime import datetime
+from python_settings import settings
 
 today = datetime.today().strftime('%Y-%m-%d')
 
@@ -43,7 +46,7 @@ logging.getLogger().addHandler(handler)
 logger.info("Lemon-Pi : starting up")
 
 if not "SETTINGS_MODULE" in os.environ:
-    os.environ["SETTINGS_MODULE"] = "config.settings"
+    os.environ["SETTINGS_MODULE"] = "config.settings-car"
 
 # main control thread
 # responsibilities
@@ -73,6 +76,13 @@ gps.start()
 obd = ObdReader(MA)
 obd.start()
 
+# start a background thread to manage the radio function
+radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY)
+radio.start()
+# and the radio interface maps car events to and from the radio
+radio_interface = RadioInterface(radio, obd, None, MA)
+radio_interface.start()
+
 # store the closest track
 closest_track: TrackLocation = None
 
@@ -86,6 +96,7 @@ def await_gps():
     lap_tracker = LapTracker(closest_track, MA)
     gps.register_position_listener(lap_tracker)
     gui.register_lap_provider(lap_tracker)
+    radio_interface.register_lap_provider(lap_tracker)
 
 # fire up a transient thread that polls until a location fix happens,
 # and then finds the closest track to our location

@@ -87,10 +87,12 @@ message CarTelemetry {
 
   int32 coolant_temp = 4;
 
-  int32 last_lap_time = 5;
+  int32 lap_count = 5;
 
-  int32 last_lap_fuel_usage = 6;
+  int32 last_lap_time = 6;
 
-  int32 fuel_remaining_percent = 7;
+  int32 last_lap_fuel_usage = 7;
+
+  int32 fuel_remaining_percent = 8;
 }
 

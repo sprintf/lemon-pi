@@ -45,7 +45,7 @@ class TrackLocation:
 
 def read_tracks() -> [TrackLocation]:
     track_list = []
-    with open("../resources/tracks.yaml") as yamlfile:
+    with open("resources/tracks.yaml") as yamlfile:
         tracks = yaml.load(yamlfile, Loader=yaml.FullLoader)
         for track in tracks["tracks"]:
             sf = track["start_finish_coords"]
