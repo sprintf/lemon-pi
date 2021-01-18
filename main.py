@@ -11,6 +11,7 @@ from display_providers import LocalTimeProvider
 from track import TrackLocation, read_tracks
 from state_machine import StateMachine
 from movement_listener import MovementListener
+from usb_detector import UsbDetector
 from haversine import haversine
 import logging
 from logging.handlers import RotatingFileHandler
@@ -57,6 +58,8 @@ state_machine = StateMachine()
 movement_listener = MovementListener()
 
 gui = Gui()
+
+UsbDetector.init()
 
 MA = MafAnalyzer(lap_logger)
 
