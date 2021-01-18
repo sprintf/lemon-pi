@@ -2,6 +2,7 @@ import obd
 from obd import OBDResponse
 import time
 import logging
+import platform
 
 from threading import Thread
 from display_providers import TemperatureProvider
@@ -36,6 +37,7 @@ class ObdReader(Thread, TemperatureProvider):
         self.last_update_time = {}
         self.fuel_listener = fuel_listener
         self.finished = False
+        self.is_rpi = platform.system() == "Linux"
         ExitApplicationEvent.register_handler(self)
 
         for key in ObdReader.refresh_rate.keys():
@@ -75,8 +77,12 @@ class ObdReader(Thread, TemperatureProvider):
         usb = ""
         logger.info("ports = " + str(ports))
         for port in ports:
-            if port.find('usbserial') > 0:
-                usb = port
+            if self.is_rpi:
+                if port.find('USB0'):
+                    usb = port
+            else:  # mac / darwin
+                if port.find('usbserial') > 0:
+                    usb = port
         if usb == "":
             return None
 
