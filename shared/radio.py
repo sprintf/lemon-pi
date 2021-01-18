@@ -80,8 +80,11 @@ class Radio(Thread):
         self.ping_freq = ping_freq
         # TODO this should move into an init function that also gets called on disconnect
         # so we can survive the radio being plugged and unplugged
-        self.ser = serial.Serial(self.choose_port(), baudrate=57600,
-                                 stopbits=STOPBITS_ONE, parity=PARITY_NONE, bytesize=EIGHTBITS)
+        if kwargs.get("ser"):
+            self.ser = kwargs['ser']
+        else:
+            self.ser = serial.Serial(self.choose_port(), baudrate=57600,
+                                     stopbits=STOPBITS_ONE, parity=PARITY_NONE, bytesize=EIGHTBITS)
         self.send_queue = Queue()
         self.send_thread = Thread(target=self.__send_outbound_messages__, daemon=True).start()
         self.receive_queue = Queue()

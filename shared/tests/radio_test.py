@@ -3,6 +3,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
 from shared.radio import Radio
+from shared.generated.messages_pb2 import Ping
 
 class RadioTestCase(unittest.TestCase):
 
@@ -10,17 +11,17 @@ class RadioTestCase(unittest.TestCase):
     #     radio = Radio("team", "password", ser=MagicMock())
     #     radio.receive_loop()
 
-    @patch("shared.radio.Radio.write")
-    def test_sending_message(self, magic:MagicMock):
+    def test_sending_message(self):
         radio = Radio("team", "password", ser=MagicMock())
         protocol = MagicMock()
-        radio.send_message(protocol, PingMessage())
+        protocol.send_cmd = MagicMock()
+        radio.send_message(protocol, Ping())
 
-        # ser should have has cancel_read called on it
-        #self.ass
-        # expect three calls : light on, tx, light off
-        self.assertEqual(3, magic.call_count)
-        self.assertEqual(b'sys set pindig GPIO11 1', magic.call_args_list[0].args[1])
-        self.assertTrue(magic.call_args_list[1].args[1].startswith(b'radio tx '))
-        self.assertEqual(b'sys set pindig GPIO11 0', magic.call_args_list[2].args[1])
+
+        # expect four calls : stop receiving, light on, tx, light off
+        self.assertEqual(4, protocol.send_cmd.call_count)
+        self.assertEqual("radio rxstop", protocol.send_cmd.call_args_list[0].args[0])
+        self.assertEqual("sys set pindig GPIO11 1", protocol.send_cmd.call_args_list[1].args[0])
+        self.assertTrue(protocol.send_cmd.call_args_list[2].args[0].startswith("radio tx "))
+        self.assertEqual("sys set pindig GPIO11 0", protocol.send_cmd.call_args_list[3].args[0])
 
