@@ -31,11 +31,12 @@ class MessageDecoder:
         # what about exceptions from this
         try:
             payload = self.__do_decrypt(encrypted_payload)
-            instance.ParseFromString(payload)
+            parse_len = instance.ParseFromString(payload)
+            # when this happens the parser gave up early, we do see a stdout message
+            # "RuntimeWarning: Unexpected end-group tag: Not all data was converted"
+            if parse_len < len(payload):
+                raise DecodeError()
             return instance
-        except RuntimeWarning:
-            # this means the protobuf was wrong
-            raise LPiNoiseException()
         except ValueError:
             # this means the decryption failed
             raise LPiNoiseException()

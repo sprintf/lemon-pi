@@ -25,6 +25,7 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
         self.log = log_to_file
         self.finished = False
         self.time_synced = False
+        self.sequential_timesync_errors = 0
         ExitApplicationEvent.register_handler(self)
 
     def handle_event(self, event, **kwargs):
@@ -48,7 +49,9 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
                                                  gps_datetime)
 
                             if lag.total_seconds() > 1:
-                                if lag.total_seconds() > 30 and not self.time_synced:
+                                self.sequential_timesync_errors += 1
+                                if (lag.total_seconds() > 30 or self.sequential_timesync_errors > 30) \
+                                        and not self.time_synced:
                                     logger.info("setting clock from GPS...")
                                     epoch = int(gps_datetime.timestamp())
                                     subprocess.run(['sudo', 'date', '-u', '-s' '@{}'.format(epoch)])
@@ -57,6 +60,7 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
                                 else:
                                     logger.warning("GPS Data time lag = {}  (skipping)".format(lag.total_seconds()))
                                 continue
+                            self.sequential_timesync_errors = 0
                             self.time_synced = True
 
                         if session.fix.status == STATUS_NO_FIX:
@@ -112,6 +116,10 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
 
 if __name__ == "__main__":
 
+    logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S',
+                        level=logging.INFO)
+
     class FileLogger(PositionUpdater):
 
         def __init__(self):
@@ -123,7 +131,7 @@ if __name__ == "__main__":
 
     tracker = GpsReader()
     tracker.register_position_listener(FileLogger())
-    tracker.start()
+    tracker.run()
 
 
 
