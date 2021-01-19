@@ -96,3 +96,13 @@ message CarTelemetry {
   int32 fuel_remaining_percent = 8;
 }
 
+message EnteringPits {
+
+  int32 seq_num = 1;
+
+  int32 timestamp = 2;
+
+  string sender = 3;
+
+}
+
