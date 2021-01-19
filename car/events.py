@@ -55,6 +55,9 @@ CompleteLapEvent = Event("CompleteLap")
 # a request to exit the application
 ExitApplicationEvent = Event("ExitApplication")
 
+# the car should transmit status on radio
+RadioSyncEvent = Event("RadioSync")
+
 ### State Change Events
 
 # the car is setting off from pits

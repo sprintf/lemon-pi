@@ -2,7 +2,7 @@ from car.track import TrackLocation
 from car.updaters import PositionUpdater, LapUpdater
 from car.display_providers import LapProvider
 from car.target import Target
-from car.events import LeaveTrackEvent, CompleteLapEvent
+from car.events import LeaveTrackEvent, CompleteLapEvent, RadioSyncEvent
 
 from haversine import haversine, Unit
 from car import geometry
@@ -35,6 +35,7 @@ class LapTracker(PositionUpdater, LapProvider):
         self.lap_count = 999
         self.last_lap_time = 0
         self.last_pit_in_time = 0
+        self.last_radio_sync_time = 0
 
     def update_position(self, lat:float, long:float, heading:float, time:float, speed:int) -> None:
         if (lat, long) == self.last_pos:
@@ -72,6 +73,15 @@ class LapTracker(PositionUpdater, LapProvider):
                 LeaveTrackEvent.emit()
                 logger.info("entered pits")
                 self.last_pit_in_time = time
+
+        elif self.track.is_radio_sync_defined() and \
+            self.__crossed_line(lat, long, heading, self.track.radio_sync):
+            # de-bounce so that we don't re-enter the pits repeatedly
+            # we could move the time into the target object,
+            if time - self.last_radio_sync_time > 30:
+                RadioSyncEvent.emit()
+                logger.info("syncing radio")
+                self.last_radio_sync_time = time
 
     def __crossed_line(self, lat, long, heading, target:Target):
         if angular_difference(target.target_heading, heading) > 20:

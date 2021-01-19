@@ -1,14 +1,14 @@
 from threading import Thread
 
 from car.display_providers import TemperatureProvider, LapProvider, FuelProvider
-from car.events import EventHandler, CompleteLapEvent
+from car.events import EventHandler, CompleteLapEvent, LeaveTrackEvent, RadioSyncEvent
 from shared.generated.messages_pb2 import (
     CarTelemetry,
     RaceStatus,
     DriverMessage,
     Ping,
-    RacePosition
-)
+    RacePosition,
+    EnteringPits)
 
 import logging
 
@@ -34,20 +34,25 @@ class RadioInterface(Thread, EventHandler):
         self.lap_provider = lap_provider
         self.fuel_provider = fuel_provider
         CompleteLapEvent.register_handler(self)
+        RadioSyncEvent.register_handler(self)
+        LeaveTrackEvent.register_handler(self)
 
     def register_lap_provider(self, lap_provider):
         self.lap_provider = lap_provider
 
     def handle_event(self, event, **kwargs):
-        if event == CompleteLapEvent:
+        if event == CompleteLapEvent or event == RadioSyncEvent:
             telemetry = CarTelemetry()
             telemetry.coolant_temp = self.temp_provider.get_temp_f()
             telemetry.last_lap_time = self.lap_provider.get_last_lap_time()
+            telemetry.lap_count = self.lap_provider.get_lap_count()
             telemetry.last_lap_fuel_usage = self.fuel_provider.get_fuel_used_last_lap_ml()
             telemetry.fuel_remaining_percent = self.fuel_provider.get_fuel_percent_remaining()
             # we send the event asynchronously, because the radio can take multiple seconds
             # to transmit, so there is no guarantee that this message will be sent exactly now
             self.radio.send_async(telemetry)
+        if event == LeaveTrackEvent:
+            self.radio.send_async(EnteringPits())
 
     def run(self):
         msg = self.radio.receive_queue.get()
