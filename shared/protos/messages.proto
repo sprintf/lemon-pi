@@ -89,7 +89,8 @@ message CarTelemetry {
 
   int32 lap_count = 5;
 
-  int32 last_lap_time = 6;
+  // last lap time is in seconds and fractions of seconds
+  float last_lap_time = 6;
 
   int32 last_lap_fuel_usage = 7;
 
@@ -105,4 +106,11 @@ message EnteringPits {
   string sender = 3;
 
 }
+
+//  ********************
+//  **** IMPORTANT *****
+//  ********************
+//
+//  As you add new definitions in here, you will need
+//  to add constructor mappings into shared/radio_message.py
 

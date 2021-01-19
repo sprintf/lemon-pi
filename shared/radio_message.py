@@ -5,8 +5,8 @@ from shared.generated.messages_pb2 import (
     DriverMessage,
     RaceStatus,
     RacePosition,
-    CarTelemetry
-)
+    CarTelemetry,
+    EnteringPits)
 
 
 class ProtobufEnum(Enum):
@@ -15,6 +15,7 @@ class ProtobufEnum(Enum):
    RaceStatus = 2
    RacePosition = 3
    CarTelemetry = 4
+   EnteringPits = 5
 
 class UnknownRadioMessage(Exception):
     pass
@@ -31,6 +32,8 @@ def create_instance(msg:ProtobufEnum):
         return RacePosition()
     elif msg == ProtobufEnum.CarTelemetry:
         return CarTelemetry()
+    elif msg == ProtobufEnum.EnteringPits:
+        return EnteringPits()
     raise UnknownRadioMessage()
 
 

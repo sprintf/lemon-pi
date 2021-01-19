@@ -30,18 +30,19 @@ logging.basicConfig(format='%(asctime)s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.WARN)
 
-if not os.path.isdir("../logs"):
-    os.mkdir("../logs")
+if not os.path.isdir("logs"):
+    os.mkdir("logs")
 file_handler = logging.FileHandler("logs/lap-logger-{}.csv".format(today))
 lap_logger = logging.getLogger("lap-logger")
 lap_logger.addHandler(file_handler)
 
-handler = RotatingFileHandler("../logs/lemon-pi.log",
+handler = RotatingFileHandler("logs/lemon-pi.log",
                               maxBytes=10000000,
                               backupCount=10)
-handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
+handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(name)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
 handler.setLevel(logging.INFO)
 logging.getLogger().addHandler(handler)
+logging.getLogger().setLevel(logging.INFO)
 
 logger.info("Lemon-Pi : starting up")
 
@@ -70,15 +71,24 @@ tracks:[TrackLocation] = read_tracks()
 
 # start a background thread to pull in gps data
 gps = GpsReader()
-gps.start()
+if settings.GPS_DISABLED:
+    logger.warning("GPS has been disabled")
+else:
+    gps.start()
 
 # start a background thread to pull in OBD data
 obd = ObdReader(MA)
-obd.start()
+if settings.OBD_DISABLED:
+    logger.warning("OBD has been disabled")
+else:
+    obd.start()
 
 # start a background thread to manage the radio function
 radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY)
-radio.start()
+if settings.RADIO_DISABLED:
+    logger.warning("Radio has been disabled")
+else:
+    radio.start()
 # and the radio interface maps car events to and from the radio
 radio_interface = RadioInterface(radio, obd, None, MA)
 radio_interface.start()
