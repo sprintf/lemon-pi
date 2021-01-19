@@ -48,7 +48,9 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
                             lag: timedelta = abs(datetime.now(tz=timezone.utc) - \
                                                  gps_datetime)
 
-                            if lag.total_seconds() > 1:
+                            # we find there's a 1s difference between SKY and TPV messages that
+                            # come in.  We could ignore SKY, but for now we allow a 2s drift
+                            if lag.total_seconds() > 2:
                                 self.sequential_timesync_errors += 1
                                 if (lag.total_seconds() > 30 or self.sequential_timesync_errors > 30) \
                                         and not self.time_synced:
