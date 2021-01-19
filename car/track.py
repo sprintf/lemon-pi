@@ -48,7 +48,7 @@ class TrackLocation:
 
     def set_radio_sync_coords(self, lat_long1, lat_long2, direction):
         self.radio_sync = Target("radio-sync", lat_long1, lat_long2, direction)
-        logger.debug("{} : radio-sync heading = {}".format(self.name, int(self.pit_in.target_heading)))
+        logger.debug("{} : radio-sync heading = {}".format(self.name, int(self.radio_sync.target_heading)))
 
     def __repr__(self):
         return self.name
@@ -80,4 +80,9 @@ def read_tracks() -> [TrackLocation]:
     return track_list
 
 if __name__ == "__main__":
+
+    logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S',
+                        level=logging.DEBUG)
+
     read_tracks()
