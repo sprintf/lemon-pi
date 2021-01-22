@@ -60,7 +60,7 @@ message RaceStatus {
 message Opponent {
   string car_number = 1;
 
-  int64 gap_text = 2;
+  string gap_text = 2;
 }
 
 // the position of a car in the race. Usually only sent to our car
