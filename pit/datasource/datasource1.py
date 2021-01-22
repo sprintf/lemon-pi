@@ -24,7 +24,7 @@ class DataSource(Thread):
         now = int(time.time())
         with urllib.request.urlopen(
                 'https://api.{}.com/Info/WebRaceList?accountID=&seriesID=&raceID={}&styleID=&t={}'.
-                        format(source, race_id, now)) as response:
+                        format(source, self.race_id, now)) as response:
             json_response = response.read()
             stream_data = json.loads(json_response)
             race = stream_data['CurrentRaces'][0]
