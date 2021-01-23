@@ -21,7 +21,11 @@ And we use [Lora](https://en.wikipedia.org/wiki/LoRa), a IoT radio mechanism to 
 
 The target hardware is to use Raspberry Pi in the car and a Mac in the pits, although all the software is common-or-garden Python so it should run on Windows/Linux in the pits too. 
 
+## Raspberry Pi Setup Instructions
 [Raspberry Pi specific instructions](README-rpi.md)
+
+# Development Instructions
+[Developer README](README-dev.md)
 
 # Hardware
 
