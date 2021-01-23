@@ -1,14 +1,29 @@
-from pit.events import EventHandler, RaceStatusEvent, LapCompletedEvent
-from shared.generated.messages_pb2 import RaceStatus, RacePosition, Opponent
+from pit.events import (
+    EventHandler,
+    RaceStatusEvent,
+    LapCompletedEvent,
+    PittingEvent,
+    PingEvent,
+    TelemetryEvent
+)
+from shared.generated.messages_pb2 import (
+    RaceStatus,
+    RacePosition,
+    EnteringPits,
+    Ping,
+    CarTelemetry
+)
 from shared.radio import Radio
+from threading import Thread
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class RadioInterface(EventHandler):
+class RadioInterface(Thread, EventHandler):
 
     def __init__(self, radio:Radio):
+        Thread.__init__(self, daemon=True)
         self.radio = radio
         RaceStatusEvent.register_handler(self)
         LapCompletedEvent.register_handler(self)
@@ -19,6 +34,13 @@ class RadioInterface(EventHandler):
 
         if event == LapCompletedEvent:
             self.send_lap_completed(**kwargs)
+
+    def run(self):
+        while True:
+            item = self.radio.receive_queue.get()
+            logger.info("received : {}".format(item.__repr__()))
+            self.radio.receive_queue.task_done()
+            self.convert_to_event(item)
 
     def send_race_status(self, flag=""):
         logger.info("race status changed to {}".format(flag))
@@ -42,3 +64,20 @@ class RadioInterface(EventHandler):
             pos.car_ahead.car_number = ahead
             pos.car_ahead.gap_text = gap
         self.radio.send_async(pos)
+
+    def convert_to_event(self, proto_msg):
+        if type(proto_msg) == EnteringPits:
+            PittingEvent.emit(car=proto_msg.sender)
+            return
+        elif type(proto_msg) == CarTelemetry:
+            TelemetryEvent.emit(car=proto_msg.sender,
+                                ts=proto_msg.timestamp,
+                                coolant_temp=proto_msg.coolant_temp,
+                                lap_count=proto_msg.lap_count,
+                                last_lap_time=proto_msg.last_lap_time,
+                                last_lap_fuel=proto_msg.last_lap_fuel_usage,
+                                fuel_percent=proto_msg.fuel_remaining_percent)
+        elif type(proto_msg) == Ping:
+            PingEvent.emit(car=proto_msg.sender, ts=proto_msg.timestamp)
+        else:
+            logger.error("unknown radio message {}".format(type(proto_msg)))

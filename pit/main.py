@@ -1,7 +1,9 @@
 
 import os
 import logging
+import sys
 from logging.handlers import RotatingFileHandler
+from threading import Thread
 from python_settings import settings
 
 from pit.radio_interface import RadioInterface
@@ -10,6 +12,7 @@ from pit.datasource.datasource_handler import DataSourceHandler
 from pit.leaderboard import RaceOrder
 from shared.radio import Radio
 from shared.usb_detector import UsbDetector
+from pit.gui import Gui
 
 logger = logging.getLogger(__name__)
 if not os.path.isdir("logs"):
@@ -35,34 +38,41 @@ if not "SETTINGS_MODULE" in os.environ:
 
 
 def run():
-    # detect USB devices (should just be Lora)
-    UsbDetector.init()
+    gui = Gui()
 
-    # start the radio thread
-    radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY)
-    RadioInterface(radio)
-    radio.start()
+    def init():
+        gui.progress(10)
+        # detect USB devices (should just be Lora)
+        UsbDetector.init()
+        gui.progress(40)
 
-    # if we have a race specified
-    if settings.RACE_ID != "":
-        # create a leaderboard
-        leaderboard = RaceOrder()
-        # filter race updates down to updates related to our car
-        updater = DataSourceHandler(leaderboard, settings.TARGET_CAR)
-        # start reading the race state
-        ds = DataSource(settings.RACE_ID, updater)
-        # and keep a thread going reading the race state
-        if ds.connect():
-            ds.start()
+        # start the radio thread
+        try:
+            with Radio(settings.RADIO_DEVICE, settings.RADIO_KEY) as radio:
+                RadioInterface(radio)
+                radio.start()
+                gui.progress(70)
+        except KeyError:
+            print("LORA radio not connected")
+            gui.shutdown()
+            sys.exit(1)
 
+        # if we have a race specified
+        if settings.RACE_ID != "":
+            # create a leaderboard
+            leaderboard = RaceOrder()
+            # filter race updates down to updates related to our car
+            updater = DataSourceHandler(leaderboard, settings.TARGET_CAR)
+            # start reading the race state
+            ds = DataSource(settings.RACE_ID, updater)
+            # and keep a thread going reading the race state
+            if ds.connect():
+                ds.start()
+            gui.progress(90)
+        gui.progress(100)
 
-    # wait for incoming messages, and log them as they arrive
-    while True:
-        # pluck incoming messages off the queue
-        item = radio.receive_queue.get()
-        logger.info("received : {}".format(item.__repr__()))
-        radio.receive_queue.task_done()
-
+    Thread(target=init, daemon=True).start()
+    gui.display()
 
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
