@@ -60,7 +60,7 @@ message RaceStatus {
 message Opponent {
   string car_number = 1;
 
-  int64 gap_seconds = 2;
+  string gap_text = 2;
 }
 
 // the position of a car in the race. Usually only sent to our car
@@ -75,7 +75,9 @@ message RacePosition {
 
   int32 position = 5;
 
-  Opponent car_ahead = 6;
+  int32 lap_count = 6;
+
+  Opponent car_ahead = 7;
 }
 
 message CarTelemetry {
@@ -113,4 +115,5 @@ message EnteringPits {
 //
 //  As you add new definitions in here, you will need
 //  to add constructor mappings into shared/radio_message.py
+//  that's really only for messages that arrive at tha car
 

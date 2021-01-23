@@ -237,7 +237,7 @@ if __name__ == "__main__":
                         datefmt='%Y-%m-%d %H:%M:%S',
                         level=logging.INFO)
     UsbDetector.init()
-    radio = Radio("car-181", "", ping_freq=30)
+    radio = Radio("car-181", "abracadabra", ping_freq=30)
     radio.receive_loop()
 
 
