@@ -39,3 +39,22 @@ RaceStatusEvent = Event("race-flag")
 #   ahead=   optional (only if someone ahead)
 #   gap=     "-" if nobody ahead
 LapCompletedEvent = Event("lap-completed")
+
+# emit() sends out
+#   car=
+PittingEvent = Event("pitting")
+
+# emit() sends out
+#   car=
+#   ts=
+PingEvent = Event("ping")
+
+# emit() sends out
+#   car=
+#   ts=
+#   coolant_temp=
+#   lap_count=
+#   last_lap_time=
+#   last_lap_fuel=
+#   fuel_percent=
+TelemetryEvent = Event("telemetry")
