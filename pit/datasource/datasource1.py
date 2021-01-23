@@ -3,9 +3,12 @@ import time
 import urllib.request
 import json
 import websocket
+import logging
 from threading import Thread
 
 from pit.datasource.datasource_handler import DataSourceHandler
+
+logger = logging.getLogger(__name__)
 
 source = 'rotinom-ecar'[::-1]
 
@@ -13,7 +16,7 @@ source = 'rotinom-ecar'[::-1]
 class DataSource(Thread):
 
     def __init__(self, race_id, handler:DataSourceHandler):
-        Thread.__init__(self)
+        Thread.__init__(self, daemon=True)
         self.race_id = race_id
         self.handler = handler
         self.stopping = False
@@ -42,15 +45,15 @@ class DataSource(Thread):
             self.handler.handle_message(message)
 
         def on_error(ws, error):
-            print("error: {}".format(error))
+            logger.warning("error: {}".format(error))
 
         def on_close(ws):
-            print("WS closed")
+            logger.info("WS closed")
 
         def on_open(ws):
-            print("Opened!")
+            logger.info("WS Opened!")
 
-        websocket.enableTrace(True)
+        #websocket.enableTrace(True)
         self.ws = websocket.WebSocketApp(self.stream_url,
                                     on_message=on_message,
                                     on_error=on_error,

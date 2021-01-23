@@ -4,7 +4,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from python_settings import settings
 
-from car.main import radio_interface
+from pit.radio_interface import RadioInterface
 from pit.datasource.datasource1 import DataSource
 from pit.datasource.datasource_handler import DataSourceHandler
 from pit.leaderboard import RaceOrder
@@ -40,11 +40,11 @@ def run():
 
     # start the radio thread
     radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY)
-    radio_interface(radio)
+    RadioInterface(radio)
     radio.start()
 
     # if we have a race specified
-    if settings.RACE_ID > 0:
+    if settings.RACE_ID != "":
         # create a leaderboard
         leaderboard = RaceOrder()
         # filter race updates down to updates related to our car
