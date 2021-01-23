@@ -214,9 +214,10 @@ class Radio(Thread):
         self.send_queue.put(msg)
 
     def __send_outbound_messages__(self):
-        msg = self.send_queue.get()
-        self.send_message(self.protocol, msg)
-        self.send_queue.task_done()
+        while True:
+            msg = self.send_queue.get()
+            self.send_message(self.protocol, msg)
+            self.send_queue.task_done()
 
     def send_message(self, protocol, msg:Message):
         logger.debug("turning off receive")
@@ -224,7 +225,7 @@ class Radio(Thread):
         protocol.transmitting = True
         protocol.send_cmd("sys set pindig GPIO11 1", delay=0.1)
         payload = self.encoder.encode(msg).hex()
-        logger.info("sending {}".format(payload))
+        logger.info("sending {}".format(type(msg)))
         protocol.send_cmd("radio tx %s" % payload)
         self.metrics.send_attempt += 1
         self.last_transmit = time.time()
