@@ -5,12 +5,18 @@ from datetime import datetime, timezone, timedelta
 from car.display_providers import SpeedProvider, PositionProvider
 from car.updaters import PositionUpdater
 from threading import Thread
-from car.events import *
+from car.event_defs import (
+    ExitApplicationEvent,
+    NotMovingEvent,
+    MovingEvent,
+    GPSConnectedEvent,
+    GPSDisconnectedEvent
+)
 import logging
 import time
 import subprocess
 
-from shared.events import logger, EventHandler
+from shared.events import EventHandler
 
 logger = logging.getLogger(__name__)
 

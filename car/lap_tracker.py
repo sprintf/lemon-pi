@@ -2,7 +2,11 @@ from car.track import TrackLocation
 from car.updaters import PositionUpdater, LapUpdater
 from car.display_providers import LapProvider
 from car.target import Target
-from car.event_defs import LeaveTrackEvent, CompleteLapEvent, RadioSyncEvent
+from car.event_defs import (
+    LeaveTrackEvent,
+    CompleteLapEvent,
+    RadioSyncEvent
+)
 
 from haversine import haversine, Unit
 from car import geometry
