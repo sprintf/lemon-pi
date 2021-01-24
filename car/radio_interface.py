@@ -69,10 +69,13 @@ class RadioInterface(Thread, EventHandler):
             self.radio.send_async(EnteringPits())
 
     def run(self):
-        msg = self.radio.receive_queue.get()
-        if msg:
-            self.process_incoming(msg)
-            self.radio.receive_queue.task_done()
+        while True:
+            try:
+                msg = self.radio.receive_queue.get()
+                self.process_incoming(msg)
+                self.radio.receive_queue.task_done()
+            except Exception:
+                logger.exception("got an exception in radio_interface")
 
     def process_incoming(self, msg):
         if type(msg) == RaceStatus:
