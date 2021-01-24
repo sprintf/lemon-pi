@@ -69,21 +69,24 @@ class RadioInterface(Thread, EventHandler):
             self.radio.send_async(EnteringPits())
 
     def run(self):
-        msg = self.radio.receive_queue.get()
-        if msg:
-            self.process_incoming(msg)
-            self.radio.receive_queue.task_done()
+        while True:
+            try:
+                msg = self.radio.receive_queue.get()
+                self.process_incoming(msg)
+                self.radio.receive_queue.task_done()
+            except Exception:
+                logger.exception("got an exception in radio_interface")
 
     def process_incoming(self, msg):
         if type(msg) == RaceStatus:
             logger.info("got race status message...{}".format(msg))
             RaceFlagStatusEvent.emit(flag=RaceStatus.RaceFlagStatus.Name(msg.flagStatus))
             if msg.flagStatus == RaceStatus.RED:
-                DriverMessageEvent.emit(text="Race Red Flagged", duration_seconds=10)
+                DriverMessageEvent.emit(text="Race Red Flagged", duration_secs=10)
             if msg.flagStatus == RaceStatus.BLACK:
-                DriverMessageEvent.emit(text="Race Black Flagged", duration_seconds=10)
+                DriverMessageEvent.emit(text="Race Black Flagged", duration_secs=10)
             if msg.flagStatus == RaceStatus.YELLOW:
-                DriverMessageEvent.emit(text="Course Yellow", duration_seconds=10)
+                DriverMessageEvent.emit(text="Course Yellow", duration_secs=10)
         elif type(msg) == DriverMessage:
             logger.info("got race driver message...{}".format(msg))
             DriverMessageEvent.emit(text=msg.text, duration_secs=30)
@@ -93,7 +96,7 @@ class RadioInterface(Thread, EventHandler):
             logger.info("got race position message...{}".format(msg))
             # is this about us directly?
             if msg.car_number == settings.CAR_NUMBER:
-                if msg.car_ahead:
+                if msg.car_ahead.car_number:
                     text = "P{} ▲ {} by {}".format(msg.position, msg.car_ahead.car_number, msg.car_ahead.gap_text)
                     DriverMessageEvent.emit(text=text, duration_secs=120)
                 else:
@@ -104,7 +107,7 @@ class RadioInterface(Thread, EventHandler):
                 # this might be the following car behind us ... it might also be for a different car in our team
                 if msg.car_ahead and msg.car_ahead.car_number == settings.CAR_NUMBER:
                     text = " ▼ {} by {}".format(msg.car_number, msg.car_ahead.gap_text)
-                    DriverMessageAddendumEvent.emit(text)
+                    DriverMessageAddendumEvent.emit(text=text)
             # TODO : we should really update the lap counter on the dash with the actual lap count from the
             # pit message
         else:

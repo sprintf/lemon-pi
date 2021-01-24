@@ -47,15 +47,10 @@ def run():
         gui.progress(40)
 
         # start the radio thread
-        try:
-            with Radio(settings.RADIO_DEVICE, settings.RADIO_KEY) as radio:
-                RadioInterface(radio)
-                radio.start()
-                gui.progress(70)
-        except KeyError:
-            print("LORA radio not connected")
-            gui.shutdown()
-            sys.exit(1)
+        radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY)
+        RadioInterface(radio)
+        radio.start()
+        gui.progress(85)
 
         # if we have a race specified
         if settings.RACE_ID != "":
