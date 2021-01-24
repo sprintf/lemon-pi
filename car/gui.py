@@ -48,36 +48,35 @@ class Gui(EventHandler):
 
         # this is our lower text area
         self.lower_row = Box(self.app, align="bottom", width=Gui.WIDTH, height=64)
-        self.lower_row.bg = "purple"
-        self.msg_area = Text(self.lower_row, "P13   ▲ 2 by 35s   ▼ 56 by 2 laps", align="left", size=48, font=self.font, color="white")
+        self.msg_area = Text(self.lower_row, "", align="left", size=48, font=self.font, color="white", bg="purple")
 
-        col1 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - 100)
-        col2 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - 100)
-        col3 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - 100)
+        self.col1 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - 100)
+        self.col2 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - 100)
+        self.col3 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - 100)
 
         # these are invisible displays used to show special case data when the car is pitting
-        col4 = Box(self.app, align="left", width=col3.width, height=col3.height, visible=False)
-        col5 = Box(self.app, align="left", width=col3.width, height=col3.height, visible=False)
+        self.col4 = Box(self.app, align="left", width=self.col3.width, height=self.col3.height, visible=False)
+        self.col5 = Box(self.app, align="left", width=self.col3.width, height=self.col3.height, visible=False)
 
-        self.time_widget = self.create_time_widget(col1)
-        Box(col1, height=24, width=208)
-        self.lap_display = self.create_lap_widget(col1)
-        Box(col2, height=24, width=208)
-        self.temp_widget = self.create_temp_widget(col2)
-        Box(col2, height=24, width=208)
-        self.speed_heading_widget = self.create_speed_widget(col2)
-        self.fuel_display = self.create_fuel_widget(col3)
+        self.time_widget = self.create_time_widget(self.col1)
+        Box(self.col1, height=24, width=208)
+        self.lap_display = self.create_lap_widget(self.col1)
+        Box(self.col2, height=24, width=208)
+        self.temp_widget = self.create_temp_widget(self.col2)
+        Box(self.col2, height=24, width=208)
+        self.speed_heading_widget = self.create_speed_widget(self.col2)
+        self.fuel_display = self.create_fuel_widget(self.col3)
 
-        Box(col2, height=24, width=208)
+        Box(self.col2, height=24, width=208)
 
         # adding obd + gps images
-        (self.gps_image, self.obd_image) = self.create_gps_obd_images(col2)
+        (self.gps_image, self.obd_image) = self.create_gps_obd_images(self.col2)
         # add a quit button
-        pb = PushButton(col2, image="resources/images/exitbutton.gif", command=self.quit)
-        Box(col2, height=24, width=208)
+        pb = PushButton(self.col2, image="resources/images/exitbutton.gif", command=self.quit)
+        Box(self.col2, height=24, width=208)
 
-        self.stint_ending_display = self.create_stint_end_instructions(col4)
-        self.stint_starting_display = self.create_stint_start_instructions(col5)
+        self.stint_ending_display = self.create_stint_end_instructions(self.col4)
+        self.stint_starting_display = self.create_stint_start_instructions(self.col5)
 
         LeaveTrackEvent.register_handler(self)
         StateChangePittedEvent.register_handler(self)
@@ -108,19 +107,19 @@ class Gui(EventHandler):
 
     def handle_event(self, event, **kwargs):
         if event == LeaveTrackEvent:
-            self.app.children[2].hide()
-            self.app.children[3].show()
-            self.app.children[4].hide()
+            self.col3.hide()
+            self.col4.show()
+            self.col5.hide()
             return
         if event == StateChangePittedEvent:
-            self.app.children[2].hide()
-            self.app.children[3].hide()
-            self.app.children[4].show()
+            self.col3.hide()
+            self.col4.hide()
+            self.col5.show()
             return
         if event == StateChangeSettingOffEvent:
-            self.app.children[2].show()
-            self.app.children[3].hide()
-            self.app.children[4].hide()
+            self.col3.show()
+            self.col4.hide()
+            self.col5.hide()
             return
 
         if event == RaceFlagStatusEvent:
@@ -155,10 +154,10 @@ class Gui(EventHandler):
             return
 
         # go back to the fuel display if we complete a lap and it is not showing.
-        if event == CompleteLapEvent and not self.app.children[2].visible:
-            self.app.children[2].show()
-            self.app.children[3].hide()
-            self.app.children[4].hide()
+        if event == CompleteLapEvent and not self.col3.visible:
+            self.col3.show()
+            self.col4.hide()
+            self.col5.hide()
             return
 
         if event == OBDConnectedEvent:
@@ -187,17 +186,17 @@ class Gui(EventHandler):
 
         if event_data.key == "s":
             # imitate start/finish behavior
-            self.app.children[2].hide()
-            self.app.children[3].show()
-            self.app.children[4].hide()
+            self.col3.hide()
+            self.col4.show()
+            self.col5.hide()
         if event_data.key == "f":
-            self.app.children[2].hide()
-            self.app.children[3].hide()
-            self.app.children[4].show()
+            self.col3.hide()
+            self.col4.hide()
+            self.col5.show()
         if event_data.key == "h":
-            self.app.children[2].show()
-            self.app.children[3].hide()
-            self.app.children[4].hide()
+            self.col3.show()
+            self.col4.hide()
+            self.col5.hide()
         if event_data.key == 'g':
             self.gps_image.on()
         if event_data.key == 'G':
