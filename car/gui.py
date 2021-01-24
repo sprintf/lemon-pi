@@ -46,18 +46,22 @@ class Gui(EventHandler):
 
         self.app = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, visible=False)
 
-        col1 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT)
-        col2 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT)
-        col3 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT)
+        # this is our lower text area
+        self.lower_row = Box(self.app, align="bottom", width=Gui.WIDTH, height=64)
+        self.lower_row.bg = "purple"
+        self.msg_area = Text(self.lower_row, "P13   ▲ 2 by 35s   ▼ 56 by 2 laps", align="left", size=48, font=self.font, color="white")
+
+        col1 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - 100)
+        col2 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - 100)
+        col3 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - 100)
 
         # these are invisible displays used to show special case data when the car is pitting
         col4 = Box(self.app, align="left", width=col3.width, height=col3.height, visible=False)
         col5 = Box(self.app, align="left", width=col3.width, height=col3.height, visible=False)
 
         self.time_widget = self.create_time_widget(col1)
-        Box(col1, height=64, width=208)
+        Box(col1, height=24, width=208)
         self.lap_display = self.create_lap_widget(col1)
-        perplexus_logo = Picture(col2, image="resources/images/perplexuslogoclean.gif")
         Box(col2, height=24, width=208)
         self.temp_widget = self.create_temp_widget(col2)
         Box(col2, height=24, width=208)
@@ -83,6 +87,9 @@ class Gui(EventHandler):
         OBDDisconnectedEvent.register_handler(self)
         GPSConnectedEvent.register_handler(self)
         GPSDisconnectedEvent.register_handler(self)
+        RaceFlagStatusEvent.register_handler(self)
+        DriverMessageEvent.register_handler(self)
+        DriverMessageAddendumEvent.register_handler(self)
 
     def present_main_app(self):
         self.splash.destroy()
@@ -92,37 +99,83 @@ class Gui(EventHandler):
         self.root.destroy()
         ExitApplicationEvent.emit()
 
+    def __remove_message_highlight(self):
+        self.msg_area.bg = "black"
+
+    def __remove_message(self):
+        self.msg_area.bg = "black"
+        self.msg_area.value = ""
+
     def handle_event(self, event, **kwargs):
         if event == LeaveTrackEvent:
             self.app.children[2].hide()
             self.app.children[3].show()
             self.app.children[4].hide()
+            return
         if event == StateChangePittedEvent:
             self.app.children[2].hide()
             self.app.children[3].hide()
             self.app.children[4].show()
+            return
         if event == StateChangeSettingOffEvent:
             self.app.children[2].show()
             self.app.children[3].hide()
             self.app.children[4].hide()
+            return
+
+        if event == RaceFlagStatusEvent:
+            # if it's green, make sure the background of the speed dial is black
+            flag = kwargs.get("flag")
+            if flag == "GREEN":
+                self.speed_heading_widget.bg = "black"
+            elif flag == "YELLOW":
+                self.speed_heading_widget.bg = "yellow"
+            elif flag == "RED":
+                self.speed_heading_widget.bg = "red"
+            elif flag == "BLACK":
+                self.speed_heading_widget.bg = "dark-blue"
+            else:
+                logger.warning("unknown flag state : {}".format(flag))
+
+        if event == DriverMessageEvent:
+            self.msg_area.value = kwargs.get("text")
+            duration_secs = kwargs.get("duration_secs")
+            self.msg_area.bg = "purple"
+            # we cancel any remove message callback to ensure this message
+            # stays until it is replaced or stays for the configured time
+            self.msg_area.cancel(self.__remove_message)
+            self.msg_area.after(3000, self.__remove_message_highlight)
+            self.msg_area.after(duration_secs * 1000, self.__remove_message)
+            return
+
+        # when the car behind us crosses the line we get an update on the time
+        # between them and us, so we add this to the message on show
+        if event == DriverMessageAddendumEvent:
+            self.msg_area.value = self.msg_area.value + kwargs.get("text")
+            return
 
         # go back to the fuel display if we complete a lap and it is not showing.
         if event == CompleteLapEvent and not self.app.children[2].visible:
             self.app.children[2].show()
             self.app.children[3].hide()
             self.app.children[4].hide()
+            return
 
         if event == OBDConnectedEvent:
             self.obd_image.on()
+            return
 
         if event == OBDDisconnectedEvent:
             self.obd_image.off()
+            return
 
         if event == GPSConnectedEvent:
             self.gps_image.on()
+            return
 
         if event == GPSDisconnectedEvent:
             self.gps_image.off()
+            return
 
     def handle_keyboard(self, event_data):
         logger.info("Key Pressed : {}".format(event_data.key))
@@ -231,10 +284,10 @@ class Gui(EventHandler):
         Text(total_box, "--.--", size='32', color="lightgreen", font=self.font, align="left")
         Text(total_box, "Gal", size='16', color="lightgreen", font=self.font, align="left")
 
-        last_hour_box = Box(result, height=100, width=200)
-        Text(last_hour_box, "Last\nHour", size='16', color="lightgreen", font=self.font, align="left")
-        Text(last_hour_box, "--.--", size='32', color="lightgreen", font=self.font, align="left")
-        Text(last_hour_box, "gph", size='16', color="lightgreen", font=self.font, align="left")
+        # last_hour_box = Box(result, height=100, width=200)
+        # Text(last_hour_box, "Last\nHour", size='16', color="lightgreen", font=self.font, align="left")
+        # Text(last_hour_box, "--.--", size='32', color="lightgreen", font=self.font, align="left")
+        # Text(last_hour_box, "gph", size='16', color="lightgreen", font=self.font, align="left")
 
         last_lap_box = Box(result, height=100, width=200)
         Text(last_lap_box, "Last\nLap", size='16', color="lightgreen", font=self.font, align="left")
@@ -321,12 +374,12 @@ class Gui(EventHandler):
     def __updateFuel(self, provider: FuelProvider):
         # children offsets:
         total_used_box : Box = self.fuel_display.children[1]
-        last_hour_box : Box  = self.fuel_display.children[2]
-        last_lap_box : Box = self.fuel_display.children[3]
-        remaining_box : Box = self.fuel_display.children[4]
+        # last_hour_box : Box  = self.fuel_display.children[2]
+        last_lap_box : Box = self.fuel_display.children[2]
+        remaining_box : Box = self.fuel_display.children[3]
 
         total_used_box.children[1].value = "{:02.2f}".format(provider.get_fuel_used_ml() / MILLILITRES_PER_GALLON)
-        last_hour_box.children[1].value = "{:02.2f}".format(provider.get_fuel_used_last_hour_ml() / MILLILITRES_PER_GALLON)
+        # last_hour_box.children[1].value = "{:02.2f}".format(provider.get_fuel_used_last_hour_ml() / MILLILITRES_PER_GALLON)
         last_lap_box.children[1].value = "{:1.02f}".format(provider.get_fuel_used_last_lap_ml() / MILLILITRES_PER_GALLON)
         remaining_box.children[1].value = "{:02d}".format(provider.get_fuel_percent_remaining())
 

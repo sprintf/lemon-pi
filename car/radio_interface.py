@@ -1,7 +1,19 @@
 from threading import Thread
 
-from car.display_providers import TemperatureProvider, LapProvider, FuelProvider
-from car.events import EventHandler, CompleteLapEvent, LeaveTrackEvent, RadioSyncEvent
+from car.display_providers import (
+    TemperatureProvider,
+    LapProvider,
+    FuelProvider
+)
+from car.events import (
+    EventHandler,
+    CompleteLapEvent,
+    LeaveTrackEvent,
+    RadioSyncEvent,
+    DriverMessageEvent,
+    DriverMessageAddendumEvent,
+    RaceFlagStatusEvent
+)
 from shared.generated.messages_pb2 import (
     CarTelemetry,
     RaceStatus,
@@ -9,6 +21,8 @@ from shared.generated.messages_pb2 import (
     Ping,
     RacePosition,
     EnteringPits)
+
+from python_settings import settings
 
 import logging
 
@@ -63,12 +77,36 @@ class RadioInterface(Thread, EventHandler):
     def process_incoming(self, msg):
         if type(msg) == RaceStatus:
             logger.info("got race status message...{}".format(msg))
+            RaceFlagStatusEvent.emit(flag=RaceStatus.RaceFlagStatus.Name(msg.flagStatus))
+            if msg.flagStatus == RaceStatus.RED:
+                DriverMessageEvent.emit(text="Race Red Flagged", duration_seconds=10)
+            if msg.flagStatus == RaceStatus.BLACK:
+                DriverMessageEvent.emit(text="Race Black Flagged", duration_seconds=10)
+            if msg.flagStatus == RaceStatus.YELLOW:
+                DriverMessageEvent.emit(text="Course Yellow", duration_seconds=10)
         elif type(msg) == DriverMessage:
             logger.info("got race driver message...{}".format(msg))
+            DriverMessageEvent.emit(text=msg.text, duration_secs=30)
         elif type(msg) == Ping:
             logger.info("got ping message...{}".format(msg))
         elif type(msg) == RacePosition:
             logger.info("got race position message...{}".format(msg))
+            # is this about us directly?
+            if msg.car_number == settings.CAR_NUMBER:
+                if msg.car_ahead:
+                    text = "P{} ▲ {} by {}".format(msg.position, msg.car_ahead.car_number, msg.car_ahead.gap_text)
+                    DriverMessageEvent.emit(text=text, duration_secs=120)
+                else:
+                    # we're in the lead, there's no-one ahead
+                    text = "P1"
+                    DriverMessageEvent.emit(text=text, duration_secs=120)
+            else:
+                # this might be the following car behind us ... it might also be for a different car in our team
+                if msg.car_ahead and msg.car_ahead.car_number == settings.CAR_NUMBER:
+                    text = " ▼ {} by {}".format(msg.car_number, msg.car_ahead.gap_text)
+                    DriverMessageAddendumEvent.emit(text)
+            # TODO : we should really update the lap counter on the dash with the actual lap count from the
+            # pit message
         else:
             logger.warning("got unexpected message : {}".format(type(msg)))
 

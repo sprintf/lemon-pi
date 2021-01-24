@@ -9,15 +9,15 @@ FUEL_CAPACITY_US_GALLONS = 17.5
 # and the pit
 RADIO_KEY = "abracadabra"
 
-# set this to the team name or your car number in the car
-# it identifies the sender within this radio group
-RADIO_DEVICE = "car"
+# your car number is used for identifying your radio device
+# as well as working out which messages are for this car
+RADIO_DEVICE = CAR_NUMBER = "181"
 
 # optionally disable OBD
 OBD_DISABLED = True
 
 # optionally disable Radio
-RADIO_DISABLED = False
+RADIO_DISABLED = True
 
 # optionally disable GPS
 GPS_DISABLED = True

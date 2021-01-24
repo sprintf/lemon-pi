@@ -3,6 +3,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 # a simple event framework so we can connect together decoupled logic
 class EventHandler:
 
@@ -16,8 +17,10 @@ class Event:
     last_event = None
     last_event_count = 0
 
-    def __init__(self, name=""):
+    def __init__(self, name="", suppress_logs=False):
         self.name = name
+        # some events emit all the time so we suppress logging them consecutively
+        self.suppress_logs = suppress_logs
         self.handlers = []
 
     def register_handler(self, handler:EventHandler):
@@ -27,7 +30,7 @@ class Event:
             logger.error("{} attempted to register same handler twice {}", self.name, handler.__class__)
 
     def emit(self, **kwargs):
-        if self == Event.last_event:
+        if self == Event.last_event and self.suppress_logs:
             Event.last_event_count += 1
         else:
             if Event.last_event_count > 0:
@@ -41,10 +44,10 @@ class Event:
 
 
 # the car is moving
-MovingEvent = Event("Moving")
+MovingEvent = Event("Moving", suppress_logs=True)
 
 # the car is not moving
-NotMovingEvent = Event("NotMoving")
+NotMovingEvent = Event("NotMoving", suppress_logs=True)
 
 # the car is exiting the race track and entering the pits
 LeaveTrackEvent = Event("LeaveTrack")
@@ -78,7 +81,21 @@ GPSDisconnectedEvent = Event("GPS-Disconnected")
 RefuelEvent = Event("Refuel")
 
 ### Car has come to a halt
-CarStoppedEvent = Event("CarStopped")
+CarStoppedEvent = Event("CarStopped", suppress_logs=True)
 
+########## Incoming Radio Events
+
+# emit() will contain
+#   text=
+#   duration_secs=
+DriverMessageEvent = Event("driver-message")
+
+# emit() will contain
+#   text=
+DriverMessageAddendumEvent = Event("driver-message-addendum")
+
+# emit() will contain
+#   flag=(GREEN|YELLOW|RED|BLACK|UNKNOWN)
+RaceFlagStatusEvent = Event("flag-status")
 
 
