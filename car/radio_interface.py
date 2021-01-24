@@ -96,7 +96,7 @@ class RadioInterface(Thread, EventHandler):
             logger.info("got race position message...{}".format(msg))
             # is this about us directly?
             if msg.car_number == settings.CAR_NUMBER:
-                if msg.car_ahead:
+                if msg.car_ahead.car_number:
                     text = "P{} ▲ {} by {}".format(msg.position, msg.car_ahead.car_number, msg.car_ahead.gap_text)
                     DriverMessageEvent.emit(text=text, duration_secs=120)
                 else:
