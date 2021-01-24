@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 import time
 
-from pit.events import RaceStatusEvent, LapCompletedEvent, PingEvent, PittingEvent, TelemetryEvent
+from pit.event_defs import RaceStatusEvent, LapCompletedEvent, PingEvent, PittingEvent, TelemetryEvent
 from pit.radio_interface import RadioInterface
 from shared.generated.messages_pb2 import Ping, EnteringPits, CarTelemetry
 

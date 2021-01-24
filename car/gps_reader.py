@@ -10,6 +10,8 @@ import logging
 import time
 import subprocess
 
+from shared.events import logger, EventHandler
+
 logger = logging.getLogger(__name__)
 
 class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):

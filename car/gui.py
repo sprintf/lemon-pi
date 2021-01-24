@@ -7,6 +7,7 @@ import logging
 import platform
 from python_settings import settings
 
+from shared.events import logger, EventHandler
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,6 @@
 
 import os
 import logging
-import sys
 from logging.handlers import RotatingFileHandler
 from threading import Thread
 from python_settings import settings

@@ -1,11 +1,11 @@
-from pit.events import (
-    EventHandler,
+from pit.event_defs import (
     RaceStatusEvent,
     LapCompletedEvent,
     PittingEvent,
     PingEvent,
     TelemetryEvent
 )
+from shared.events import EventHandler
 from shared.generated.messages_pb2 import (
     RaceStatus,
     RacePosition,
