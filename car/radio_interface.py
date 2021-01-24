@@ -107,7 +107,7 @@ class RadioInterface(Thread, EventHandler):
                 # this might be the following car behind us ... it might also be for a different car in our team
                 if msg.car_ahead and msg.car_ahead.car_number == settings.CAR_NUMBER:
                     text = " ▼ {} by {}".format(msg.car_number, msg.car_ahead.gap_text)
-                    DriverMessageAddendumEvent.emit(text)
+                    DriverMessageAddendumEvent.emit(text=text)
             # TODO : we should really update the lap counter on the dash with the actual lap count from the
             # pit message
         else:
