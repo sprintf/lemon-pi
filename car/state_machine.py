@@ -1,10 +1,13 @@
 
 from enum import Enum
 
-from car.events import *
+from car.event_defs import *
 
 
 # define a few different states the car can be in at the track
+from shared.events import EventHandler
+
+
 class State(Enum):
     PARKED_IN_PIT = 1
     LEAVING_PIT = 2

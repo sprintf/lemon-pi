@@ -5,8 +5,7 @@ from car.display_providers import (
     LapProvider,
     FuelProvider
 )
-from car.events import (
-    EventHandler,
+from car.event_defs import (
     CompleteLapEvent,
     LeaveTrackEvent,
     RadioSyncEvent,
@@ -14,6 +13,7 @@ from car.events import (
     DriverMessageAddendumEvent,
     RaceFlagStatusEvent
 )
+from shared.events import EventHandler
 from shared.generated.messages_pb2 import (
     CarTelemetry,
     RaceStatus,

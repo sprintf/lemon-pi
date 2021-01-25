@@ -1,4 +1,4 @@
-from pit.events import RaceStatusEvent, LapCompletedEvent
+from pit.event_defs import RaceStatusEvent, LapCompletedEvent
 from pit.leaderboard import RaceOrder, CarPosition
 
 

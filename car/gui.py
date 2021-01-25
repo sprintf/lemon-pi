@@ -1,12 +1,17 @@
 from guizero import App, Text, Box, PushButton, Picture
 
 from car.display_providers import *
-from car.events import *
+from car.event_defs import (
+
+    LeaveTrackEvent, StateChangePittedEvent, StateChangeSettingOffEvent, CompleteLapEvent, OBDConnectedEvent,
+    OBDDisconnectedEvent, GPSConnectedEvent, GPSDisconnectedEvent, RaceFlagStatusEvent, DriverMessageEvent,
+    DriverMessageAddendumEvent, ExitApplicationEvent)
 
 import logging
 import platform
 from python_settings import settings
 
+from shared.events import logger, EventHandler
 
 logger = logging.getLogger(__name__)
 

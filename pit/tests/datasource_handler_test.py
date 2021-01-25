@@ -7,7 +7,7 @@ from pit.leaderboard import RaceOrder
 
 class DatasourceHandlerTestCase(unittest.TestCase):
 
-    @patch("pit.events.RaceStatusEvent.emit")
+    @patch("pit.event_defs.RaceStatusEvent.emit")
     def test_flags(self, emit:MagicMock):
         ro = RaceOrder()
         dsh = DataSourceHandler(ro, "100")
