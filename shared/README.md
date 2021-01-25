@@ -32,11 +32,12 @@ e.g.
 The base definition can be found in [shared/events.py](shared/events.py)
 
 Event definitions are all grouped together into a single file.
+
 For the car, they are in [car/event_defs.py](car/event_defs.py)
 
 For the pit, they are in [pit/event_defs.py](pit/event_defs.py)
 
-This event framework is very straightforward and is not threaded. So the thread that emits the event snchronously traverses all the registered handlers.
+This event framework is very straightforward and is not threaded. So the thread that emits the event synchronously traverses all the registered handlers.
 
 ## A USB detector
 This can tell which piece of hardware (GPS / Lora / OBD) is plugged into each USB port.
