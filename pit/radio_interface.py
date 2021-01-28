@@ -3,7 +3,8 @@ from pit.event_defs import (
     LapCompletedEvent,
     PittingEvent,
     PingEvent,
-    TelemetryEvent
+    TelemetryEvent,
+    SendMessageEvent
 )
 from shared.events import EventHandler
 from shared.generated.messages_pb2 import (
@@ -11,7 +12,8 @@ from shared.generated.messages_pb2 import (
     RacePosition,
     EnteringPits,
     Ping,
-    CarTelemetry
+    CarTelemetry,
+    DriverMessage
 )
 from shared.radio import Radio
 from threading import Thread
@@ -27,6 +29,7 @@ class RadioInterface(Thread, EventHandler):
         self.radio = radio
         RaceStatusEvent.register_handler(self)
         LapCompletedEvent.register_handler(self)
+        SendMessageEvent.register_handler(self)
 
     def handle_event(self, event, **kwargs):
         if event == RaceStatusEvent:
@@ -34,6 +37,9 @@ class RadioInterface(Thread, EventHandler):
 
         if event == LapCompletedEvent:
             self.send_lap_completed(**kwargs)
+
+        if event == SendMessageEvent:
+            self.send_driver_message(**kwargs)
 
     def run(self):
         while True:
@@ -65,6 +71,12 @@ class RadioInterface(Thread, EventHandler):
             pos.car_ahead.gap_text = gap
         self.radio.send_async(pos)
 
+    def send_driver_message(self, car="", msg=""):
+        # todo : extend message to accept a car number
+        message = DriverMessage()
+        message.text = msg
+        self.radio.send_async(message)
+
     def convert_to_event(self, proto_msg):
         if type(proto_msg) == EnteringPits:
             PittingEvent.emit(car=proto_msg.sender)
@@ -81,3 +93,5 @@ class RadioInterface(Thread, EventHandler):
             PingEvent.emit(car=proto_msg.sender, ts=proto_msg.timestamp)
         else:
             logger.error("unknown radio message {}".format(type(proto_msg)))
+
+

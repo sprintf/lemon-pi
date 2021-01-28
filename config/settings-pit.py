@@ -9,9 +9,9 @@ RADIO_DEVICE = "pit"
 
 # provide a race id to track realtime results
 # zero means disabled
-RACE_ID = 0
+RACE_ID = ""
 
 # the race car we want to track
 # zero means no tracking
 # must be set in conjunction with a RACE_ID
-TARGET_CAR = 0
+TARGET_CAR = ""

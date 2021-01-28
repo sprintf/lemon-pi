@@ -10,6 +10,7 @@ from pit.datasource.datasource1 import DataSource
 from pit.datasource.datasource_handler import DataSourceHandler
 from pit.leaderboard import RaceOrder
 from shared.radio import Radio
+from shared.time_provider import LocalTimeProvider
 from shared.usb_detector import UsbDetector
 from pit.gui import Gui
 
@@ -38,6 +39,7 @@ if not "SETTINGS_MODULE" in os.environ:
 
 def run():
     gui = Gui()
+    gui.register_time_provider(LocalTimeProvider())
 
     def init():
         gui.progress(10)

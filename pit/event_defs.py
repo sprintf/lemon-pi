@@ -35,3 +35,8 @@ PingEvent = Event("ping")
 #   last_lap_fuel=
 #   fuel_percent=
 TelemetryEvent = Event("telemetry")
+
+# emit() sends out
+#   car=
+#   msg=
+SendMessageEvent = Event("send-message")

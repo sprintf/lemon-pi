@@ -12,6 +12,7 @@ import platform
 from python_settings import settings
 
 from shared.events import logger, EventHandler
+from shared.time_provider import TimeProvider
 
 logger = logging.getLogger(__name__)
 

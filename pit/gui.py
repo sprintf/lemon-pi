@@ -1,7 +1,18 @@
-from guizero import App, Text, Box, PushButton, Picture
+from guizero import App, Text, Box, TextBox, PushButton
 import logging
 
+from pit.event_defs import SendMessageEvent, RaceStatusEvent, PittingEvent
+from shared.events import Event
+from shared.time_provider import TimeProvider
+
 logger = logging.getLogger(__name__)
+
+
+class BigText(Text):
+
+    def __init__(self, parent, text, **kwargs):
+        Text.__init__(self, parent, text, size=32, color="white", **kwargs)
+
 
 class Gui():
 
@@ -20,15 +31,40 @@ class Gui():
         self.main = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, layout="grid", visible=False)
         self.main.set_border(6, color="green")
 
-        self.time = self.create_clock(self.main, grid=[0,0])
-        self.temp = self.create_temp_gauge(self.main, grid=[1,0])
-        self.fuel = self.create_fuel_gauge(self.main, grid=[2,0])
-        self.timer = self.create_lap_timer(self.main, grid=[0,1])
-        self.lap_fuel = self.create_lap_fuel(self.main, grid=[1,1])
-        self.pitting = self.create_pitting_alert(self.main, grid=[1,2])
+        self.time_widget = self.create_clock(self.main, grid=[0,0])
+        self.race_status = self.create_race_status(self.main, grid=[1,0])
+        self.status_message = self.create_status_message(self.main, grid=[0, 1])
+
+        self.timer = self.create_lap_timer(self.main, grid=[0,2])
+        self.lap_fuel = self.create_lap_fuel(self.main, grid=[1,2])
+
+        self.temp = self.create_temp_gauge(self.main, grid=[0,3])
+        self.fuel = self.create_fuel_gauge(self.main, grid=[1,3])
+
+        self.message = self.create_message_field(self.main, grid=[0,4])
+
+        RaceStatusEvent.register_handler(self)
+        PittingEvent.register_handler(self)
 
     def display(self):
         self.root.display()
+
+    def shutdown(self):
+        self.root.destroy()
+
+    def handle_event(self, event:Event, flag=None, car=""):
+        if event == RaceStatusEvent:
+            self.flag.bg = flag.lower()
+            return
+
+        if event == PittingEvent:
+            # flash these up and then clear after a while
+            self.__show_message(text="Car {} is pitting".format(car), duration_secs=120)
+            return
+
+    def register_time_provider(self, provider:TimeProvider):
+        self.time_widget.repeat(1000, self.__updateTime, args=[provider])
+        self.time_widget.repeat(500, self.__update_time_beat)
 
     def progress(self, percent):
         if percent == 100:
@@ -39,46 +75,98 @@ class Gui():
 
     def create_temp_gauge(self, parent, grid):
         result = Box(parent, grid=grid)
-        Text(result, "Temp", align="left", color="white")
-        self.coolant_temp = Text(result, "???", align="right", color="white")
+        BigText(result, "Temp", align="left")
+        self.coolant_temp = BigText(result, "???", align="right")
         return result
 
     def create_fuel_gauge(self, parent, grid):
         result = Box(parent, grid=grid)
-        Text(result, "Fuel %", align="left", color="white")
-        self.fuel_percent = Text(result, "???", align="right", color="white")
+        BigText(result, "Fuel %", align="left")
+        self.fuel_percent = BigText(result, "???", align="right")
         return result
 
     def create_clock(self, parent, grid):
         result = Box(parent, grid=grid)
-        self.clock_hour = Text(result, "HH", align="left", color="white")
-        Text(result, ":", align="left", color="white")
-        self.clock_minute = Text(result, "MM", align="left", color="white")
+        self.clock_hour = BigText(result, "HH", align="left")
+        BigText(result, ":", align="left")
+        self.clock_minute = BigText(result, "MM", align="left")
         return result
 
     def create_lap_timer(self, parent, grid):
         result = Box(parent, grid=grid)
-        Text(result, "lap :", align="left", color="white")
-        self.lap_count = Text(result, "NN", align="left", color="white")
-        Text(result, "  ", align="left", color="white")
-        self.lap_time_minute = Text(result, "MM", align="left", color="white")
-        Text(result, ":", align="left", color="white")
-        self.lap_time_second = Text(result, "SS", align="left", color="white")
+        BigText(result, "lap :", align="left")
+        self.lap_count = BigText(result, "NN", align="left")
+        BigText(result, "  ", align="left")
+        self.lap_time_minute = BigText(result, "MM", align="left")
+        BigText(result, ":", align="left")
+        self.lap_time_second = BigText(result, "SS", align="left")
         return result
 
     def create_lap_fuel(self, parent, grid):
         result = Box(parent, grid=grid)
-        self.lap_fuel = Text(result, "NN", align="left", color="white")
-        Text(result, "g", align="left", color="white")
+        self.lap_fuel = BigText(result, "NN", align="left")
+        BigText(result, "g", align="left")
         return result
 
-    def create_pitting_alert(self, parent, grid):
+    def create_race_status(self, parent, grid):
         result = Box(parent, grid=grid)
-        self.pitting = Text(result, "PITTING", align="left", color="white")
+        BigText(result, "Race:", align="left")
+        self.flag = Box(result, width=64, height=48)
+        self.flag.bg = "green"
         return result
 
-    def shutdown(self):
-        self.root.destroy()
+    def create_status_message(self, parent, grid):
+        result = Box(parent, grid=grid)
+        self.status = BigText(result, "", align="left")
+        return result
+
+    def send_message(self):
+        # validate not too long
+        text = self.message.children[1].value.strip()
+        if len(text) > 0 and len(text) < 20:
+            SendMessageEvent.emit(msg=self.message.children[1].value)
+            self.message.children[1].value = ""
+            self.__show_message(text="message sent", duration_secs=1)
+
+    def create_message_field(self, parent, grid):
+        result = Box(parent, grid=grid)
+        BigText(result, "Send driver message", align="left")
+        tb = TextBox(result, "", width=16, align="left")
+        tb.text_color = "grey"
+        tb.text_size = 32
+        pb = PushButton(result, text="Send", align="left")
+        pb.when_clicked = self.send_message
+        return result
+
+    def __update_time_beat(self):
+        beat : Text = self.time_widget.children[1]
+        if beat.text_color == "white":
+            beat.text_color = self.main.bg
+        else:
+            beat.text_color = "white"
+
+    def __updateTime(self, provider: TimeProvider):
+        self.time_widget.children[0].value = "{:02d}".format(provider.get_hours())
+        self.time_widget.children[2].value = "{:02d}".format(provider.get_minutes())
+
+    def __remove_message(self):
+        self.status.bg = "black"
+        self.status.value = ""
+
+    def __remove_message_highlight(self):
+        self.status.bg = "black"
+
+    def __show_message(self, text="", duration_secs=10):
+        self.status.cancel(self.__remove_message)
+        # if the message is showing for a while then flash up a highlight
+        if duration_secs > 10:
+            self.status.after(2000, self.__remove_message_highlight)
+        self.status.after(duration_secs * 1000, self.__remove_message)
+        self.status.value = text
+
+
+
+
 
 # items to display
 # last time we heard from car
@@ -90,3 +178,10 @@ class Gui():
 # est pit time
 #   mean fuel used over last 3 laps
 # pitting flag
+
+# Race overall:
+#  time
+#  flag status
+#  message board <message sent> | <car 181 pitting>
+
+

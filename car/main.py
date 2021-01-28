@@ -8,7 +8,7 @@ from car.obd_reader import ObdReader
 from car.lap_tracker import LapTracker
 from car.radio_interface import RadioInterface
 from car.wifi import WifiManager
-from car.display_providers import LocalTimeProvider
+from shared.time_provider import LocalTimeProvider
 from car.track import TrackLocation, read_tracks
 from car.state_machine import StateMachine
 from car.movement_listener import MovementListener
