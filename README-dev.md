@@ -28,17 +28,7 @@ For the Lora Radio, to avoid getting hit with the radio traffic from all the oth
 
 The configuration mechanism we use is [python-settings](https://pypi.org/project/python-settings/)
 
-If you create your own settings file called `my_settings.py` then create an environment variable to pick it up
-` export SETTINGS_MODULE=config.my_settings
-`
-
-Notice, you don't put the `.py` on the end of the name, but the path is included separated by a dot `.`
-
-You probably need to hack the start scripts 
- `start-car.sh` and
- `start-pit.sh`
-
-to pick up the config files.   I've filed https://github.com/sprintf/lemon-pi/issues/64 in order to make this more straightforward.
+Edit your own settings into `config/local_settings_car.py` and `config/local_settings_pit.py`
 
 ## Adding Track Data
 

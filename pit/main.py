@@ -34,7 +34,7 @@ logging.basicConfig(format='%(asctime)s %(message)s',
                     level=logging.INFO)
 
 if not "SETTINGS_MODULE" in os.environ:
-    os.environ["SETTINGS_MODULE"] = "config.settings-pit"
+    os.environ["SETTINGS_MODULE"] = "config.local_settings_pit"
 
 
 def run():

@@ -47,7 +47,7 @@ logging.getLogger().setLevel(logging.INFO)
 logger.info("Lemon-Pi : starting up")
 
 if not "SETTINGS_MODULE" in os.environ:
-    os.environ["SETTINGS_MODULE"] = "config.settings-car"
+    os.environ["SETTINGS_MODULE"] = "config.local_settings_car"
 
 # main control thread
 # responsibilities

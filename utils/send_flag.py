@@ -16,7 +16,7 @@ logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
                     level=logging.INFO)
 
 if not "SETTINGS_MODULE" in os.environ:
-    os.environ["SETTINGS_MODULE"] = "config.settings-pit"
+    os.environ["SETTINGS_MODULE"] = "config.local_settings_pit"
 
 if len(sys.argv) != 2:
     print("usage : {} [green|red|yellow|black]".format(__file__))

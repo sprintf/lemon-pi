@@ -1,4 +1,5 @@
-from guizero import App, Text, Box, TextBox, PushButton
+from guizero import App, Text, Box, TextBox, PushButton, ListBox
+
 import logging
 
 from pit.event_defs import SendMessageEvent, RaceStatusEvent, PittingEvent
@@ -38,10 +39,18 @@ class Gui():
         self.timer = self.create_lap_timer(self.main, grid=[0,2])
         self.lap_fuel = self.create_lap_fuel(self.main, grid=[1,2])
 
-        self.temp = self.create_temp_gauge(self.main, grid=[0,3])
-        self.fuel = self.create_fuel_gauge(self.main, grid=[1,3])
+        Box(self.main, height=64, width="fill", grid=[0,3])
 
-        self.message = self.create_message_field(self.main, grid=[0,4])
+        self.temp = self.create_temp_gauge(self.main, grid=[0,4])
+        self.fuel = self.create_fuel_gauge(self.main, grid=[1,4])
+
+        Box(self.main, height=64, width="fill", grid=[0,5])
+
+        self.message = self.create_message_field(self.main, grid=[0,6])
+
+        Box(self.main, height=64, width="fill", grid=[0,7])
+
+        self.lap_list = self.create_lap_list(self.main, grid=[0,8])
 
         RaceStatusEvent.register_handler(self)
         PittingEvent.register_handler(self)
@@ -120,6 +129,15 @@ class Gui():
         self.status = BigText(result, "", align="left")
         return result
 
+    def create_lap_list(self, parent, grid):
+        result = ListBox(parent, grid=grid, scrollbar=True, height=200, width=450)
+        result.text_color = "white"
+        result.text_size = 32
+        result.font = "courier"
+        result.append("LAP  TIME   FUEL")
+        result.append(" {:2d} {:2d}:{:2d} {:2.2f}".format(1, 1, 57, 326.5))
+        return result
+
     def send_message(self):
         # validate not too long
         text = self.message.children[1].value.strip()
@@ -163,8 +181,6 @@ class Gui():
             self.status.after(2000, self.__remove_message_highlight)
         self.status.after(duration_secs * 1000, self.__remove_message)
         self.status.value = text
-
-
 
 
 
