@@ -1,12 +1,19 @@
+import os
+from threading import Thread
 
 from pit.datasource.datasource_handler import DataSourceHandler
 from pit.leaderboard import RaceOrder
 from datetime import datetime
+from python_settings import settings
 import time
 
 # Utility that can play through a recorded file of a race, at a faster simulated speed
+from pit.radio_interface import RadioInterface
+from shared.radio import Radio
+from shared.usb_detector import UsbDetector
 
-def sim_race(file, handler:DataSourceHandler, time_factor=1):
+
+def sim_race(file, handler:DataSourceHandler, time_factor):
     simtime = 0
 
     with open(file) as f:
@@ -29,11 +36,25 @@ def sim_race(file, handler:DataSourceHandler, time_factor=1):
                         print("for {} gap is {} ... sleeping".format(bits[1], gap))
                         time.sleep(gap.total_seconds() / time_factor)
                         simtime = linetime
-            print(line)
+                # if bits[0] == "$COMP" and len(bits) == 8:
+                #     print("adding {}")
+            #print(line)
+
+if not "SETTINGS_MODULE" in os.environ:
+    os.environ["SETTINGS_MODULE"] = "config.local_settings_pit"
 
 
 
 if __name__ == "__main__":
+    UsbDetector().init()
+
+    radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY)
+    radio.start()
+
+    ri = RadioInterface(radio)
+    ri.start()
+
     leaderboard = RaceOrder()
-    handler = DataSourceHandler(leaderboard, "156")
-    sim_race("../resources/test/test-file.dat", handler, time_factor=100)
+
+    handler = DataSourceHandler(leaderboard, "444")
+    sim_race("../resources/test/test-file.dat", handler, 10)

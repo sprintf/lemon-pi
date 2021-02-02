@@ -2,12 +2,14 @@ from guizero import App, Text, Box, TextBox, PushButton, ListBox
 
 import logging
 
-from pit.event_defs import SendMessageEvent, RaceStatusEvent, PittingEvent
+from pit.event_defs import SendMessageEvent, RaceStatusEvent, PittingEvent, LapCompletedEvent, TelemetryEvent
 from shared.events import Event
 from shared.time_provider import TimeProvider
 
 logger = logging.getLogger(__name__)
 
+
+presses = 0
 
 class BigText(Text):
 
@@ -50,18 +52,21 @@ class Gui():
 
         Box(self.main, height=64, width="fill", grid=[0,7])
 
-        self.lap_list = self.create_lap_list(self.main, grid=[0,8])
+        self.lap_list:ListBox = self.create_lap_list(self.main, grid=[0,8])
 
         RaceStatusEvent.register_handler(self)
         PittingEvent.register_handler(self)
+        LapCompletedEvent.register_handler(self)
+        TelemetryEvent.register_handler(self)
 
     def display(self):
+        self.root.when_key_pressed = self.handle_keyboard
         self.root.display()
 
     def shutdown(self):
         self.root.destroy()
 
-    def handle_event(self, event:Event, flag=None, car=""):
+    def handle_event(self, event:Event, flag=None, car="", **kwargs):
         if event == RaceStatusEvent:
             self.flag.bg = flag.lower()
             return
@@ -69,6 +74,10 @@ class Gui():
         if event == PittingEvent:
             # flash these up and then clear after a while
             self.__show_message(text="Car {} is pitting".format(car), duration_secs=120)
+            return
+
+        if event == TelemetryEvent:
+            self.__update_car_data__(**kwargs)
             return
 
     def register_time_provider(self, provider:TimeProvider):
@@ -81,6 +90,24 @@ class Gui():
             self.main.visible = True
         else:
             self.splash_progress.value = "{}%".format(percent)
+
+    def handle_keyboard(self, event_data):
+        logger.info("Key Pressed : {}".format(event_data.key))
+
+        # check if we got a CTRL-C
+        if ord(event_data.key) == 3:
+            self.shutdown()
+            return
+
+        if event_data.key == "l":
+            global presses
+            self.__update_car_data__(car="181",
+                                     lap_count=1 + presses,
+                                     coolant_temp=190 + presses,
+                                     last_lap_time=124 - presses,
+                                     last_lap_fuel=312 + presses,
+                                     fuel_percent=98 - presses)
+            presses += 1
 
     def create_temp_gauge(self, parent, grid):
         result = Box(parent, grid=grid)
@@ -135,7 +162,6 @@ class Gui():
         result.text_size = 32
         result.font = "courier"
         result.append("LAP  TIME   FUEL")
-        result.append(" {:2d} {:2d}:{:2d} {:2.2f}".format(1, 1, 57, 326.5))
         return result
 
     def send_message(self):
@@ -182,7 +208,14 @@ class Gui():
         self.status.after(duration_secs * 1000, self.__remove_message)
         self.status.value = text
 
-
+    def __update_car_data__(self, car="", coolant_temp=0, lap_count=0,
+                            last_lap_time=0, last_lap_fuel=0, fuel_percent = -1):
+        minutes = int(last_lap_time / 60)
+        seconds = last_lap_time % 60
+        entry = "{:03d} {:02d}:{:02d}   {:03d}".format(lap_count, minutes, seconds, last_lap_fuel )
+        self.lap_list.insert(1, entry)
+        self.coolant_temp.value = coolant_temp
+        self.fuel_percent.value = fuel_percent
 
 # items to display
 # last time we heard from car

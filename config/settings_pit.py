@@ -1,4 +1,9 @@
 
+
+# the number of seconds to delay sending race data to the car
+# we can't send it as ther car hits the line because the car is sending us stuff
+RACE_DATA_SEND_DELAY_SEC=3
+
 # make sure this is specified in your local config, it must be the
 # same value in both your car and pit config
 # RADIO_KEY = "abracadabra"

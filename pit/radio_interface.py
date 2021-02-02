@@ -16,7 +16,10 @@ from shared.generated.messages_pb2 import (
     DriverMessage
 )
 from shared.radio import Radio
+from python_settings import settings
+
 from threading import Thread
+import time
 import logging
 
 logger = logging.getLogger(__name__)
@@ -60,7 +63,7 @@ class RadioInterface(Thread, EventHandler):
             pass
         self.radio.send_async(status)
 
-    def send_lap_completed(self, car="", position=0, laps=0, ahead=None, gap="" ):
+    def send_lap_completed(self, car="", position=0, laps=0, ahead=None, gap="", last_lap_time=0 ):
         logger.info("car: {} completed lap {} in pos {}".format(car, laps, position))
         pos = RacePosition()
         pos.car_number = car
@@ -69,7 +72,7 @@ class RadioInterface(Thread, EventHandler):
         if ahead:
             pos.car_ahead.car_number = ahead
             pos.car_ahead.gap_text = gap
-        self.radio.send_async(pos)
+        Thread(target=self.__delayed_send__, args=(pos, settings.RACE_DATA_SEND_DELAY_SEC)).start()
 
     def send_driver_message(self, car="", msg=""):
         # todo : extend message to accept a car number
@@ -94,4 +97,9 @@ class RadioInterface(Thread, EventHandler):
         else:
             logger.error("unknown radio message {}".format(type(proto_msg)))
 
+    # sleep for a moment before sending data to the car so it doesn't collide with
+    # data coming from the car as it passes the line
+    def __delayed_send__(self, pos, delay):
+        time.sleep(delay)
+        self.radio.send_async(pos)
 
