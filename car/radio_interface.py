@@ -11,7 +11,8 @@ from car.event_defs import (
     RadioSyncEvent,
     DriverMessageEvent,
     DriverMessageAddendumEvent,
-    RaceFlagStatusEvent
+    RaceFlagStatusEvent,
+    LapInfoEvent
 )
 from shared.events import EventHandler
 from shared.generated.messages_pb2 import (
@@ -103,13 +104,12 @@ class RadioInterface(Thread, EventHandler):
                     # we're in the lead, there's no-one ahead
                     text = "P1"
                     DriverMessageEvent.emit(text=text, duration_secs=120)
+                LapInfoEvent.emit(lap_count=msg.lap_count)
             else:
                 # this might be the following car behind us ... it might also be for a different car in our team
                 if msg.car_ahead and msg.car_ahead.car_number == settings.CAR_NUMBER:
                     text = " ▼ {} by {}".format(msg.car_number, msg.car_ahead.gap_text)
                     DriverMessageAddendumEvent.emit(text=text)
-            # TODO : we should really update the lap counter on the dash with the actual lap count from the
-            # pit message
         else:
             logger.warning("got unexpected message : {}".format(type(msg)))
 

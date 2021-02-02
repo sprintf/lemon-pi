@@ -5,13 +5,16 @@ from car.target import Target
 from car.event_defs import (
     LeaveTrackEvent,
     CompleteLapEvent,
-    RadioSyncEvent
+    RadioSyncEvent,
+    LapInfoEvent
 )
 
 from haversine import haversine, Unit
 from car import geometry
 import time
 import logging
+
+from shared.events import EventHandler
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +30,7 @@ def angular_difference(h1, h2):
     return diff
 
 
-class LapTracker(PositionUpdater, LapProvider):
+class LapTracker(PositionUpdater, LapProvider, EventHandler):
 
     def __init__(self, track: TrackLocation, listener: LapUpdater):
         self.track = track
@@ -40,6 +43,7 @@ class LapTracker(PositionUpdater, LapProvider):
         self.last_lap_time = 0
         self.last_pit_in_time = 0
         self.last_radio_sync_time = 0
+        LapInfoEvent.register_handler(self)
 
     def update_position(self, lat:float, long:float, heading:float, time:float, speed:int) -> None:
         if (lat, long) == self.last_pos:
@@ -86,6 +90,10 @@ class LapTracker(PositionUpdater, LapProvider):
                 RadioSyncEvent.emit()
                 logger.info("syncing radio")
                 self.last_radio_sync_time = time
+
+    def handle_event(self, event, lap_count=0):
+        if event == LapInfoEvent:
+            self.lap_count = lap_count
 
     def __crossed_line(self, lat, long, heading, target:Target):
         if angular_difference(target.target_heading, heading) > 20:
