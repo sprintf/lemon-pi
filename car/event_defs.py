@@ -56,4 +56,8 @@ DriverMessageAddendumEvent = Event("driver-message-addendum")
 #   flag=(GREEN|YELLOW|RED|BLACK|UNKNOWN)
 RaceFlagStatusEvent = Event("flag-status")
 
+# emit() will contain
+#   lap_count=
+LapInfoEvent = Event("lap-info")
+
 

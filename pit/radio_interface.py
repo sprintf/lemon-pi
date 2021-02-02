@@ -72,7 +72,12 @@ class RadioInterface(Thread, EventHandler):
         if ahead:
             pos.car_ahead.car_number = ahead
             pos.car_ahead.gap_text = gap
-        Thread(target=self.__delayed_send__, args=(pos, settings.RACE_DATA_SEND_DELAY_SEC)).start()
+        delayed_send = Thread(target=self.__delayed_send__, args=(pos, settings.RACE_DATA_SEND_DELAY_SEC))
+        if settings.RACE_DATA_SEND_DELAY_SEC > 0:
+            delayed_send.start()
+        else:
+            # run it in foreground for unittests
+            delayed_send.run()
 
     def send_driver_message(self, car="", msg=""):
         # todo : extend message to accept a car number

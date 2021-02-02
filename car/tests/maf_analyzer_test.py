@@ -5,7 +5,8 @@ from car.maf_analyzer import MafAnalyzer
 from python_settings import settings
 import config.test_settings as my_local_settings
 
-settings.configure(my_local_settings)
+if not settings.configured:
+    settings.configure(my_local_settings)
 
 
 class MafTestCase(unittest.TestCase):
