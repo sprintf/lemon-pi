@@ -49,7 +49,7 @@ class DataSourceHandler:
                             target = self.leaderboard.number_lookup.get(self.target_car)
                             ahead = target.car_in_front
                             gap = target.gap(ahead)
-                            self.emit_lap_completed(car_number, laps, position, ahead, gap)
+                            self.emit_lap_completed(car_number, laps, position, ahead, gap, last_lap)
                         else:
                             this_car = self.leaderboard.number_lookup.get(car_number)
                             if not this_car:
@@ -57,12 +57,12 @@ class DataSourceHandler:
                             ahead = this_car.car_in_front
                             if ahead and ahead.car_number == self.target_car:
                                 gap = this_car.gap(ahead)
-                                self.emit_lap_completed(car_number, laps, position, ahead, gap)
+                                self.emit_lap_completed(car_number, laps, position, ahead, gap, last_lap)
         except Exception as e:
             print(e)
 
-    def emit_lap_completed(self, car_number, laps, position, ahead, gap):
+    def emit_lap_completed(self, car_number, laps, position, ahead, gap, last_lap_time):
         if ahead:
-            LapCompletedEvent.emit(car=car_number, laps=laps, position=position, ahead=ahead.car_number, gap=gap)
+            LapCompletedEvent.emit(car=car_number, laps=laps, position=position, ahead=ahead.car_number, gap=gap, last_lap_time=last_lap_time)
         else:
-            LapCompletedEvent.emit(car=car_number, laps=laps, position=position, ahead=None, gap="-")
+            LapCompletedEvent.emit(car=car_number, laps=laps, position=position, ahead=None, gap="-", last_lap_time=last_lap_time)

@@ -8,7 +8,7 @@ from car.obd_reader import ObdReader
 from car.lap_tracker import LapTracker
 from car.radio_interface import RadioInterface
 from car.wifi import WifiManager
-from car.display_providers import LocalTimeProvider
+from shared.time_provider import LocalTimeProvider
 from car.track import TrackLocation, read_tracks
 from car.state_machine import StateMachine
 from car.movement_listener import MovementListener
@@ -47,7 +47,7 @@ logging.getLogger().setLevel(logging.INFO)
 logger.info("Lemon-Pi : starting up")
 
 if not "SETTINGS_MODULE" in os.environ:
-    os.environ["SETTINGS_MODULE"] = "config.settings-car"
+    os.environ["SETTINGS_MODULE"] = "config.local_settings_car"
 
 # main control thread
 # responsibilities
