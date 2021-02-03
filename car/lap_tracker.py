@@ -36,7 +36,7 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
         self.track = track
         self.listener = listener
         self.on_track = False
-        self.lap_start_time = 0.0
+        self.lap_start_time = time.time()
         self.last_pos = (0, 0)
         self.last_pos_time = 0.0
         self.lap_count = 999
@@ -91,9 +91,18 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                 logger.info("syncing radio")
                 self.last_radio_sync_time = time
 
-    def handle_event(self, event, lap_count=0):
+    def handle_event(self, event, lap_count=0, ts=0):
         if event == LapInfoEvent:
-            self.lap_count = lap_count
+            # the lap info tells us the last lap completed, but this
+            # lap timer is showing the next lap, so we add one to it
+            self.lap_count = lap_count + 1
+
+            # this only gets hit in simulation mode when the car is not
+            # actually running. It lets us see some lap time data when
+            # testing out a pre-recorded feed
+            if not self.on_track:
+                self.last_lap_time = ts - self.lap_start_time
+                self.lap_start_time = ts
 
     def __crossed_line(self, lat, long, heading, target:Target):
         if angular_difference(target.target_heading, heading) > 20:

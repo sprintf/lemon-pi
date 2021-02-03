@@ -218,6 +218,10 @@ class Radio(Thread):
             msg = self.send_queue.get()
             self.send_message(self.protocol, msg)
             self.send_queue.task_done()
+            logger.info("awaiting TX completion")
+            while self.protocol.transmitting:
+                time.sleep(0.1)
+            logger.info("TX complete")
 
     def send_message(self, protocol, msg:Message):
         logger.debug("turning off receive")
