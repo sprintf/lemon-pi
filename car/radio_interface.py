@@ -6,7 +6,6 @@ from car.display_providers import (
     FuelProvider
 )
 from car.event_defs import (
-    CompleteLapEvent,
     LeaveTrackEvent,
     RadioSyncEvent,
     DriverMessageEvent,
@@ -48,7 +47,6 @@ class RadioInterface(Thread, EventHandler):
         self.temp_provider = temp_provider
         self.lap_provider = lap_provider
         self.fuel_provider = fuel_provider
-        CompleteLapEvent.register_handler(self)
         RadioSyncEvent.register_handler(self)
         LeaveTrackEvent.register_handler(self)
 
@@ -56,7 +54,7 @@ class RadioInterface(Thread, EventHandler):
         self.lap_provider = lap_provider
 
     def handle_event(self, event, **kwargs):
-        if event == CompleteLapEvent or event == RadioSyncEvent:
+        if event == RadioSyncEvent:
             telemetry = CarTelemetry()
             telemetry.coolant_temp = self.temp_provider.get_temp_f()
             telemetry.last_lap_time = self.lap_provider.get_last_lap_time()
