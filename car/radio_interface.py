@@ -104,7 +104,7 @@ class RadioInterface(Thread, EventHandler):
                     # we're in the lead, there's no-one ahead
                     text = "P1"
                     DriverMessageEvent.emit(text=text, duration_secs=120)
-                LapInfoEvent.emit(lap_count=msg.lap_count, ts=msg.ts)
+                LapInfoEvent.emit(lap_count=msg.lap_count, ts=msg.timestamp)
             else:
                 # this might be the following car behind us ... it might also be for a different car in our team
                 if msg.car_ahead and msg.car_ahead.car_number == settings.CAR_NUMBER:
