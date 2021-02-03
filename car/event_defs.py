@@ -58,6 +58,7 @@ RaceFlagStatusEvent = Event("flag-status")
 
 # emit() will contain
 #   lap_count=
+#   ts=
 LapInfoEvent = Event("lap-info")
 
 

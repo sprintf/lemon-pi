@@ -8,3 +8,4 @@ secrets.py
 mymap.html
 python-OBD
 shared/generated
+config/local_*

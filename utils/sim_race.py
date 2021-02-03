@@ -1,5 +1,5 @@
 import os
-from threading import Thread
+import logging
 
 from pit.datasource.datasource_handler import DataSourceHandler
 from pit.leaderboard import RaceOrder
@@ -12,6 +12,11 @@ from pit.radio_interface import RadioInterface
 from shared.radio import Radio
 from shared.usb_detector import UsbDetector
 
+logger = logging.getLogger(__name__)
+
+logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S',
+                    level=logging.INFO)
 
 def sim_race(file, handler:DataSourceHandler, time_factor):
     simtime = 0
@@ -57,4 +62,4 @@ if __name__ == "__main__":
     leaderboard = RaceOrder()
 
     handler = DataSourceHandler(leaderboard, "444")
-    sim_race("../resources/test/test-file.dat", handler, 10)
+    sim_race("../resources/test/test-file.dat", handler, 5)
