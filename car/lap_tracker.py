@@ -56,6 +56,8 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
             # approach might be to ensure car travels so far away from line
             if time - self.lap_start_time > 10:
                 CompleteLapEvent.emit()
+                if not self.track.is_radio_sync_defined():
+                    RadioSyncEvent.emit()
                 if not self.on_track:
                     logger.info("entering track")
                     # this isn't true for a multi-driver day, but we'll keep each
