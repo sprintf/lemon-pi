@@ -210,7 +210,9 @@ class Radio(Thread):
                 logger.exception(exc)
             logger.info("port closed")
 
-        def send_cmd(self, cmd, delay=settings.RADIO_CMD_COMPLETION_TIME):
+        def send_cmd(self, cmd, delay=0):
+            if delay == 0:
+                delay = settings.RADIO_CMD_COMPLETION_TIME
             logger.debug("sending cmd {}".format(cmd))
             self.transport.write(('%s\r\n' % cmd).encode('UTF-8'))
             time.sleep(delay)
