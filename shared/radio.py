@@ -122,10 +122,17 @@ class Radio(Thread):
 
         def set_radio(self, radio):
             self.radio = radio
+            if self.transport and not self.initialized:
+                self.__configure__()
 
         def connection_made(self, transport):
             logger.info("connection made")
             self.transport = transport
+            if self.radio and not self.initialized:
+                self.__configure__()
+
+        def __configure__(self):
+            logger.info("configuring radio")
             self.send_cmd('sys get ver')
             # default frequency is 923300000
             # bandwidth (bw) can be 125 250 or 500
