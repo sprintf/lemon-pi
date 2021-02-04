@@ -55,9 +55,9 @@ It is not possible to run two or three USB devices connected to the Pi as well a
 
 * The maximum packet size of a Lora radio packet is 256 bytes.
 * Transmit times / Receive times increase relative to the size of the data being transmitted
-* It takes about 6s to send / receive a 256 byte message.
+* It takes about 6s to send / receive a 256 byte message utilizing 125KHz of bandwidth.
 * Although Lora has multi-mile range, it can't go through solid obstructions. In other words it works by 'radio line of sight' although field testing shows it goes through trees and bushes and houses.
-* We ended up using protobuf as a message format as it offers very compact on the wire representation, which has brought the lag time down between send and receive to about two seconds.
+* We ended up using protobuf as a message format as it offers very compact on the wire representation, which has brought the lag time down between send and receive to between one and two seconds.
 * The radio can either transmit or receive and with multi-second windows when it is doing this we need to keep chatter to a minimum, so we don't send a constant stream of GPS updates, instead we send a summary of each lap including coolant temp, lap time, fuel used on the lap, and total fuel remaining
 * Because the start/finish line isn't always the most visible 'radio line of sight' we allow an optional point on the track to be specified and the car sends its data when it hits that point.
 
