@@ -1,6 +1,7 @@
 from guizero import App, Text, Box, TextBox, PushButton, ListBox
 
 import logging
+from python_settings import settings
 
 from pit.event_defs import SendMessageEvent, RaceStatusEvent, PittingEvent, LapCompletedEvent, TelemetryEvent
 from shared.events import Event
@@ -168,7 +169,7 @@ class Gui():
         # validate not too long
         text = self.message.children[1].value.strip()
         if len(text) > 0 and len(text) < 20:
-            SendMessageEvent.emit(msg=self.message.children[1].value)
+            SendMessageEvent.emit(msg=self.message.children[1].value, car=settings.TARGET_CAR)
             self.message.children[1].value = ""
             self.__show_message(text="message sent", duration_secs=1)
 

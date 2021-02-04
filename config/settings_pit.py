@@ -4,6 +4,9 @@
 # we can't send it as ther car hits the line because the car is sending us stuff
 RACE_DATA_SEND_DELAY_SEC=3
 
+# the time taken to complete a radio command
+RADIO_CMD_COMPLETION_TIME = 0.1
+
 # make sure this is specified in your local config, it must be the
 # same value in both your car and pit config
 # RADIO_KEY = "abracadabra"

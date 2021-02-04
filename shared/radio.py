@@ -9,6 +9,7 @@ from queue import Queue
 from threading import Thread
 from serial.threaded import LineReader, ReaderThread
 from serial.serialutil import PARITY_NONE, STOPBITS_ONE, EIGHTBITS
+from python_settings import settings
 
 from shared.message_encoder import MessageEncoder
 from shared.message_decoder import (
@@ -209,9 +210,7 @@ class Radio(Thread):
                 logger.exception(exc)
             logger.info("port closed")
 
-        # todo : might be worth putting this 0.1 into config. The laptop handles 0.1 ok
-        # but will the pi ... and will all pis?
-        def send_cmd(self, cmd, delay=0.1):
+        def send_cmd(self, cmd, delay=settings.RADIO_CMD_COMPLETION_TIME):
             logger.debug("sending cmd {}".format(cmd))
             self.transport.write(('%s\r\n' % cmd).encode('UTF-8'))
             time.sleep(delay)
@@ -248,15 +247,15 @@ class Radio(Thread):
 
     def send_message(self, protocol, msg:Message):
         logger.debug("turning off receive")
-        protocol.send_cmd("radio rxstop", delay=0.1)
+        protocol.send_cmd("radio rxstop")
         protocol.transmitting = True
-        protocol.send_cmd("sys set pindig GPIO11 1", delay=0.1)
+        protocol.send_cmd("sys set pindig GPIO11 1")
         payload = self.encoder.encode(msg).hex()
         logger.info("sending {}".format(type(msg)))
         protocol.send_cmd("radio tx %s" % payload)
         self.metrics.send_attempt += 1
         self.last_transmit = time.time()
-        protocol.send_cmd("sys set pindig GPIO11 0", delay=0.1)
+        protocol.send_cmd("sys set pindig GPIO11 0")
         logger.debug("message sent")
 
 

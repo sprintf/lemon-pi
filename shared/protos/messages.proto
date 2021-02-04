@@ -32,6 +32,8 @@ message DriverMessage {
 
   string text = 4;
 
+  string car_number = 5;
+
 }
 
 // the race status. Only sent when it changes

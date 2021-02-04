@@ -6,12 +6,14 @@ from python_settings import settings
 
 
 from car.display_providers import FuelProvider
+from car.event_defs import RefuelEvent
 from car.updaters import FuelUsageUpdater, LapUpdater
+from shared.events import EventHandler
 
 logger = logging.getLogger(__name__)
 
 
-class MafAnalyzer(FuelUsageUpdater, LapUpdater, FuelProvider):
+class MafAnalyzer(FuelUsageUpdater, LapUpdater, FuelProvider, EventHandler):
 
     def __init__(self, lap_logger):
         self.lap_logger = lap_logger
@@ -23,6 +25,12 @@ class MafAnalyzer(FuelUsageUpdater, LapUpdater, FuelProvider):
         self.fuel_used_by_minute = []
         self.cached_fuel_usage = None
         self.cached_fuel_usage_time = 0.0
+        RefuelEvent.register_handler(self)
+
+    def handle_event(self, event, **kwargs):
+        logger.info("refuelling")
+        self.total_fuel_used_ml = 0.0
+        self.buffer_values = []
 
     def update_lap(self, lap_count: int, last_lap_time: float):
         if lap_count > 0:

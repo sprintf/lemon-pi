@@ -88,7 +88,10 @@ class RadioInterface(Thread, EventHandler):
                 DriverMessageEvent.emit(text="Course Yellow", duration_secs=10)
         elif type(msg) == DriverMessage:
             logger.info("got race driver message...{}".format(msg))
-            DriverMessageEvent.emit(text=msg.text, duration_secs=30)
+            # for a multi-car team we only want to show the message to the car it
+            # was intended for
+            if msg.car_number == settings.CAR_NUMBER:
+                DriverMessageEvent.emit(text=msg.text, duration_secs=30)
         elif type(msg) == Ping:
             logger.info("got ping message...{}".format(msg))
         elif type(msg) == RacePosition:
