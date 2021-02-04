@@ -15,7 +15,7 @@ class DecoderTestCase(unittest.TestCase):
     def test_decoding_noise(self):
         m = MessageDecoder("letmein")
         with self.assertRaises(NoiseException):
-            m.decode('this is a message')
+            m.decode(b'this is a message')
 
     def test_decoding_message_from_other_team(self):
         e = MessageEncoder("pit", "team-2")

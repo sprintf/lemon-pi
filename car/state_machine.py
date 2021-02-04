@@ -20,10 +20,10 @@ class State(Enum):
 class StateMachine(EventHandler):
 
     def __init__(self):
-        # todo : on power up determine if this is really whats going on
-        # might break us if we get this wrong
+        # we assume we're parked in pit when we are initialized, if we're not
+        # we're in big trouble anyway. If we cross the start-finish line then we
+        # switch state to ON_TRACK anyway
         self.state = State.PARKED_IN_PIT
-        # todo : register for all primary events (mustn't do all or we go into endless loop)
         MovingEvent.register_handler(self)
         CarStoppedEvent.register_handler(self)
         LeaveTrackEvent.register_handler(self)
@@ -37,7 +37,6 @@ class StateMachine(EventHandler):
                 self.state = State.LEAVING_PIT
                 StateChangeSettingOffEvent.emit()
                 return
-            # todo : toggle on obd tells us that we've refueled
             if event == OBDConnectedEvent:
                 RefuelEvent.emit()
                 return
@@ -45,7 +44,6 @@ class StateMachine(EventHandler):
         if self.state == State.ON_TRACK:
             if event == LeaveTrackEvent:
                 self.state = State.LEAVING_TRACK
-                # todo : emit a Pitting Message -> can send over radio
                 return
 
         if self.state == State.LEAVING_TRACK:

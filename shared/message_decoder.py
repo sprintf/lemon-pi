@@ -24,7 +24,6 @@ class MessageDecoder:
 
     def decode(self, payload:[bytes]) -> Message:
         if not payload[0:2] == b"LP":
-            # todo : write test for this
             raise NoiseException()
         instance = create_instance(ProtobufEnum(int(payload[2])))
         encrypted_payload = payload[len("LPx"):]

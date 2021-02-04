@@ -2,8 +2,15 @@
 
 import unittest
 from unittest.mock import MagicMock
-from shared.radio import Radio
 from shared.generated.messages_pb2 import Ping
+
+from python_settings import settings
+import config.test_settings as my_local_settings
+
+if not settings.configured:
+    settings.configure(my_local_settings)
+
+from shared.radio import Radio
 
 class RadioTestCase(unittest.TestCase):
 
@@ -33,3 +40,6 @@ class RadioTestCase(unittest.TestCase):
             map[freq] = True
             self.assertTrue(int(freq / 100000) in Radio.FREQ)
         self.assertEqual(len(Radio.FREQ), len(map))
+
+if __name__ == '__main__':
+    unittest.main()

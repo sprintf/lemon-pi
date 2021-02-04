@@ -80,9 +80,9 @@ class RadioInterface(Thread, EventHandler):
             delayed_send.run()
 
     def send_driver_message(self, car="", msg=""):
-        # todo : extend message to accept a car number
         message = DriverMessage()
         message.text = msg
+        message.car_number = car
         self.radio.send_async(message)
 
     def convert_to_event(self, proto_msg):

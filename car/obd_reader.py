@@ -5,6 +5,8 @@ import logging
 import platform
 
 from threading import Thread
+from python_settings import settings
+
 from car.display_providers import TemperatureProvider
 from car.updaters import FuelUsageUpdater
 from car.event_defs import OBDConnectedEvent, OBDDisconnectedEvent, ExitApplicationEvent
@@ -78,8 +80,7 @@ class ObdReader(Thread, TemperatureProvider):
         if not port:
             return None
 
-        # TODO : move the protocol into settings
-        result = obd.OBD(port, protocol="3")
+        result = obd.OBD(port, protocol=settings.OBD_PROTOCOL)
         status = result.status()
         if status == obd.OBDStatus.NOT_CONNECTED or \
            status == obd.OBDStatus.ELM_CONNECTED:
@@ -124,8 +125,7 @@ class ObdReader(Thread, TemperatureProvider):
         raw_fuel_mass = maf_value / 14.64
         trim_adjustment = raw_fuel_mass * ((self.short_term_fuel_trim + self.long_term_fuel_trim) / 100)
         adjusted_fuel_mass = raw_fuel_mass + trim_adjustment
-        # todo : weight a liter of '91 grade gas ... allegedly it weights about 750 grams
-        ml_per_second = adjusted_fuel_mass * (1000/750)
+        ml_per_second = adjusted_fuel_mass * (1000/757)
         return ml_per_second
 
 if __name__ == "__main__":
