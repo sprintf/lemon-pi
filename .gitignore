@@ -8,4 +8,5 @@ secrets.py
 mymap.html
 python-OBD
 shared/generated
-config/local_*
+config/local_settings_pit.py
+config/local_settings_car.py
