@@ -3,6 +3,7 @@
 import time
 import random
 import serial
+from zlib import adler32
 import logging
 from queue import Queue
 from threading import Thread
@@ -67,10 +68,14 @@ class RadioMetrics:
 
 class Radio(Thread):
 
+    # frequencies we can use
+    FREQ = [9233, 9239, 9245, 9251, 9257, 9263, 9269, 9275]
+
     def __init__(self, sender:str, key:str, ping_freq=45, **kwargs):
         Thread.__init__(self, daemon=True)
         self.encoder = MessageEncoder(sender, key)
         self.decoder = MessageDecoder(key)
+        self.frequency = self.__pick_radio_freq__(key)
         self.transmitting = False
         self.protocol = None
         self.metrics = RadioMetrics()
@@ -87,6 +92,10 @@ class Radio(Thread):
         self.send_thread = Thread(target=self.__send_outbound_messages__, daemon=True)
         self.receive_queue = Queue()
 
+    def __pick_radio_freq__(self, key:str) -> int:
+        index = adler32(key.encode("UTF8")) % len(Radio.FREQ)
+        return Radio.FREQ[index] * 100000
+
     def run(self):
         try:
             self.receive_loop()
@@ -99,6 +108,7 @@ class Radio(Thread):
 
     def __radio_ready__(self):
         logger.info("radio is ready!")
+        logger.info("using frequency {}".format(self.frequency))
         self.send_thread.start()
         logger.info("send thread started")
 
@@ -117,6 +127,12 @@ class Radio(Thread):
             logger.info("connection made")
             self.transport = transport
             self.send_cmd('sys get ver')
+            # default frequency is 923300000
+            # bandwidth (bw) can be 125 250 or 500
+            # we are using 500 bandwidth, and then picking a frequency
+            # based on the hash of the secret (which has to be shared between tx and rx)
+            self.send_cmd('radio set bw 500')
+            self.send_cmd('radio set freq {}'.format(self.radio.frequency))
             self.send_cmd('radio get freq')
             self.send_cmd('radio get sf')
             # wait for up to a minute on commands : this creates few errors on read

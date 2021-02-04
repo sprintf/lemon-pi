@@ -1,7 +1,7 @@
 
 
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from shared.radio import Radio
 from shared.generated.messages_pb2 import Ping
 
@@ -25,3 +25,11 @@ class RadioTestCase(unittest.TestCase):
         self.assertTrue(protocol.send_cmd.call_args_list[2].args[0].startswith("radio tx "))
         self.assertEqual("sys set pindig GPIO11 0", protocol.send_cmd.call_args_list[3].args[0])
 
+    def test_radio_freq(self):
+        radio = Radio("team", "password", ser=MagicMock())
+        map = {}
+        for x in range(1, 80):
+            freq = radio.__pick_radio_freq__(str(x))
+            map[freq] = True
+            self.assertTrue(int(freq / 100000) in Radio.FREQ)
+        self.assertEqual(len(Radio.FREQ), len(map))
