@@ -12,6 +12,12 @@ tracks:
      pit_entry_coords: "(39.541604,-122.331588),(39.541502,-122.331592)"
      pit_entry_direction: "W"
 
+  -  name: "Thunderhill West"
+     start_finish_coords: "(39.537447,-122.338924),(39.537470,-122.338567)"
+     start_finish_direction: "N"
+     pit_entry_coords: "(39.535192,-122.338194),(39.535092,-122.338176)"
+     pit_entry_direction: "E"
+
   -  name: "Laguna Seca"
      start_finish_coords: "(36.586308,-121.756908),(36.586158,-121.756649)"
      start_finish_direction: "SW"
@@ -23,6 +29,24 @@ tracks:
      start_finish_direction: "E"
      pit_entry_coords: "(35.488943,-119.547690),(35.489060,-119.547604)"
      pit_entry_direction: "SE"
+
+  -  name: "Oregon Raceway Park"
+     start_finish_coords: "(45.363790,-120.744707),(45.363816,-120.744277)"
+     start_finish_direction: "N"
+     pit_entry_coords: "(45.363325,-120.744259),(45.363247,-120.744166)"
+     pit_entry_direction: "NE"
+
+  -  name: "The Ridge"
+     start_finish_coords: "(47.254785,-123.192485),(47.254622,-123.192489)"
+     start_finish_direction: "E"
+     pit_entry_coords: "(47.254623,-123.197713),(47.254509,-123.197639)"
+     pit_entry_direction: "NE"
+
+  -  name: "Willow Springs"
+     start_finish_coords: "(34.871434,-118.263770),(34.871621,-118.263620)"
+     start_finish_direction: "NW"
+     pit_entry_coords: "(34.870017,-118.261156),(34.869861,-118.261210)"
+     pit_entry_direction: "E"
 
 
   -  name: "Arlington Test Track"
