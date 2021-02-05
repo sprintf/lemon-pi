@@ -43,6 +43,8 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
         self.last_lap_time = 0
         self.last_pit_in_time = 0
         self.last_radio_sync_time = 0
+        self.last_timestamp = 0
+        self.last_dist_to_line = 0
         LapInfoEvent.register_handler(self)
 
     def update_position(self, lat:float, long:float, heading:float, time:float, speed:int) -> None:
@@ -51,13 +53,12 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
 
         logger.debug("updating position to {} {}".format(lat, long))
         self.last_pos = (lat, long)
-        if self.__crossed_line(lat, long, heading, self.track.start_finish):
+        crossed_line, cross_time = self._crossed_line(lat, long, heading, time, self.track.start_finish)
+        if crossed_line:
             # de-bounce hitting start finish line twice ... a better
             # approach might be to ensure car travels so far away from line
             if time - self.lap_start_time > 10:
                 CompleteLapEvent.emit()
-                if not self.track.is_radio_sync_defined():
-                    RadioSyncEvent.emit()
                 if not self.on_track:
                     logger.info("entering track")
                     # this isn't true for a multi-driver day, but we'll keep each
@@ -69,13 +70,16 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                 else:
                     logger.info("completed lap!")
                     self.lap_count += 1
-                    self.last_lap_time = time - self.lap_start_time
+                    self.last_lap_time = cross_time - self.lap_start_time
                     if self.listener:
                         self.listener.update_lap(self.lap_count, self.last_lap_time)
-                self.lap_start_time = time
+                self.lap_start_time = cross_time
+
+                if not self.track.is_radio_sync_defined():
+                    RadioSyncEvent.emit()
 
         elif self.track.is_pit_defined() and \
-            self.__crossed_line(lat, long, heading, self.track.pit_in):
+            self._crossed_line(lat, long, heading, time, self.track.pit_in)[0]:
             # de-bounce so that we don't re-enter the pits repeatedly
             # we could move the time into the target object,
             if time - self.last_pit_in_time > 30:
@@ -85,7 +89,7 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                 self.last_pit_in_time = time
 
         elif self.track.is_radio_sync_defined() and \
-            self.__crossed_line(lat, long, heading, self.track.radio_sync):
+            self._crossed_line(lat, long, heading, time, self.track.radio_sync)[0]:
             # de-bounce so that we don't re-enter the pits repeatedly
             # we could move the time into the target object,
             if time - self.last_radio_sync_time > 30:
@@ -106,9 +110,9 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                 self.last_lap_time = ts - self.lap_start_time
                 self.lap_start_time = ts
 
-    def __crossed_line(self, lat, long, heading, target:Target):
+    def _crossed_line(self, lat, long, heading, time:float, target:Target):
         if angular_difference(target.target_heading, heading) > 20:
-            return False
+            return False, 0
 
         dist = int(haversine(target.midpoint, (lat, long), unit=Unit.FEET))
         logger.debug("distance to target = {} feet".format(dist))
@@ -128,9 +132,20 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                 target_heading = geometry.heading_between_lat_long((lat, long), intersect)
                 if (abs(heading - target_heading) > 160):
                     logger.info("GONE PASSED {} line!!!!".format(target.name))
-                    logger.info("my heading = {}, target heading = {}".format(heading, target.target_heading))
-                    return True
-        return False
+                    logger.debug("my heading = {}, target heading = {}".format(heading, target.target_heading))
+
+                    # work out the precise time we crossed the line
+                    time_gap = time - self.last_timestamp
+                    distance_ratio = (self.last_dist_to_line + dist) / dist
+                    logger.debug("adjusting line cross time back by {:.3f}".format(time_gap / distance_ratio))
+                    est_cross_time = time - (time_gap / distance_ratio)
+
+                    return True, est_cross_time
+
+                # we're in front of the line, store the distance and the current time
+                self.last_dist_to_line = dist
+                self.last_timestamp = time
+        return False, 0
 
     def get_lap_count(self) -> int:
         return self.lap_count
@@ -144,11 +159,17 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
 import csv
 from car.track import read_tracks
 
+logger = logging.getLogger(__name__)
+
+logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S',
+                    level=logging.DEBUG)
+
 if __name__ == "__main__":
     tracks = read_tracks()
 
     tracker = LapTracker(tracks[1], None)
-    with open("../traces/trace-1608347418.csv") as csvfile:
+    with open("traces/trace-1608347418.csv") as csvfile:
         points = csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC)
         x = 0
         for point in points:
