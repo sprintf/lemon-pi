@@ -35,7 +35,7 @@ jobs:
         run: echo " result = ${{ steps.generate.outcome }}"
 
       - id: upload-file
-        if: steps.generate.outcome == success()
+        if: steps.generate.outcome == "success"
         uses: google-github-actions/upload-cloud-storage@main
         with:
           credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
@@ -43,7 +43,7 @@ jobs:
           destination: perplexus/public
 
       - id: upload-images
-        if: steps.generate.outcome == success()
+        if: steps.generate.outcome == "success"
         uses: google-github-actions/upload-cloud-storage@main
         with:
           credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
