@@ -29,10 +29,6 @@ jobs:
           pip install -r requirements.txt
           export PYTHONPATH='.'
           python utils/plot_tracks.py
-          
-      - id: echo-status
-        name: "debug the status result"
-        run: echo " result = ${{ steps.generate.outcome }}"
 
       - id: upload-file
         if: steps.generate.outcome == 'success'
@@ -42,7 +38,7 @@ jobs:
           path: resources/tracks.yaml
           destination: perplexus/public
 
-      - id: upload-images
+      - id: upload-html
         if: steps.generate.outcome == 'success'
         uses: google-github-actions/upload-cloud-storage@main
         with:
@@ -50,4 +46,44 @@ jobs:
           path: tracks
           destination: perplexus/public
 
+      - id: generate-thumbnails
+        name: Generating thumbnails
+        if: steps.generate.outcome == 'success'
+        run: |
+          echo "generating thumbnails"
+          pip install pyppeteer
+          for x in tracks/*.html ; do
+            python utils/html_to_image.py $x
+          done
+          mkdir tracks/thumbnails
+          mv tracks/*.png tracks/thumbnails
+
+      - id: upload-images
+        if: steps.generate.outcome == 'success'
+        uses: google-github-actions/upload-cloud-storage@main
+        with:
+          credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+          path: tracks/thumbnails
+          destination: perplexus/public
+
+      - id: update-track-page
+        if: steps.generate.outcome == 'success'
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          # gen the track file
+          head README-tracks.md -n 10 > README-tracks.tmp.md
+          for x in tracks/*.html ; do
+            img=`echo $x | sed -e 's/.html/.png/' -e 's/tracks/tracks\/thumbnails/'`
+            name=`grep <title> $x | sed -e 's/<title>//' -e 's/<\/title>//'`
+            echo '!['$name' (https://storage.googleapis.com/perplexus/public/'${x}')]' >> README-tracks.tmp.md
+            echo '(https://storage.googleapis.com/perplexus/public/'${img}')' >> README-tracks.tmp.md
+          done
+
+          rm README-tracks.md
+          mv README-tracks.tmp.md README-tracks.md
+
+          git add README-tracks.md
+          git commit -m "auto generated"
+          git push origin master
 

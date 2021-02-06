@@ -5,6 +5,7 @@ import os
 import sys
 import zlib
 import urllib
+import argparse
 from car.track import read_tracks
 
 # utility to generate maps of all the tracks, indicating
@@ -15,7 +16,9 @@ def run():
 
     for track in tracks:
         lat_long = track.start_finish.lat_long1
-        gmap = gmplot.GoogleMapPlotter(lat_long[0], lat_long[1], 16, map_type="satellite")
+        gmap = gmplot.GoogleMapPlotter(lat_long[0], lat_long[1], 16,
+                                       map_type="satellite",
+                                       title=track.name)
         gmap.apikey = os.environ["GMAP_APIKEY"]
         start_finish = zip(*[
             track.start_finish.lat_long1,
@@ -60,14 +63,17 @@ if __name__ == "__main__":
     except HTTPError:
         pass
 
+    force = len(sys.argv) == 2 and sys.argv[1] == '-f'
+
     # don't do anything if the files are the same
-    if check == check2:
+    if check == check2 and not force:
         print("no update needed")
         sys.exit(1)
 
     # generate new maps
     if not os.path.isdir("tracks"):
         os.mkdir("tracks")
+
     run()
     print("new track maps generated")
 
