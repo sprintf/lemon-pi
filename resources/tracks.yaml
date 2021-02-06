@@ -48,7 +48,7 @@ tracks:
      pit_entry_coords: "(34.870017,-118.261156),(34.869861,-118.261210)"
      pit_entry_direction: "E"
 
-# this is a local test area, used for testing
+# this is a local test track, used for well, testing.
   -  name: "Arlington Test Track"
      start_finish_coords: "(37.926223,-122.295029),(37.926291,-122.294879)"
      start_finish_direction: "SE"
