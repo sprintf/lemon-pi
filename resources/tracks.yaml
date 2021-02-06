@@ -1,4 +1,3 @@
-# metadata for the tracks supported by lemon-pi
 
 tracks:
   -  name: "Sonoma Raceway"
@@ -10,8 +9,8 @@ tracks:
   -  name: "Thunderhill"
      start_finish_coords: "(39.538475,-122.331300),(39.538480,-122.331113)"
      start_finish_direction: "S"
-     pit_entry_coords: "(39.541604,-122.331588),(39.541502,-122.331592)"
-     pit_entry_direction: "W"
+     pit_entry_coords: "(39.543792,-122.331770),(39.543737,-122.331823)"
+     pit_entry_direction: "SE"
 
   -  name: "Thunderhill West"
      start_finish_coords: "(39.537447,-122.338924),(39.537470,-122.338567)"
