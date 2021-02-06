@@ -49,8 +49,7 @@ tracks:
      pit_entry_direction: "E"
 
 # this is a local test track, used for testing.
-# not a closed track, not used by professional drovers
-# bring your own sheep
+# not a closed track, not used by professional drivers
   -  name: "Arlington Test Track"
      start_finish_coords: "(37.926223,-122.295029),(37.926291,-122.294879)"
      start_finish_direction: "SE"
