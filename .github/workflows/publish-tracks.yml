@@ -73,11 +73,13 @@ jobs:
           git config user.email "<>"
           # gen the track file
           # head README-tracks.md -n 10 > README-tracks.tmp.md
+          urlbase="https://storage.googleapis.com/perplexus/public"
           for x in tracks/*.html ; do
             img=`echo $x | sed -e 's/.html/.png/' -e 's/tracks/thumbnails/'`
             name=`grep "<title>" $x | sed -e 's/<title>//' -e 's/<\/title>//'`
-            echo '!['$name' (https://storage.googleapis.com/perplexus/public/'${x}')]' \
-                 '(https://storage.googleapis.com/perplexus/public/'${img}')' >> README-tracks.tmp.md
+            echo '' >> README-tracks.tmp.md
+            echo '#'"$name" >> README-tracks.tmp.md
+            echo '!['$name' ('${urlbase}/${x}')]('${urlbase}/${img}')' >> README-tracks.tmp.md
             echo '' >> README-tracks.tmp.md
           done
 
