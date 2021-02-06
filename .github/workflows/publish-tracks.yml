@@ -29,6 +29,10 @@ jobs:
           pip install -r requirements.txt
           export PYTHONPATH='.'
           python utils/plot_tracks.py
+          
+      - id: echo-status
+        name: "debug the status result"
+        run: echo " result = ${{ steps.generate.outcome }}"
 
       - id: upload-file
         if: steps.generate.outcome == success()
