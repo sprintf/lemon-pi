@@ -6,6 +6,8 @@ name: Publish Tracks
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
@@ -14,10 +16,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: generate some things
+        env:
+          GMAP_APIKEY : ${{ secrets.GMAP_APIKEY }}
+        run: |
+          python utils/plot_tracks.py
       - id: upload-file
         uses: google-github-actions/upload-cloud-storage@main
-        with: 
+        with:
           credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
           path: resources/tracks.yaml
           destination: perplexus/public
+      - id: upload-images
+        uses: google-github-actions/upload-cloud-storage@main
+        with:
+          credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+          path: resources/*.html
+          destination: perplexus/public
+
 

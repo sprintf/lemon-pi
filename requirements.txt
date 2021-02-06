@@ -1,5 +1,6 @@
 blowfish==0.6.1
 freezegun==1.0.0
+gmplot==1.4.1
 gps==3.19
 guizero==1.1.1
 haversine==2.3.0
@@ -12,3 +13,4 @@ python-dateutil==2.8.1
 python-settings==0.2.2
 PyYAML==5.3.1
 six==1.15.0
+websocket-client==0.57.0
