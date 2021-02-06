@@ -59,7 +59,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # generate new maps
-    if not dir("tracks"):
+    if not os.path.isdir("tracks"):
         os.mkdir("tracks")
     run()
 
