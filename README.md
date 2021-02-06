@@ -41,6 +41,10 @@ Lostik Lora Radio [Ronoth](https://ronoth.com/products/lostik) you'll need may n
 
 All the above plug-and-play with the Raspberry Pi.
 
+# Tracks Currently Supported
+
+The tracks that are currently supported is [here](README-tracks.md)
+
 # Power Considerations
 
 The Raspberry Pi needs a good 2amp power supply. Many USB cables will struggle, and many USB power sources are not rated for this.
