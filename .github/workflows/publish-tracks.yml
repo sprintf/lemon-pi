@@ -72,10 +72,10 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
           # gen the track file
-          head README-tracks.md -n 10 > README-tracks.tmp.md
+          # head README-tracks.md -n 10 > README-tracks.tmp.md
           for x in tracks/*.html ; do
             img=`echo $x | sed -e 's/.html/.png/' -e 's/tracks/tracks\/thumbnails/'`
-            name=`grep <title> $x | sed -e 's/<title>//' -e 's/<\/title>//'`
+            name=`grep "<title>" $x | sed -e 's/<title>//' -e 's/<\/title>//'`
             echo '!['$name' (https://storage.googleapis.com/perplexus/public/'${x}')]' >> README-tracks.tmp.md
             echo '(https://storage.googleapis.com/perplexus/public/'${img}')' >> README-tracks.tmp.md
           done
@@ -85,5 +85,5 @@ jobs:
 
           git add README-tracks.md
           git commit -m "auto generated"
-          git push origin master
+          git push origin main
 
