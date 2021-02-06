@@ -1,3 +1,5 @@
+from urllib.error import HTTPError
+
 import gmplot
 import os
 import sys
@@ -50,17 +52,23 @@ if __name__ == "__main__":
     check = zlib.crc32(tracks.read().encode("utf-8"))
 
     # calc the crc23 of the published tracks
+    check2 = 0
     url = "https://storage.googleapis.com/perplexus/public/tracks.yaml"
-    file = urllib.request.urlopen(url)
-    check2 = zlib.crc32(file.read())
+    try:
+        file = urllib.request.urlopen(url)
+        check2 = zlib.crc32(file.read())
+    except HTTPError:
+        pass
 
     # don't do anything if the files are the same
     if check == check2:
+        print("no update needed")
         sys.exit(1)
 
     # generate new maps
     if not os.path.isdir("tracks"):
         os.mkdir("tracks")
     run()
+    print("new track maps generated")
 
 
