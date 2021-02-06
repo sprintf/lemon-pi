@@ -74,16 +74,21 @@ jobs:
           # gen the track file
           # head README-tracks.md -n 10 > README-tracks.tmp.md
           for x in tracks/*.html ; do
-            img=`echo $x | sed -e 's/.html/.png/' -e 's/tracks/tracks\/thumbnails/'`
+            img=`echo $x | sed -e 's/.html/.png/' -e 's/tracks/thumbnails/'`
             name=`grep "<title>" $x | sed -e 's/<title>//' -e 's/<\/title>//'`
-            echo '!['$name' (https://storage.googleapis.com/perplexus/public/'${x}')]' >> README-tracks.tmp.md
-            echo '(https://storage.googleapis.com/perplexus/public/'${img}')' >> README-tracks.tmp.md
+            echo '!['$name' (https://storage.googleapis.com/perplexus/public/'${x}')]' \
+                 '(https://storage.googleapis.com/perplexus/public/'${img}')' >> README-tracks.tmp.md
+            echo '' >> README-tracks.tmp.md
           done
 
           rm README-tracks.md
           mv README-tracks.tmp.md README-tracks.md
 
+          now=`date +%Y%m%d-%H%m`
+          branch="auto-tracks-$now"
           git add README-tracks.md
-          git commit -m "auto generated"
-          git push origin main
+          git checkout -b $branch
+          git commit -m "auto generated track update"
+          git push --set-upstream origin $branch
+
 
