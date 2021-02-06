@@ -37,7 +37,7 @@ jobs:
         uses: google-github-actions/upload-cloud-storage@main
         with:
           credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
-          path: resources/*.html
+          path: tracks
           destination: perplexus/public
 
 

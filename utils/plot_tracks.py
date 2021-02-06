@@ -38,7 +38,7 @@ def run():
             gmap.polygon(*radio, color='purple', edge_width=20)
             gmap.text(*track.radio_sync.lat_long1, '   radio')
 
-        gmap.draw("resources/{}.html".format(track.name.lower().replace(' ', '-')))
+        gmap.draw("tracks/{}.html".format(track.name.lower().replace(' ', '-')))
 
 if __name__ == "__main__":
     if not os.environ["GMAP_APIKEY"]:
@@ -59,6 +59,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # generate new maps
+    if not dir("tracks"):
+        os.mkdir("tracks")
     run()
 
 
