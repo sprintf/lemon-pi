@@ -6,6 +6,8 @@ name: Publish Tracks
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
@@ -14,10 +16,32 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - id: generate
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: generate some things
+        env:
+          GMAP_APIKEY : ${{ secrets.GMAP_APIKEY }}
+        continue-on-error: true
+        run: |
+          pip install -r requirements.txt
+          export PYTHONPATH='.'
+          python utils/plot_tracks.py
       - id: upload-file
+        if: steps.generate.outcome == success
         uses: google-github-actions/upload-cloud-storage@main
-        with: 
+        with:
           credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
           path: resources/tracks.yaml
           destination: perplexus/public
+      - id: upload-images
+        if: steps.generate.outcome == success
+        uses: google-github-actions/upload-cloud-storage@main
+        with:
+          credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+          path: tracks
+          destination: perplexus/public
+
 
