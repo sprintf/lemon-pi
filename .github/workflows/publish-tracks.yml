@@ -79,7 +79,8 @@ jobs:
             name=`grep "<title>" $x | sed -e 's/<title>//' -e 's/<\/title>//'`
             echo '' >> README-tracks.tmp.md
             echo '# '"$name" >> README-tracks.tmp.md
-            echo '[[['${urlbase}/${img}']]]('${urlbase}/${x}')' >> README-tracks.tmp.md
+            echo '![]('${urlbase}/${img}')' >> README-tracks.tmp.md
+            echo '[Zoomable map]('${urlbase}/${x}')' >> README-tracks.tmp.md
             echo '' >> README-tracks.tmp.md
           done
 
