@@ -1,7 +1,7 @@
 
 from config.settings_pit import *
 
-RADIO_KEY = "mykey"
+RADIO_KEY = "mykey2"
 
 # provide a race id to track realtime results
 # zero means disabled
