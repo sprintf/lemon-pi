@@ -25,7 +25,7 @@ jobs:
           GMAP_APIKEY : ${{ secrets.GMAP_APIKEY }}
         run: |
           pip install -r requirements.txt
-          export PYTHONPATH=`pwd`
+          export PYTHONPATH='.'
           python utils/plot_tracks.py
       - id: upload-file
         uses: google-github-actions/upload-cloud-storage@main
