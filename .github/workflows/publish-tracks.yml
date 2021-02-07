@@ -87,6 +87,7 @@ jobs:
 
           rm README-tracks.md
           mv README-tracks.tmp.md README-tracks.md
+          rm -rf tracks
 
           now=`date +%Y%m%d-%H%m`
           branch="auto-tracks-$now"
