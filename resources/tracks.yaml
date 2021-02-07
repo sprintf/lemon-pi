@@ -50,7 +50,7 @@ tracks:
 
 # this is a local test track, used for testing and other things.
 # not a closed track, not used by professional drivers
-  -  name: "Arlington Test Circuit"
+  -  name: "Arlington Test Track"
      start_finish_coords: "(37.926223,-122.295029),(37.926291,-122.294879)"
      start_finish_direction: "SE"
      pit_entry_coords: "(37.928483,-122.297005),(37.928385,-122.297129)"
