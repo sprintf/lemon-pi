@@ -5,18 +5,29 @@ import os
 import sys
 import zlib
 import urllib
-import argparse
-from car.track import read_tracks
+from car.track import read_tracks, TrackLocation, Target
+
 
 # utility to generate maps of all the tracks, indicating
 # where the start/finish and pit in coordinates are
+
+def _calc_mid(track:TrackLocation):
+    sum_lat = 0
+    sum_long = 0
+    count = 0
+    for t in [track.pit_in, track.start_finish]:
+        if t:
+            count += 2
+            sum_lat += t.lat_long1[0] + t.lat_long2[0]
+            sum_long += t.lat_long1[1] + t.lat_long2[1]
+    return sum_lat / count, sum_long / count
 
 def run():
     tracks = read_tracks()
 
     for track in tracks:
-        lat_long = track.start_finish.lat_long1
-        gmap = gmplot.GoogleMapPlotter(lat_long[0], lat_long[1], 16,
+        mid_lat, mid_long = _calc_mid(track)
+        gmap = gmplot.GoogleMapPlotter(mid_lat, mid_long, 16,
                                        map_type="satellite",
                                        title=track.name)
         gmap.apikey = os.environ["GMAP_APIKEY"]
@@ -24,7 +35,7 @@ def run():
             track.start_finish.lat_long1,
             track.start_finish.lat_long2,
         ])
-        gmap.polygon(*start_finish, color='black', edge_width=20)
+        gmap.polygon(*start_finish, color='white', edge_width=20)
         gmap.text(*track.start_finish.lat_long1, '   start/finish')
 
         if track.is_pit_defined():

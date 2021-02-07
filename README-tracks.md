@@ -1,54 +1,54 @@
 
 # Arlington Test Track
-![](https://storage.googleapis.com/perplexus/public/thumbnails/arlington-test-track.png)
+![](https://storage.googleapis.com/perplexus/public/thumbnails/arlington-test-track.jpg)
 
 [Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/arlington-test-track.html)
 
 
 # Buttonwillow
-![](https://storage.googleapis.com/perplexus/public/thumbnails/buttonwillow.png)
+![](https://storage.googleapis.com/perplexus/public/thumbnails/buttonwillow.jpg)
 
 [Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/buttonwillow.html)
 
 
 # Laguna Seca
-![](https://storage.googleapis.com/perplexus/public/thumbnails/laguna-seca.png)
+![](https://storage.googleapis.com/perplexus/public/thumbnails/laguna-seca.jpg)
 
 [Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/laguna-seca.html)
 
 
 # Oregon Raceway Park
-![](https://storage.googleapis.com/perplexus/public/thumbnails/oregon-raceway-park.png)
+![](https://storage.googleapis.com/perplexus/public/thumbnails/oregon-raceway-park.jpg)
 
 [Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/oregon-raceway-park.html)
 
 
 # Sonoma Raceway
-![](https://storage.googleapis.com/perplexus/public/thumbnails/sonoma-raceway.png)
+![](https://storage.googleapis.com/perplexus/public/thumbnails/sonoma-raceway.jpg)
 
 [Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/sonoma-raceway.html)
 
 
 # The Ridge
-![](https://storage.googleapis.com/perplexus/public/thumbnails/the-ridge.png)
+![](https://storage.googleapis.com/perplexus/public/thumbnails/the-ridge.jpg)
 
 [Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/the-ridge.html)
 
 
 # Thunderhill West
-![](https://storage.googleapis.com/perplexus/public/thumbnails/thunderhill-west.png)
+![](https://storage.googleapis.com/perplexus/public/thumbnails/thunderhill-west.jpg)
 
 [Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/thunderhill-west.html)
 
 
 # Thunderhill
-![](https://storage.googleapis.com/perplexus/public/thumbnails/thunderhill.png)
+![](https://storage.googleapis.com/perplexus/public/thumbnails/thunderhill.jpg)
 
 [Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/thunderhill.html)
 
 
 # Willow Springs
-![](https://storage.googleapis.com/perplexus/public/thumbnails/willow-springs.png)
+![](https://storage.googleapis.com/perplexus/public/thumbnails/willow-springs.jpg)
 
 [Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/willow-springs.html)
 

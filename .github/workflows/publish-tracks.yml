@@ -56,7 +56,7 @@ jobs:
             python utils/html_to_image.py $x
           done
           mkdir tracks/thumbnails
-          mv tracks/*.png tracks/thumbnails
+          mv tracks/*.jpg tracks/thumbnails
 
       - id: upload-images
         if: steps.generate.outcome == 'success'
@@ -75,7 +75,7 @@ jobs:
           # head README-tracks.md -n 10 > README-tracks.tmp.md
           urlbase="https://storage.googleapis.com/perplexus/public"
           for x in tracks/*.html ; do
-            img=`echo $x | sed -e 's/.html/.png/' -e 's/tracks/thumbnails/'`
+            img=`echo $x | sed -e 's/.html/.jpg/' -e 's/tracks/thumbnails/'`
             name=`grep "<title>" $x | sed -e 's/<title>//' -e 's/<\/title>//'`
             echo '' >> README-tracks.tmp.md
             echo '# '"$name" >> README-tracks.tmp.md
