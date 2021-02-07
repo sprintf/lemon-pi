@@ -103,7 +103,7 @@ jobs:
           fi
 
       - id: pull-request
-        if: steps.generate.outcome == 'success' and env.diff_state == 'dirty'
+        if: steps.generate.outcome == 'success' && env.diff_state == 'dirty'
         uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.ACCESS_TOKEN }}
