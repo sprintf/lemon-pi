@@ -89,19 +89,25 @@ jobs:
           mv README-tracks.tmp.md README-tracks.md
           rm -rf tracks
 
-          now=`date +%Y%m%d-%H%m`
-          branch="auto-tracks-$now"
-          git checkout -b $branch
-          git add README-tracks.md
-          git commit -m "auto generated track update"
-          git push --set-upstream origin $branch
+          if [[ $(git diff --stat) != '' ]]; then
+            echo "diff_state=dirty" >> $GITHUB_ENV
+            now=`date +%Y%m%d-%H%m`
+            branch="auto-tracks-$now"
+            echo "tmp_branch=$branch" >> $GITHUB_ENV
+            git checkout -b $branch
+            git add README-tracks.md
+            git commit -m "auto generated track update"
+            git push --set-upstream origin $branch
+          else
+            echo "diff_state=clean" >> $GITHUB_ENV
+          fi
 
       - id: pull-request
-        if: steps.generate.outcome == 'success'
+        if: steps.generate.outcome == 'success' and env.diff_state == 'dirty'
         uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.ACCESS_TOKEN }}
-          branch: $branch
+          branch: $env.tmp_branch
 
 
 
