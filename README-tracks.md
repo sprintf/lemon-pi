@@ -1,8 +1,8 @@
 
-# Arlington Test Track
-![](https://storage.googleapis.com/perplexus/public/thumbnails/arlington-test-track.jpg)
+# Arlington Test Track (new new)
+![](https://storage.googleapis.com/perplexus/public/thumbnails/arlington-test-track-(new-new).jpg)
 
-[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/arlington-test-track.html)
+[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/arlington-test-track-(new-new).html)
 
 
 # Buttonwillow
