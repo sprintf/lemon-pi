@@ -54,6 +54,12 @@ tracks:
      pit_entry_coords: "(29.888209,-90.195193),(29.888117,-90.195292)"
      pit_entry_direction: "SE"
 
+  - name: "Pittsburg International Race Complex"
+       start_finish_coords: "(40.850794,-80.347840),(40.850663,-80.347767)"
+       start_finish_direction: "SW"
+       pit_entry_coords: "(40.851486,-80.344985),(40.851406,-80.344969)"
+       pit_entry_direction: "W"
+
 # this is a local test track, used for testing and other things.
   -  name: "Arlington Test Track"
      start_finish_coords: "(37.926223,-122.295029),(37.926291,-122.294879)"

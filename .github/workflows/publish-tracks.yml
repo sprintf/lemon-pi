@@ -110,7 +110,8 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.ACCESS_TOKEN }}
-          branch: main
+          branch: ${{ env.tmp_branch }}
+          base: main
           delete-branch: true
           title: 'Update Tracks.md'
           body: |
