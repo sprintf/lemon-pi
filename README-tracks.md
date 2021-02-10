@@ -1,10 +1,4 @@
 
-# Arlington Test Track (new new)
-![](https://storage.googleapis.com/perplexus/public/thumbnails/arlington-test-track-(new-new).jpg)
-
-[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/arlington-test-track-(new-new).html)
-
-
 # Buttonwillow
 ![](https://storage.googleapis.com/perplexus/public/thumbnails/buttonwillow.jpg)
 
@@ -15,6 +9,12 @@
 ![](https://storage.googleapis.com/perplexus/public/thumbnails/laguna-seca.jpg)
 
 [Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/laguna-seca.html)
+
+
+# Nola Motorsports Park
+![](https://storage.googleapis.com/perplexus/public/thumbnails/nola-motorsports-park.jpg)
+
+[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/nola-motorsports-park.html)
 
 
 # Oregon Raceway Park
