@@ -23,6 +23,18 @@
 [Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/oregon-raceway-park.html)
 
 
+# Pittsburg International Race Complex
+![](https://storage.googleapis.com/perplexus/public/thumbnails/pittsburg-international-race-complex.jpg)
+
+[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/pittsburg-international-race-complex.html)
+
+
+# Road Atlanta
+![](https://storage.googleapis.com/perplexus/public/thumbnails/road-atlanta.jpg)
+
+[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/road-atlanta.html)
+
+
 # Sonoma Raceway
 ![](https://storage.googleapis.com/perplexus/public/thumbnails/sonoma-raceway.jpg)
 
