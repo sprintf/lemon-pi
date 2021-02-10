@@ -94,13 +94,9 @@ jobs:
 
           if [[ $(git diff --stat) != '' ]]; then
             echo "diff_state=dirty" >> $GITHUB_ENV
-            now=`date +%Y%m%d-%H%m`
+            now=`date +%Y%m%d-%H%M`
             branch="auto-tracks-$now"
             echo "tmp_branch=$branch" >> $GITHUB_ENV
-            git checkout -b $branch
-            git add README-tracks.md
-            git commit -m "auto generated track update"
-            git push --set-upstream origin $branch
           else
             echo "diff_state=clean" >> $GITHUB_ENV
           fi

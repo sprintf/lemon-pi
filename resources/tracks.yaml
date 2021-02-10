@@ -60,6 +60,12 @@ tracks:
      pit_entry_coords: "(40.851486,-80.344985),(40.851406,-80.344969)"
      pit_entry_direction: "W"
 
+  -  name: "Road Atlanta"
+     start_finish_coords: "(34.150442,-83.814164),(34.150312,-83.814269)"
+     start_finish_direction: "SE"
+     pit_entry_coords: "(34.150441,-83.816277),(34.150359,-83.816274)"
+     pit_entry_direction: "E"
+
 # this is a local test track, used for testing and other things.
   -  name: "Arlington Test Track"
      start_finish_coords: "(37.926223,-122.295029),(37.926291,-122.294879)"
