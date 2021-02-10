@@ -48,14 +48,20 @@ tracks:
      pit_entry_coords: "(34.870017,-118.261156),(34.869861,-118.261210)"
      pit_entry_direction: "E"
 
+  -  name: "Nola Motorsports Park"
+     start_finish_coords: "(29.885470,-90.199226),(29.885338,-90.199125)"
+     start_finish_direction: "SW"
+     pit_entry_coords: "(29.888209,-90.195193),(29.888117,-90.195292)"
+     pit_entry_direction: "SE"
+
 # this is a local test track, used for testing and other things.
-# not a closed track, not used by professional drivers
-  -  name: "Arlington Test Track (new new)"
+  -  name: "Arlington Test Track"
      start_finish_coords: "(37.926223,-122.295029),(37.926291,-122.294879)"
      start_finish_direction: "SE"
      pit_entry_coords: "(37.928483,-122.297005),(37.928385,-122.297129)"
      pit_entry_direction: "NW"
      radio_sync_coords: "(37.927329,-122.296101),(37.927392,-122.295992)"
      radio_sync_direction: "SE"
+     hidden: "true"
 
 

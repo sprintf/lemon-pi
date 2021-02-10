@@ -29,7 +29,7 @@ def run():
         mid_lat, mid_long = _calc_mid(track)
         gmap = gmplot.GoogleMapPlotter(mid_lat, mid_long, 16,
                                        map_type="satellite",
-                                       title=track.name)
+                                       title=track.get_display_name())
         gmap.apikey = os.environ["GMAP_APIKEY"]
         start_finish = zip(*[
             track.start_finish.lat_long1,

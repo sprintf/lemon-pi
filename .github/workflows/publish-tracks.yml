@@ -77,12 +77,15 @@ jobs:
           for x in tracks/*.html ; do
             img=`echo $x | sed -e 's/.html/.jpg/' -e 's/tracks/thumbnails/'`
             name=`grep "<title>" $x | sed -e 's/<title>//' -e 's/<\/title>//'`
-            echo '' >> README-tracks.tmp.md
-            echo '# '"$name" >> README-tracks.tmp.md
-            echo '![]('${urlbase}/${img}')' >> README-tracks.tmp.md
-            echo '' >> README-tracks.tmp.md
-            echo '[Zoomable map]('${urlbase}/${x}')' >> README-tracks.tmp.md
-            echo '' >> README-tracks.tmp.md
+            # do not include hidden tracks in the public index
+            if [[ $name != *_ ]] ; then
+              echo '' >> README-tracks.tmp.md
+              echo '# '"$name" >> README-tracks.tmp.md
+              echo '![]('${urlbase}/${img}')' >> README-tracks.tmp.md
+              echo '' >> README-tracks.tmp.md
+              echo '[Zoomable map]('${urlbase}/${x}')' >> README-tracks.tmp.md
+              echo '' >> README-tracks.tmp.md
+            fi
           done
 
           rm README-tracks.md

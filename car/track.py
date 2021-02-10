@@ -17,9 +17,14 @@ class TrackLocation:
         self.start_finish:Target = Target("start/finish", start_finish_begin, start_finish_end, dir)
         self.pit_in:Target = None
         self.radio_sync:Target = None
+        self.hidden = False
 
         logger.debug("{} : width = {} heading = {}".format(name, self.track_width_feet(),
                                                     int(self.start_finish.target_heading)))
+
+    def get_display_name(self):
+        # name hidden tracks with an _ at the end of their name
+        return "{}_".format(self.name) if self.hidden else self.name
 
     def track_width_feet(self):
         return int(haversine(self.start_finish.lat_long1, self.start_finish.lat_long2, unit=Unit.FEET))
@@ -76,8 +81,10 @@ def read_tracks() -> [TrackLocation]:
                 assert len(points) == 4, "expected 4 points"
                 track_data.set_radio_sync_coords((float(points[0]), float(points[1])),
                                              (float(points[2]), float(points[3])), track["radio_sync_direction"])
+            if "hidden" in track and track["hidden"]:
+                track_data.hidden = True
             track_list.append(track_data)
     return track_list
 
 if __name__ == "__main__":
-    read_tracks()
+    print(len(read_tracks()))
