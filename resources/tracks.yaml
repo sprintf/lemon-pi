@@ -66,6 +66,12 @@ tracks:
      pit_entry_coords: "(34.150441,-83.816277),(34.150359,-83.816274)"
      pit_entry_direction: "E"
 
+  -  name: "MSR Houston"
+     start_finish_coords: "(29.279136,-95.422390),(29.278962,-95.422432)"
+     start_finish_direction: "W"
+     pit_entry_coords: "(29.278953,-95.420712),(29.278887,-95.420603)"
+     pit_entry_direction: "SW"
+
 # this is a local test track, used for testing and other things.
   -  name: "Arlington Test Track"
      start_finish_coords: "(37.926223,-122.295029),(37.926291,-122.294879)"
