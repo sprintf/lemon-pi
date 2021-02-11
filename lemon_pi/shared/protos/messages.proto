@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+package lemon_pi.shared.generated;
+
+// common fields ...
+// ALL messages should include:
+//   seq_num
+//   timestamp
+//   sender
+//
+// These will be auto-populated on send
+
+// a ping message, sent sporadically from both car and pit
+message Ping {
+
+  int32 seq_num = 1;
+
+  int32 timestamp = 2;
+
+  string sender = 3;
+
+}
+
+// a text message from the pits to the driver
+message DriverMessage {
+
+  int32 seq_num = 1;
+
+  int32 timestamp = 2;
+
+  string sender = 3;
+
+  string text = 4;
+
+  string car_number = 5;
+
+}
+
+// the race status. Only sent when it changes
+
+message RaceStatus {
+
+  int32 seq_num = 1;
+
+  int32 timestamp = 2;
+
+  string sender = 3;
+
+  enum RaceFlagStatus {
+    UNKNOWN = 0;
+    GREEN = 1;
+    YELLOW = 2;
+    RED = 3;
+    BLACK = 4;
+  }
+
+  RaceFlagStatus flagStatus = 4;
+}
+
+// this message doesn't have the key fields because it's an embedded part of
+// other messages
+message Opponent {
+  string car_number = 1;
+
+  string gap_text = 2;
+}
+
+// the position of a car in the race. Usually only sent to our car
+message RacePosition {
+  int32 seq_num = 1;
+
+  int32 timestamp = 2;
+
+  string sender = 3;
+
+  string car_number = 4;
+
+  int32 position = 5;
+
+  int32 lap_count = 6;
+
+  Opponent car_ahead = 7;
+}
+
+message CarTelemetry {
+  int32 seq_num = 1;
+
+  int32 timestamp = 2;
+
+  string sender = 3;
+
+  int32 coolant_temp = 4;
+
+  int32 lap_count = 5;
+
+  // last lap time is in seconds and fractions of seconds
+  float last_lap_time = 6;
+
+  int32 last_lap_fuel_usage = 7;
+
+  int32 fuel_remaining_percent = 8;
+}
+
+message EnteringPits {
+
+  int32 seq_num = 1;
+
+  int32 timestamp = 2;
+
+  string sender = 3;
+
+}
+
+//  ********************
+//  **** IMPORTANT *****
+//  ********************
+//
+//  As you add new definitions in here, you will need
+//  to add constructor mappings into shared/radio_message.py
+//  that's really only for messages that arrive at tha car
+

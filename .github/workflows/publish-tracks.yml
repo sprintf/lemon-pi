@@ -53,7 +53,7 @@ jobs:
           echo "generating thumbnails"
           pip install pyppeteer
           for x in tracks/*.html ; do
-            python utils/html_to_image.py $x
+            python lemon_pi/utils/html_to_image.py $x
           done
           mkdir tracks/thumbnails
           mv tracks/*.jpg tracks/thumbnails
