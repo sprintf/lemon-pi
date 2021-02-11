@@ -11,6 +11,12 @@
 [Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/laguna-seca.html)
 
 
+# MSR Houston
+![](https://storage.googleapis.com/perplexus/public/thumbnails/msr-houston.jpg)
+
+[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/msr-houston.html)
+
+
 # Nola Motorsports Park
 ![](https://storage.googleapis.com/perplexus/public/thumbnails/nola-motorsports-park.jpg)
 
