@@ -27,8 +27,7 @@ jobs:
         continue-on-error: true
         run: |
           pip install -r requirements.txt
-          export PYTHONPATH='.'
-          python utils/plot_tracks.py
+          python lemon_pi/utils/plot_tracks.py
 
       - id: upload-file
         if: steps.generate.outcome == 'success'
@@ -53,7 +52,7 @@ jobs:
           echo "generating thumbnails"
           pip install pyppeteer
           for x in tracks/*.html ; do
-            python utils/html_to_image.py $x
+            python lemon_pi/utils/html_to_image.py $x
           done
           mkdir tracks/thumbnails
           mv tracks/*.jpg tracks/thumbnails

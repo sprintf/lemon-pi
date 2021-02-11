@@ -7,6 +7,6 @@ traces
 secrets.py
 mymap.html
 python-OBD
-shared/generated
-config/local_settings_pit.py
-config/local_settings_car.py
+lemon_pi/shared/generated
+lemon_pi/config/local_settings_pit.py
+lemon_pi/config/local_settings_car.py

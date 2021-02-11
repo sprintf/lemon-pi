@@ -54,7 +54,7 @@ sudo apt-get install protobuf-compiler
 8. launch the lemon-pi application
 
 ```sh
-python3 main.py
+./start-car.sh
 ```
 
 ## Autostarting 
