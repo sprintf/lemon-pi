@@ -27,6 +27,7 @@ jobs:
         continue-on-error: true
         run: |
           pip install -r requirements.txt
+          export PYTHONPATH='.'
           python lemon_pi/utils/plot_tracks.py
 
       - id: upload-file
