@@ -72,6 +72,12 @@ tracks:
      pit_entry_coords: "(29.278953,-95.420712),(29.278887,-95.420603)"
      pit_entry_direction: "SW"
 
+  -  name: "New Hampshire Motor Speedway"
+     start_finish_coords: "(43.363132,-71.462133),(43.363060,-71.461852)"
+     start_finish_direction: "S"
+     pit_entry_coords: "(43.364704,-71.461090),(43.364642,-71.460877)"
+     pit_entry_direction: "S"
+
 # this is a local test track, used for testing and other things.
   -  name: "Arlington Test Track"
      start_finish_coords: "(37.926223,-122.295029),(37.926291,-122.294879)"
