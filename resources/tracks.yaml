@@ -78,6 +78,12 @@ tracks:
      pit_entry_coords: "(43.364704,-71.461090),(43.364642,-71.460877)"
      pit_entry_direction: "S"
 
+  -  name: "Gingerman Raceway"
+     start_finish_coords: "(42.408026,-86.140581),(42.408028,-86.140392)"
+     start_finish_direction: "N"
+     pit_entry_coords: "(42.405682,-86.140487),(42.405601,-86.140484)"
+     pit_entry_direction: "W"
+
 # this is a local test track, used for testing and other things.
   -  name: "Arlington Test Track"
      start_finish_coords: "(37.926223,-122.295029),(37.926291,-122.294879)"
