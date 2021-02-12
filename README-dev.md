@@ -66,6 +66,10 @@ By default the car will transmit to the pits each time it crosses the start/fini
 
 The car automatically selects the closest track when the raspberry pi in-car application boots up.
 
+The full set of track maps that are supported is [here](README-tracks.md)
+When you make changes to the tracks.yaml file the new track map is automatically created and the readme page is updated.
+
+
 ## Technical Road Map
 
   We hope to put this system to the test in April 2021 at Sonoma Raceway at the 24 hours of lemons Sears Pointless race. We will see how ready we are, and how COVID affected the race is. But it gives us a deadline to get things operating.

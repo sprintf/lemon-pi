@@ -27,7 +27,7 @@ def run():
 
     for track in tracks:
         mid_lat, mid_long = _calc_mid(track)
-        gmap = gmplot.GoogleMapPlotter(mid_lat, mid_long, 16,
+        gmap = gmplot.GoogleMapPlotter(mid_lat, mid_long, 14,
                                        map_type="satellite",
                                        title=track.get_display_name())
         gmap.apikey = os.environ["GMAP_APIKEY"]
