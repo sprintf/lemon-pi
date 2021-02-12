@@ -17,6 +17,12 @@
 [Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/msr-houston.html)
 
 
+# New Hampshire Motor Speedway
+![](https://storage.googleapis.com/perplexus/public/thumbnails/new-hampshire-motor-speedway.jpg)
+
+[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/new-hampshire-motor-speedway.html)
+
+
 # Nola Motorsports Park
 ![](https://storage.googleapis.com/perplexus/public/thumbnails/nola-motorsports-park.jpg)
 
