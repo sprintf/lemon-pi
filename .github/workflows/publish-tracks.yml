@@ -85,9 +85,7 @@ jobs:
             if [[ $name != *_ ]] ; then
               echo '' >> README-tracks.tmp.md
               echo '# '"$name" >> README-tracks.tmp.md
-              echo '<a href='"${urlbase}/${x}"'><img src='"${urlbase}/${img}"'></a>' >> README-tracks.tmp.md
-              echo '' >> README-tracks.tmp.md
-              echo '[Zoomable map]('${urlbase}/${x}')' >> README-tracks.tmp.md
+              echo '<a href="'${urlbase}/${x}'"><img src="'${urlbase}/${img}'"></a>' >> README-tracks.tmp.md
               echo '' >> README-tracks.tmp.md
             fi
           done

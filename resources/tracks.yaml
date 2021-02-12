@@ -84,6 +84,12 @@ tracks:
      pit_entry_coords: "(42.405682,-86.140487),(42.405601,-86.140484)"
      pit_entry_direction: "W"
 
+  -  name: "High Plains Raceway"
+     start_finish_coords: "(39.735103,-103.894444),(39.734969,-103.894485)"
+     start_finish_direction: "E"
+     pit_entry_coords: "(39.735443,-103.895937),(39.735368,-103.895936)"
+     pit_entry_direction: "E"
+
 # this is a local test track, used for testing and other things.
   -  name: "Arlington Test Track"
      start_finish_coords: "(37.926223,-122.295029),(37.926291,-122.294879)"
