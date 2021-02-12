@@ -1,84 +1,60 @@
 
 # Buttonwillow
-<a href=https://storage.googleapis.com/perplexus/public/tracks/buttonwillow.html><img src=https://storage.googleapis.com/perplexus/public/thumbnails/buttonwillow.jpg></a>
-
-[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/buttonwillow.html)
+<a href="https://storage.googleapis.com/perplexus/public/tracks/buttonwillow.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/buttonwillow.jpg"></a>
 
 
 # Gingerman Raceway
-<a href=https://storage.googleapis.com/perplexus/public/tracks/gingerman-raceway.html><img src=https://storage.googleapis.com/perplexus/public/thumbnails/gingerman-raceway.jpg></a>
+<a href="https://storage.googleapis.com/perplexus/public/tracks/gingerman-raceway.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/gingerman-raceway.jpg"></a>
 
-[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/gingerman-raceway.html)
+
+# High Plains Raceway
+<a href="https://storage.googleapis.com/perplexus/public/tracks/high-plains-raceway.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/high-plains-raceway.jpg"></a>
 
 
 # Laguna Seca
-<a href=https://storage.googleapis.com/perplexus/public/tracks/laguna-seca.html><img src=https://storage.googleapis.com/perplexus/public/thumbnails/laguna-seca.jpg></a>
-
-[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/laguna-seca.html)
+<a href="https://storage.googleapis.com/perplexus/public/tracks/laguna-seca.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/laguna-seca.jpg"></a>
 
 
 # MSR Houston
-<a href=https://storage.googleapis.com/perplexus/public/tracks/msr-houston.html><img src=https://storage.googleapis.com/perplexus/public/thumbnails/msr-houston.jpg></a>
-
-[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/msr-houston.html)
+<a href="https://storage.googleapis.com/perplexus/public/tracks/msr-houston.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/msr-houston.jpg"></a>
 
 
 # New Hampshire Motor Speedway
-<a href=https://storage.googleapis.com/perplexus/public/tracks/new-hampshire-motor-speedway.html><img src=https://storage.googleapis.com/perplexus/public/thumbnails/new-hampshire-motor-speedway.jpg></a>
-
-[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/new-hampshire-motor-speedway.html)
+<a href="https://storage.googleapis.com/perplexus/public/tracks/new-hampshire-motor-speedway.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/new-hampshire-motor-speedway.jpg"></a>
 
 
 # Nola Motorsports Park
-<a href=https://storage.googleapis.com/perplexus/public/tracks/nola-motorsports-park.html><img src=https://storage.googleapis.com/perplexus/public/thumbnails/nola-motorsports-park.jpg></a>
-
-[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/nola-motorsports-park.html)
+<a href="https://storage.googleapis.com/perplexus/public/tracks/nola-motorsports-park.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/nola-motorsports-park.jpg"></a>
 
 
 # Oregon Raceway Park
-<a href=https://storage.googleapis.com/perplexus/public/tracks/oregon-raceway-park.html><img src=https://storage.googleapis.com/perplexus/public/thumbnails/oregon-raceway-park.jpg></a>
-
-[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/oregon-raceway-park.html)
+<a href="https://storage.googleapis.com/perplexus/public/tracks/oregon-raceway-park.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/oregon-raceway-park.jpg"></a>
 
 
 # Pittsburg International Race Complex
-<a href=https://storage.googleapis.com/perplexus/public/tracks/pittsburg-international-race-complex.html><img src=https://storage.googleapis.com/perplexus/public/thumbnails/pittsburg-international-race-complex.jpg></a>
-
-[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/pittsburg-international-race-complex.html)
+<a href="https://storage.googleapis.com/perplexus/public/tracks/pittsburg-international-race-complex.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/pittsburg-international-race-complex.jpg"></a>
 
 
 # Road Atlanta
-<a href=https://storage.googleapis.com/perplexus/public/tracks/road-atlanta.html><img src=https://storage.googleapis.com/perplexus/public/thumbnails/road-atlanta.jpg></a>
-
-[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/road-atlanta.html)
+<a href="https://storage.googleapis.com/perplexus/public/tracks/road-atlanta.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/road-atlanta.jpg"></a>
 
 
 # Sonoma Raceway
-<a href=https://storage.googleapis.com/perplexus/public/tracks/sonoma-raceway.html><img src=https://storage.googleapis.com/perplexus/public/thumbnails/sonoma-raceway.jpg></a>
-
-[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/sonoma-raceway.html)
+<a href="https://storage.googleapis.com/perplexus/public/tracks/sonoma-raceway.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/sonoma-raceway.jpg"></a>
 
 
 # The Ridge
-<a href=https://storage.googleapis.com/perplexus/public/tracks/the-ridge.html><img src=https://storage.googleapis.com/perplexus/public/thumbnails/the-ridge.jpg></a>
-
-[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/the-ridge.html)
+<a href="https://storage.googleapis.com/perplexus/public/tracks/the-ridge.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/the-ridge.jpg"></a>
 
 
 # Thunderhill West
-<a href=https://storage.googleapis.com/perplexus/public/tracks/thunderhill-west.html><img src=https://storage.googleapis.com/perplexus/public/thumbnails/thunderhill-west.jpg></a>
-
-[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/thunderhill-west.html)
+<a href="https://storage.googleapis.com/perplexus/public/tracks/thunderhill-west.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/thunderhill-west.jpg"></a>
 
 
 # Thunderhill
-<a href=https://storage.googleapis.com/perplexus/public/tracks/thunderhill.html><img src=https://storage.googleapis.com/perplexus/public/thumbnails/thunderhill.jpg></a>
-
-[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/thunderhill.html)
+<a href="https://storage.googleapis.com/perplexus/public/tracks/thunderhill.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/thunderhill.jpg"></a>
 
 
 # Willow Springs
-<a href=https://storage.googleapis.com/perplexus/public/tracks/willow-springs.html><img src=https://storage.googleapis.com/perplexus/public/thumbnails/willow-springs.jpg></a>
-
-[Zoomable map](https://storage.googleapis.com/perplexus/public/tracks/willow-springs.html)
+<a href="https://storage.googleapis.com/perplexus/public/tracks/willow-springs.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/willow-springs.jpg"></a>
 
