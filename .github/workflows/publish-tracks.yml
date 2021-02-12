@@ -52,11 +52,16 @@ jobs:
         run: |
           echo "generating thumbnails"
           pip install pyppeteer
+          python lemon_pi/utils/html_to_image.py `ls tracks/*.html`
           for x in tracks/*.html ; do
-            python lemon_pi/utils/html_to_image.py $x
+            image=`echo $x | sed 's/\.html/\.jpg/'`
+            python lemon_pi/utils/image_crop.py $image
           done
           mkdir tracks/thumbnails
-          mv tracks/*.jpg tracks/thumbnails
+          for x in tracks/*-clipped.jpg ; do
+            target=`echo $x | sed 's/-clipped//'`
+            mv $x tracks/thumbnails/`basename $target`
+          done
 
       - id: upload-images
         if: steps.generate.outcome == 'success'
@@ -77,11 +82,10 @@ jobs:
           for x in tracks/*.html ; do
             img=`echo $x | sed -e 's/.html/.jpg/' -e 's/tracks/thumbnails/'`
             name=`grep "<title>" $x | sed -e 's/<title>//' -e 's/<\/title>//'`
-            # do not include hidden tracks in the public index
             if [[ $name != *_ ]] ; then
               echo '' >> README-tracks.tmp.md
               echo '# '"$name" >> README-tracks.tmp.md
-              echo '![]('${urlbase}/${img}')' >> README-tracks.tmp.md
+              echo '<a href='"${urlbase}/${x}"'><img src='"${urlbase}/${img}"'></a>' >> README-tracks.tmp.md
               echo '' >> README-tracks.tmp.md
               echo '[Zoomable map]('${urlbase}/${x}')' >> README-tracks.tmp.md
               echo '' >> README-tracks.tmp.md
