@@ -20,7 +20,8 @@ from lemon_pi.shared.generated.messages_pb2 import (
     DriverMessage,
     Ping,
     RacePosition,
-    EnteringPits)
+    EnteringPits,
+    RaceFlagStatus)
 
 from python_settings import settings
 
@@ -79,12 +80,12 @@ class RadioInterface(Thread, EventHandler):
     def process_incoming(self, msg):
         if type(msg) == RaceStatus:
             logger.info("got race status message...{}".format(msg))
-            RaceFlagStatusEvent.emit(flag=RaceStatus.RaceFlagStatus.Name(msg.flagStatus))
-            if msg.flagStatus == RaceStatus.RED:
+            RaceFlagStatusEvent.emit(flag=RaceFlagStatus.Name(msg.flag_status))
+            if msg.flag_status == RaceStatus.RED:
                 DriverMessageEvent.emit(text="Race Red Flagged", duration_secs=10)
-            if msg.flagStatus == RaceStatus.BLACK:
+            if msg.flag_status == RaceStatus.BLACK:
                 DriverMessageEvent.emit(text="Race Black Flagged", duration_secs=10)
-            if msg.flagStatus == RaceStatus.YELLOW:
+            if msg.flag_status == RaceStatus.YELLOW:
                 DriverMessageEvent.emit(text="Course Yellow", duration_secs=10)
         elif type(msg) == DriverMessage:
             logger.info("got race driver message...{}".format(msg))
@@ -111,6 +112,11 @@ class RadioInterface(Thread, EventHandler):
                 if msg.car_ahead and msg.car_ahead.car_number == settings.CAR_NUMBER:
                     text = " ▼ {} by {}".format(msg.car_number, msg.car_ahead.gap_text)
                     DriverMessageAddendumEvent.emit(text=text)
+            # now that this message also contains the race flag status we can emit it
+            # unlike the similar message above this does not mean that the status has changed
+            # it's more for corrective purposes, so the display doesn't get stuck in a bad
+            # state if a flag message is missed
+            RaceFlagStatusEvent.emit(flag=RaceFlagStatus.Name(msg.flag_status))
         else:
             logger.warning("got unexpected message : {}".format(type(msg)))
 

@@ -5,7 +5,10 @@ import logging
 import time
 from python_settings import settings
 
-from lemon_pi.shared.generated.messages_pb2 import RaceStatus
+from lemon_pi.shared.generated.messages_pb2 import (
+    RaceStatus,
+    RaceFlagStatus
+)
 from lemon_pi.shared.radio import Radio
 from lemon_pi.shared.usb_detector import UsbDetector
 
@@ -28,7 +31,7 @@ radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY)
 radio.start()
 
 msg = RaceStatus()
-msg.flagStatus = RaceStatus.RaceFlagStatus.Value(sys.argv[1].upper())
+msg.flag_status = RaceFlagStatus.Value(sys.argv[1].upper())
 
 radio.send_async(msg)
 
