@@ -36,6 +36,14 @@ message DriverMessage {
 
 }
 
+enum RaceFlagStatus {
+  UNKNOWN = 0;
+  GREEN = 1;
+  YELLOW = 2;
+  RED = 3;
+  BLACK = 4;
+}
+
 // the race status. Only sent when it changes
 
 message RaceStatus {
@@ -46,15 +54,7 @@ message RaceStatus {
 
   string sender = 3;
 
-  enum RaceFlagStatus {
-    UNKNOWN = 0;
-    GREEN = 1;
-    YELLOW = 2;
-    RED = 3;
-    BLACK = 4;
-  }
-
-  RaceFlagStatus flagStatus = 4;
+  RaceFlagStatus flag_status = 4;
 }
 
 // this message doesn't have the key fields because it's an embedded part of
@@ -80,6 +80,11 @@ message RacePosition {
   int32 lap_count = 6;
 
   Opponent car_ahead = 7;
+
+  // in order to prevent missed flag transmissions from polluting the
+  // display forever, we send the race status in each RacePosition update
+  RaceFlagStatus flag_status = 8;
+
 }
 
 message CarTelemetry {

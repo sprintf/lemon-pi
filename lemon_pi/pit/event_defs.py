@@ -16,6 +16,7 @@ RaceStatusEvent = Event("race-flag")
 #   ahead=   optional (only if someone ahead)
 #   gap=     "-" if nobody ahead
 #   last_lap_time=  text of lap time
+#   flag=
 LapCompletedEvent = Event("lap-completed")
 
 # emit() sends out

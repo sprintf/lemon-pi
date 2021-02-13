@@ -4,7 +4,7 @@ import time
 
 from lemon_pi.pit.event_defs import RaceStatusEvent, LapCompletedEvent, PingEvent, PittingEvent, TelemetryEvent
 from lemon_pi.pit.radio_interface import RadioInterface
-from lemon_pi.shared.generated.messages_pb2 import Ping, EnteringPits, CarTelemetry
+from lemon_pi.shared.generated.messages_pb2 import Ping, EnteringPits, CarTelemetry, RaceFlagStatus
 from python_settings import settings
 import lemon_pi.config.test_settings as my_local_settings
 
@@ -42,6 +42,18 @@ class RadioInterfaceTestCase(unittest.TestCase):
         self.assertEqual(3, fields.position)
         self.assertEqual("181", fields.car_ahead.car_number)
         self.assertEqual("5 laps", fields.car_ahead.gap_text)
+
+    @patch("lemon_pi.shared.radio.Radio")
+    def test_race_position_with_flag(self, radio):
+        ri = RadioInterface(radio)
+        radio.send_async = MagicMock()
+        ri.handle_event(LapCompletedEvent, car='1', laps=2, position=3, ahead="181", flag="Green")
+        fields = radio.send_async.call_args.args[0]
+        self.assertEqual("1", fields.car_number)
+        self.assertEqual(2, fields.lap_count)
+        self.assertEqual(3, fields.position)
+        self.assertEqual("181", fields.car_ahead.car_number)
+        self.assertEqual(RaceFlagStatus.GREEN, fields.flag_status)
 
     def test_ping_processing(self):
         ri = RadioInterface(MagicMock())

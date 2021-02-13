@@ -13,7 +13,8 @@ from lemon_pi.shared.generated.messages_pb2 import (
     EnteringPits,
     Ping,
     CarTelemetry,
-    DriverMessage
+    DriverMessage,
+    RaceFlagStatus
 )
 from lemon_pi.shared.radio import Radio
 from python_settings import settings
@@ -54,21 +55,25 @@ class RadioInterface(Thread, EventHandler):
     def send_race_status(self, flag=""):
         logger.info("race status changed to {}".format(flag))
         status = RaceStatus()
-        status.flagStatus = RaceStatus.RaceFlagStatus.UNKNOWN
+        status.flag_status = self.set_flag_status(flag)
+        self.radio.send_async(status)
+
+    def set_flag_status(self, flag):
         try:
             # this can fail with an empty string, in which case it remains
             # set to UNKNOWN
-            status.flagStatus = RaceStatus.RaceFlagStatus.Value(flag.upper())
+            return RaceFlagStatus.Value(flag.upper())
         except ValueError:
             pass
-        self.radio.send_async(status)
+        return RaceFlagStatus.UNKNOWN
 
-    def send_lap_completed(self, car="", position=0, laps=0, ahead=None, gap="", last_lap_time=0 ):
+    def send_lap_completed(self, car="", position=0, laps=0, ahead=None, gap="", last_lap_time=0, flag=""):
         logger.info("car: {} completed lap {} in pos {}".format(car, laps, position))
         pos = RacePosition()
         pos.car_number = car
         pos.position = position
         pos.lap_count = laps
+        pos.flag_status = self.set_flag_status(flag)
         if ahead:
             pos.car_ahead.car_number = ahead
             pos.car_ahead.gap_text = gap
