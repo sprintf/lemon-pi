@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
