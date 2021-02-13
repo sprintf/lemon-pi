@@ -1,9 +1,9 @@
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from lemon_pi.car.event_defs import (
     MovingEvent,
-    LeaveTrackEvent, CompleteLapEvent, CarStoppedEvent, RefuelEvent, OBDConnectedEvent
+    LeaveTrackEvent, CompleteLapEvent, CarStoppedEvent, OBDConnectedEvent
 )
 from lemon_pi.car.state_machine import (
     StateMachine,
@@ -38,13 +38,14 @@ class StateMachineTestCase(unittest.TestCase):
         CarStoppedEvent.emit()
         self.assertEqual(sm.state, State.PARKED_IN_PIT)
 
-    def test_obd_reconnecting_in_pit_issues_refuel(self):
+    @patch("lemon_pi.car.event_defs.RefuelEvent.emit")
+    def test_obd_reconnecting_in_pit_issues_refuel(self, refuel_event):
         sm = StateMachine()
         CarStoppedEvent.emit()
         self.assertEqual(sm.state, State.PARKED_IN_PIT)
-        RefuelEvent.emit = Mock()
+        refuel_event.assert_not_called()
         OBDConnectedEvent.emit()
-        RefuelEvent.emit.assert_called_once()
+        refuel_event.assert_called()
 
 
 
