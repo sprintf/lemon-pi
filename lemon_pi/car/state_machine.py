@@ -28,6 +28,7 @@ class StateMachine(EventHandler):
         CarStoppedEvent.register_handler(self)
         LeaveTrackEvent.register_handler(self)
         CompleteLapEvent.register_handler(self)
+        OBDConnectedEvent.register_handler(self)
 
     def handle_event(self, event, speed=0, lat_long=None):
         # upon power on we assume we're in the pit, so this
@@ -46,7 +47,7 @@ class StateMachine(EventHandler):
                 self.state = State.LEAVING_TRACK
                 return
 
-        if self.state == State.LEAVING_TRACK:
+        if self.state in [State.LEAVING_TRACK, State.LEAVING_PIT]:
             if event == CarStoppedEvent:
                 self.state = State.PARKED_IN_PIT
                 StateChangePittedEvent.emit()
