@@ -86,19 +86,20 @@ class UsbDetector:
             if self.device_map.get(device):
                 # it's been identified as Lora
                 continue
-            try:
-                obd_scanner = obd.OBD(portstr=device)
-                if obd_scanner.status() != OBDStatus.NOT_CONNECTED:
-                    self.usb_map[UsbDevice.OBD] = device
-                    self.device_map[device] = UsbDevice.OBD
-                    logger.info("associated {} with OBD".format(device))
-                obd_scanner.close()
-            except:
-                logger.info("ok, so it's not OBD")
+            with serial.Serial(device, baudrate=38400, timeout=2) as ser:
+                try:
+                    ser.write("atz\r\r".encode("UTF-8"))
+                    time.sleep(0.5)
+                    resp_bytes = ser.readline()
+                    logger.info(resp_bytes)
+                    if "ELM327" in str(resp_bytes):
+                        self.usb_map[UsbDevice.OBD] = device
+                        self.device_map[device] = UsbDevice.OBD
+                        logger.info("associated {} with OBD".format(device))
+                finally:
+                    ser.close()
 
         self.last_scan_time = time.time()
-
-
 
     def __get_dev_pattern__(self):
         if platform.system() == "Linux":
@@ -111,6 +112,6 @@ if __name__ == "__main__":
 
     logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
-                        level=logging.INFO)
+                        level=logging.DEBUG)
 
     UsbDetector.init()
