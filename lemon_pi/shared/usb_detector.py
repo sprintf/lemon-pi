@@ -6,8 +6,6 @@ import logging
 import serial
 import time
 from enum import Enum
-import obd
-from obd import OBDStatus
 
 logger = logging.getLogger(__name__)
 
