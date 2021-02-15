@@ -9,7 +9,6 @@ from lemon_pi.car.event_defs import (
 
 import logging
 import platform
-from python_settings import settings
 
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.time_provider import TimeProvider
@@ -17,6 +16,7 @@ from lemon_pi.shared.time_provider import TimeProvider
 logger = logging.getLogger(__name__)
 
 MILLILITRES_PER_GALLON = 3785
+
 
 class ToggleImage(Picture):
 
@@ -219,7 +219,6 @@ class Gui(EventHandler):
         # on raspberry pi we go full screen
         if platform.system() == "Linux":
             self.root.set_full_screen()
-        self.root.after(int(settings.SPLASH_SCREEN_DELAY), self.present_main_app)
         self.root.display()
         # don't put any code here ... the display loop never returns
 

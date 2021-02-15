@@ -56,51 +56,62 @@ if not "SETTINGS_MODULE" in os.environ:
 #  2. fire up OBD thread
 #  3. fire up GPS thread
 
-WifiManager().disable_wifi()
 
-state_machine = StateMachine()
-movement_listener = MovementListener()
+
+
 
 gui = Gui()
 
-UsbDetector.init()
+def init():
+    # detect USB devices (should just be Lora)
+    UsbDetector.init()
 
-MA = MafAnalyzer(lap_logger)
+    WifiManager().disable_wifi()
 
-tracks:[TrackLocation] = read_tracks()
+    StateMachine()
+    MovementListener()
 
-# start a background thread to pull in gps data
-gps = GpsReader()
-if settings.GPS_DISABLED:
-    logger.warning("GPS has been disabled")
-else:
-    gps.start()
+    MA = MafAnalyzer(lap_logger)
+    obd = ObdReader(MA)
+    gps = GpsReader()
+    radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY)
+    radio_interface = RadioInterface(radio, obd, None, MA)
 
-# start a background thread to pull in OBD data
-obd = ObdReader(MA)
-if settings.OBD_DISABLED:
-    logger.warning("OBD has been disabled")
-else:
-    obd.start()
+    # start a background thread to pull in gps data
+    if settings.GPS_DISABLED:
+        logger.warning("GPS has been disabled")
+    else:
+        gps.start()
 
-# start a background thread to manage the radio function
-radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY)
-if settings.RADIO_DISABLED:
-    logger.warning("Radio has been disabled")
-else:
-    radio.start()
-# and the radio interface maps car events to and from the radio
-radio_interface = RadioInterface(radio, obd, None, MA)
-radio_interface.start()
+    # start a background thread to pull in OBD data
+    if settings.OBD_DISABLED:
+        logger.warning("OBD has been disabled")
+    else:
+        obd.start()
 
-# store the closest track
-closest_track: TrackLocation = None
+    # start a background thread to manage the radio function
+    if settings.RADIO_DISABLED:
+        logger.warning("Radio has been disabled")
+    else:
+        radio.start()
+    # and the radio interface maps car events to and from the radio
+    radio_interface.start()
 
-def await_gps():
+    logger.info("registering GUI providers")
+    gui.register_speed_provider(gps)
+    gui.register_time_provider(LocalTimeProvider())
+    gui.register_temp_provider(obd)
+    gui.register_fuel_provider(MA)
+
+    logger.info("reading tracks")
+    tracks: [TrackLocation] = read_tracks()
+
+    # show the main application
+    gui.present_main_app()
+
     logger.info("awaiting location to choose track")
     while not gps.is_working() or gps.get_lat_long() == (0, 0):
         time.sleep(1)
-    global closest_track
     closest_track = min(tracks, key=lambda x: haversine(gps.get_lat_long(), x.start_finish.midpoint))
     logger.info("closest track selected : {}".format(closest_track))
     lap_tracker = LapTracker(closest_track, MA)
@@ -108,13 +119,7 @@ def await_gps():
     gui.register_lap_provider(lap_tracker)
     radio_interface.register_lap_provider(lap_tracker)
 
-# fire up a transient thread that polls until a location fix happens,
-# and then finds the closest track to our location
-Thread(target=await_gps, daemon=True).start()
-
-gui.register_speed_provider(gps)
-gui.register_time_provider(LocalTimeProvider())
-gui.register_temp_provider(obd)
-gui.register_fuel_provider(MA)
+Thread(target=init, daemon=True).start()
 
 gui.display()
+
