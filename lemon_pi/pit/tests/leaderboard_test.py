@@ -15,7 +15,7 @@ class LeaderboardTestCase(unittest.TestCase):
         self.assertTrue(race.__check_data_structure__())
         self.assertEqual(1, race.size())
         # start the race
-        race.update_position("181", 1)
+        race.update_position("181", 1, 1)
         self.assertTrue(race.__check_data_structure__())
 
     def test_race_with_two_cars(self):
@@ -25,7 +25,7 @@ class LeaderboardTestCase(unittest.TestCase):
         self.assertTrue(race.__check_data_structure__())
         self.assertEqual(2, race.size())
         # start the race
-        race.update_position("181", 1)
+        race.update_position("181", 1, 1)
         self.assertTrue(race.__check_data_structure__())
 
     def test_two_cars_other_order(self):
@@ -35,9 +35,10 @@ class LeaderboardTestCase(unittest.TestCase):
         self.assertTrue(race.__check_data_structure__())
         self.assertEqual(2, race.size())
         # start the race
-        race.update_position("181", 1)
+        race.update_position("181", 1, 1)
         self.assertTrue(race.__check_data_structure__())
-        self.assertPositions(race, ["181", "180"])
+        self.assertPositions(race, ["181"])
+        self.assertEqual(CarPosition.NOT_STARTED, race.first.car_behind.position)
 
     def test_race_with_multiple_cars(self):
         race = RaceOrder()
@@ -47,11 +48,11 @@ class LeaderboardTestCase(unittest.TestCase):
         self.assertTrue(race.__check_data_structure__())
         self.assertEqual(3, race.size())
         # start the race
-        race.update_position("181", 1)
+        race.update_position("181", 1, 1)
         self.assertTrue(race.__check_data_structure__())
-        race.update_position("180", 2)
+        race.update_position("180", 2, 1)
         self.assertTrue(race.__check_data_structure__())
-        race.update_position("183", 3)
+        race.update_position("183", 3, 1)
         self.assertTrue(race.__check_data_structure__())
         self.assertPositions(race, ["181", "180", "183"])
 
@@ -63,18 +64,18 @@ class LeaderboardTestCase(unittest.TestCase):
         race.add_car(CarPosition("2", "Cervesa"))
         race.add_car(CarPosition("999", "Non-starter"))
 
-        race.update_position("2", 1)
-        race.update_position("180", 2)
-        race.update_position("183", 3)
-        race.update_position("181", 4)
+        race.update_position("2", 1, 1)
+        race.update_position("180", 2, 1)
+        race.update_position("183", 3, 1)
+        race.update_position("181", 4, 1)
 
         self.assertTrue(race.__check_data_structure__())
 
         # lap 2 happens and there a big overtake
-        race.update_position("181", 1)
-        race.update_position("2", 2)
-        race.update_position("180", 3)
-        race.update_position("183", 4)
+        race.update_position("181", 1, 2)
+        race.update_position("2", 2, 2)
+        race.update_position("180", 3, 2)
+        race.update_position("183", 4, 2)
         self.assertTrue(race.__check_data_structure__())
         self.assertPositions(race, ["181", "2", "180", "183"])
 
@@ -88,10 +89,10 @@ class LeaderboardTestCase(unittest.TestCase):
 
         # when race data arrives as we join partway through a race the
         # entries come in out of sequential order
-        race.update_position("180", 3)
-        race.update_position("2", 4)
-        race.update_position("183", 2)
-        race.update_position("181", 1)
+        race.update_position("180", 3, 4)
+        race.update_position("2", 4, 4)
+        race.update_position("183", 2, 5)
+        race.update_position("181", 1, 6)
 
         self.assertTrue(race.__check_data_structure__())
         self.assertPositions(race, ["181", "183", "180", "2"])

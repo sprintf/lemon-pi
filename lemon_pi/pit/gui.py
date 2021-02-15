@@ -8,7 +8,7 @@ from lemon_pi.pit.event_defs import (
     RaceStatusEvent,
     PittingEvent,
     LapCompletedEvent,
-    TelemetryEvent
+    TelemetryEvent, DumpLeaderboardEvent
 )
 from lemon_pi.shared.events import Event
 from lemon_pi.shared.time_provider import TimeProvider
@@ -115,6 +115,9 @@ class Gui():
                                      last_lap_fuel=312 + presses,
                                      fuel_percent=98 - presses)
             presses += 1
+
+        if event_data.key == 'd':
+            DumpLeaderboardEvent.emit()
 
     def create_temp_gauge(self, parent, grid):
         result = Box(parent, grid=grid)

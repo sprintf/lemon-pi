@@ -48,10 +48,14 @@ def run():
         gui.progress(40)
 
         # start the radio thread
-        radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY)
-        RadioInterface(radio)
-        radio.start()
-        gui.progress(85)
+        try:
+            radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY)
+            RadioInterface(radio)
+            radio.start()
+            gui.progress(85)
+        except KeyError:
+            print("ERROR : Lora radio device not detected")
+            gui.shutdown()
 
         # if we have a race specified
         if settings.RACE_ID != "":

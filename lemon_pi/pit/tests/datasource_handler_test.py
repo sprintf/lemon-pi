@@ -37,6 +37,24 @@ class DatasourceHandlerTestCase(unittest.TestCase):
             for line in f.readlines():
                 dsh.handle_message(line)
         self.assertEqual("160", ro.first.car_number)
+        ro.__check_data_structure__()
+
+    # will leave this as a manual test that can be run as the data file is
+    # elsewhere and is very large
+    # def test_luckydog(self):
+    #     ro = RaceOrder()
+    #     dsh = DataSourceHandler(ro, "125")
+    #     with open('/Users/paulnormington/src/rpi/base-station/capture-102308.dat') as f:
+    #         last_line = ""
+    #         for line in f.readlines():
+    #             dsh.handle_message(line)
+    #             print("handled '{}'".format(line))
+    #             if line.startswith("$RMS"):
+    #                 ro.__check_data_structure__()
+    #             if line.startswith("$F") and last_line.startswith("$F"):
+    #                 ro.__check_data_structure__()
+    #             last_line = line
+    #     print(ro)
 
 
 test_file = """

@@ -42,3 +42,6 @@ TelemetryEvent = Event("telemetry")
 #   car=
 #   msg=
 SendMessageEvent = Event("send-message")
+
+# dumo out the leaderboard to stdout
+DumpLeaderboardEvent = Event("dump-leaderboard")
