@@ -23,11 +23,13 @@ class DataSourceHandler:
                             self.race_flag = bits[5].strip('" ')
                             RaceStatusEvent.emit(flag=self.race_flag)
                     if bits[0] == "$G" and len(bits) == 5:
+                        # "$G" indicates a cars position and number of laps completed
                         # print(bits)
                         car_number = bits[2].strip('"')
-                        self.leaderboard.update_position(car_number, int(bits[1]))
+                        laps_completed = None
                         if bits[3].isnumeric():
-                            self.leaderboard.update_lap_count(car_number, int(bits[3]))
+                            laps_completed = int(bits[3])
+                        self.leaderboard.update_position(car_number, int(bits[1]), laps_completed)
                     if bits[0] == "$H" and len(bits) == 5:
                         # print(bits)
                         car_number = bits[2].strip('"')

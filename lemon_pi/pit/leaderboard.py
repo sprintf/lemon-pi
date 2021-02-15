@@ -4,6 +4,10 @@
 # the leaderboard is a double linked list, where each element
 # contains a pointer to the `car_in_front` and another to the
 # `car_behind`.
+from lemon_pi.pit.event_defs import DumpLeaderboardEvent
+from lemon_pi.shared.events import EventHandler
+
+
 class CarPosition:
 
     NOT_STARTED = 99999
@@ -12,7 +16,7 @@ class CarPosition:
         self.car_number = car_number
         self.team_driver_name = name
         self.position = CarPosition.NOT_STARTED
-        self.laps_completed = None
+        self.laps_completed = 0
         self.last_lap_time = None
         self.last_lap_timestamp = None
         self.fastest_lap_time = None
@@ -21,7 +25,7 @@ class CarPosition:
         self.car_behind = None
 
     def __repr__(self):
-        return "{} {} laps:{} by {} last: {} best: {} on lap {}".format(self.car_number, self.position,
+        return "#{} {}th laps:{} by {} last: {} best: {} on lap {}".format(self.car_number, self.position,
                                     self.laps_completed,
                                     self.gap(self.car_in_front),
                                     self.last_lap_time, self.fastest_lap_time, self.fastest_lap)
@@ -52,11 +56,16 @@ class CarPosition:
 # The RaceOrder is the main datastructure that indexes and manages the
 # CarPosition.
 # It updates as cars pass the start/finish line
-class RaceOrder:
+class RaceOrder(EventHandler):
 
     def __init__(self):
         self.first = None
-        self.number_lookup = dict()
+        self.number_lookup = {}
+        DumpLeaderboardEvent.register_handler(self)
+
+    def handle_event(self, event, **kwargs):
+        if event == DumpLeaderboardEvent:
+            print(self.__repr__())
 
     def add_car(self, car: CarPosition):
         existing = self.number_lookup.get(car.car_number)
@@ -67,18 +76,19 @@ class RaceOrder:
     def size(self):
         return len(self.number_lookup)
 
-    def update_position(self, car_number, position):
+    def update_position(self, car_number, position, lap_count):
         car = self.number_lookup.get(car_number)
         if not car:
             raise Exception
-        car.position = position
-        self.__adjust_position__(car)
+        # the lap_count can be passed in as none
+        if lap_count:
+            car.laps_completed = lap_count
+            car.position = position
 
-    def update_lap_count(self, car_number, lap_count):
-        car = self.number_lookup.get(car_number)
-        if not car:
-            raise Exception
-        car.laps_completed = lap_count
+        self.__adjust_position__(car)
+        # renumber the field
+        self.cleanup()
+        #self.__check_data_structure__()
 
     def update_last_lap(self, car_number, last_lap_time):
         car = self.number_lookup.get(car_number)
@@ -106,15 +116,23 @@ class RaceOrder:
         target.car_behind.car_in_front = target
         return target
 
+    # adjust the position of a car, whatever it's ultimate position is
+    # there can be no cars ahead of it with a position greater or equal
+    # and there can be no car behind with a position less than or equal
     def __adjust_position__(self, car: CarPosition):
         # there's nothing but us
         if not car.car_behind and not car.car_in_front:
             return
 
-        # if we're in the right spot
-        if car.car_behind and car.position >= car.car_behind.position and \
-           car.car_in_front and car.position < car.car_in_front.position:
-            return
+        # # if we're in the right spot
+        # if car.car_behind and car.position == CarPosition.NOT_STARTED and \
+        #     car.car_behind.position == CarPosition.NOT_STARTED:
+        #     return
+        #
+        # # not sure this is legit short circuit
+        # if car.car_behind and car.position < car.car_behind.position and \
+        #    car.car_in_front and car.position > car.car_in_front.position:
+        #     return
 
         # scan forwards and backwards to find insertion point
         insert_after = self.__find_insertion_point__(car)
@@ -155,19 +173,13 @@ class RaceOrder:
             former_behind.car_in_front = former_in_front
 
         # finally, renumber all the cars into new positions
-        scan = car.car_behind
-        position = car.position + 1
-        while scan and scan != former_behind:
-            if scan.position != position:
-                scan.position = position
-            scan = scan.car_behind
-            position += 1
+        self.cleanup()
 
     def __find_insertion_point__(self, car: CarPosition):
         target_position = car.position
         scan = car.car_in_front
         iterations = 0
-        while scan and (scan.position >= target_position or scan.position == CarPosition.NOT_STARTED):
+        while scan and (scan.laps_completed < car.laps_completed or scan.position == CarPosition.NOT_STARTED):
             scan = scan.car_in_front
             iterations += 1
 
@@ -178,9 +190,9 @@ class RaceOrder:
         if iterations == 0:
             prev = car
             scan = car.car_behind
-            while scan and scan.position < target_position:
-                scan = scan.car_behind
+            while scan and scan.laps_completed >= car.laps_completed and scan.position != CarPosition.NOT_STARTED:
                 prev = scan
+                scan = scan.car_behind
 
             return prev
 
@@ -213,9 +225,9 @@ class RaceOrder:
         # position is correct for each one...any with no position
         # set must be all at the end of the list
         if self.first and self.first.position != CarPosition.NOT_STARTED:
-            assert self.first.position == 1
+            assert self.first.position == 1, self.__repr__()
             last_position = 0
-            scan = self.first
+            scan:CarPosition = self.first
             ns_encountered = False
             while scan:
                 if scan.position == CarPosition.NOT_STARTED:
@@ -223,11 +235,27 @@ class RaceOrder:
                 if ns_encountered:
                     assert scan.position == CarPosition.NOT_STARTED
                 else:
-                    assert scan.position == last_position + 1
+                    assert scan.position == last_position + 1, "pos {} found car in pos {}\n{}".format(last_position + 1, scan.position, self.__repr__())
                     last_position = scan.position
+                    if scan.car_in_front:
+                        assert scan.car_in_front.laps_completed >= scan.laps_completed, \
+                                scan.__repr__() + " isn't behind " + scan.car_in_front.__repr__()
                 scan = scan.car_behind
 
         return True
+
+    # go through the results and make them all sequential from 1 .. N
+    def cleanup(self):
+        pos = 1
+        scan = self.first
+        while scan and scan.position != CarPosition.NOT_STARTED:
+            scan.position = pos
+            pos += 1
+            scan = scan.car_behind
+        while scan:
+            if scan.laps_completed == 0:
+                scan.position = CarPosition.NOT_STARTED
+            scan = scan.car_behind
 
     def __repr__(self):
         result = ""
@@ -236,3 +264,5 @@ class RaceOrder:
             result = result + "\n" + repr(scan)
             scan = scan.car_behind
         return result
+
+
