@@ -42,6 +42,10 @@ class UsbDetector:
     def get(cls, device_type:UsbDevice):
         return UsbDetector.__instance.usb_map[device_type]
 
+    @classmethod
+    def detected(cls, device_type:UsbDevice):
+        return UsbDetector.__instance.usb_map.get(device_type) is not None
+
     def __scan__(self):
         glob_pattern = self.__get_dev_pattern__()
         devices = glob.glob(glob_pattern)

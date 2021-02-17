@@ -1,6 +1,11 @@
 
-# this is the splash screen delay in milliseconds
-SPLASH_SCREEN_DELAY = 3000
+# DISPLAY_WIDTH = 1024
+# DISPLAY_HEIGHT = 600
+DISPLAY_WIDTH = 800
+DISPLAY_HEIGHT = 480
+
+# enable for touchscreens, by default disabled
+EXIT_BUTTON_ENABLED = False
 
 # the size of the vehicle's fuel tank
 FUEL_CAPACITY_US_GALLONS = 15

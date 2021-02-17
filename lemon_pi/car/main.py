@@ -60,7 +60,7 @@ if not "SETTINGS_MODULE" in os.environ:
 
 
 
-gui = Gui()
+gui = Gui(settings.DISPLAY_WIDTH, settings.DISPLAY_HEIGHT)
 
 def init():
     # detect USB devices (should just be Lora)
