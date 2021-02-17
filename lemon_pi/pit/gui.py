@@ -122,6 +122,7 @@ class Gui():
 
     def create_temp_gauge(self, parent, grid):
         result = AlertBox(parent, grid=grid)
+        result.set_range(settings.TEMP_BAND_LOW, settings.TEMP_BAND_WARN, settings.TEMP_BAND_HIGH)
         BigText(result, "Temp", align="left")
         BigText(result, "???", align="right")
         return result

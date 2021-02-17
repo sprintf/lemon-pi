@@ -23,3 +23,8 @@ RADIO_CMD_COMPLETION_TIME = 0.1
 # protocol for OBD
 # see elm327.py for the list
 OBD_PROTOCOL = "3"
+
+# temperature bands : display colorizes in these bands
+TEMP_BAND_LOW = 180
+TEMP_BAND_WARN = 205
+TEMP_BAND_HIGH = 215

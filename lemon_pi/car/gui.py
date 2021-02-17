@@ -274,6 +274,7 @@ class Gui(EventHandler):
 
     def create_temp_widget(self, parent):
         result = AlertBox(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(112 * Gui.SCALE_FACTOR))
+        result.set_range(settings.TEMP_BAND_LOW, settings.TEMP_BAND_WARN, settings.TEMP_BAND_HIGH)
         result.set_border(4, "darkgreen")
         Text(result, "TEMP", size=Gui.TEXT_SMALL, color="white")
         Text(result, "???", size=Gui.TEXT_XL, font=self.font, color="white")
