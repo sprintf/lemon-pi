@@ -9,8 +9,11 @@ from lemon_pi.car.event_defs import (
 
 import logging
 import platform
+from python_settings import settings
+
 
 from lemon_pi.shared.events import EventHandler
+from lemon_pi.shared.gui_components import AlertBox
 from lemon_pi.shared.time_provider import TimeProvider
 
 logger = logging.getLogger(__name__)
@@ -34,11 +37,33 @@ class ToggleImage(Picture):
 
 class Gui(EventHandler):
 
+    # these are not really constants, as they get overridden first thing based on
+    # settings, but it's ok to think of them ac constants
     WIDTH = 800
     HEIGHT = 480
     COL_WIDTH = 266
+    SCALE_FACTOR = 1
+    
+    TEXT_TINY = 16
+    TEXT_SMALL = 24
+    TEXT_MED = 32
+    TEXT_LARGE = 48
+    TEXT_XL = 64
 
-    def __init__(self):
+    def __init__(self, width, height):
+        Gui.WIDTH = width
+        Gui.HEIGHT = height
+        Gui.COL_WIDTH = int(width / 3)
+        Gui.LOWER_ROW_HEIGHT = int(Gui.HEIGHT / 5)
+        Gui.SCALE_FACTOR = Gui.WIDTH / 800
+        
+        if width > 1000:
+            Gui.TEXT_TINY = 24
+            Gui.TEXT_SMALL = 32
+            Gui.TEXT_MED = 48
+            Gui.TEXT_LARGE = 64
+            Gui.TEXT_XL = 72
+
         self.font = self.__identify_font(platform.system())
         self.root = App("Lemon-Pi",
                        bg="black",
@@ -46,40 +71,41 @@ class Gui(EventHandler):
                        height=Gui.HEIGHT)
 
         self.splash = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, visible=True)
-        Box(self.splash, width=Gui.WIDTH, height=100)
+        Box(self.splash, width=Gui.WIDTH, height=int(100 * Gui.SCALE_FACTOR))
         Picture(self.splash, image="resources/images/perplexuslogoslpash.gif")
-        Text(self.splash, "Powered by Normtronix", size="24", font=self.font, color="white")
+        Text(self.splash, "Powered by Normtronix", size=Gui.TEXT_SMALL, font=self.font, color="white")
 
         self.app = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, visible=False)
 
         # this is our lower text area
-        self.lower_row = Box(self.app, align="bottom", width=Gui.WIDTH, height=64)
+        self.lower_row = Box(self.app, align="bottom", width=Gui.WIDTH, height=int(64 * Gui.SCALE_FACTOR))
         self.msg_area = Text(self.lower_row, "", align="left", size=48, font=self.font, color="white", bg="purple")
 
-        self.col1 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - 100)
-        self.col2 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - 100)
-        self.col3 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - 100)
+        self.col1 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - Gui.LOWER_ROW_HEIGHT)
+        self.col2 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - Gui.LOWER_ROW_HEIGHT)
+        self.col3 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - Gui.LOWER_ROW_HEIGHT)
 
         # these are invisible displays used to show special case data when the car is pitting
         self.col4 = Box(self.app, align="left", width=self.col3.width, height=self.col3.height, visible=False)
         self.col5 = Box(self.app, align="left", width=self.col3.width, height=self.col3.height, visible=False)
 
         self.time_widget = self.create_time_widget(self.col1)
-        Box(self.col1, height=24, width=208)
+        Box(self.col1, height=24, width=int(Gui.COL_WIDTH * 0.8))
         self.lap_display = self.create_lap_widget(self.col1)
-        Box(self.col2, height=24, width=208)
-        self.temp_widget = self.create_temp_widget(self.col2)
-        Box(self.col2, height=24, width=208)
+        Box(self.col2, height=24, width=int(Gui.COL_WIDTH * 0.8))
+        self.temp_widget:AlertBox = self.create_temp_widget(self.col2)
+        Box(self.col2, height=24, width=int(Gui.COL_WIDTH * 0.8))
         self.speed_heading_widget = self.create_speed_widget(self.col2)
         self.fuel_display = self.create_fuel_widget(self.col3)
 
-        Box(self.col2, height=24, width=208)
+        Box(self.col2, height=24, width=int(Gui.COL_WIDTH * 0.8))
 
         # adding obd + gps images
         (self.gps_image, self.obd_image) = self.create_gps_obd_images(self.col2)
         # add a quit button
-        pb = PushButton(self.col2, image="resources/images/exitbutton.gif", command=self.quit)
-        Box(self.col2, height=24, width=208)
+        if settings.EXIT_BUTTON_ENABLED:
+            PushButton(self.col2, image="resources/images/exitbutton.gif", command=self.quit)
+            Box(self.col2, height=24, width=int(Gui.COL_WIDTH * 0.8))
 
         self.stint_ending_display = self.create_stint_end_instructions(self.col4)
         self.stint_starting_display = self.create_stint_start_instructions(self.col5)
@@ -241,115 +267,97 @@ class Gui(EventHandler):
         self.fuel_display.repeat(1000, self.__updateFuel, args=[provider])
 
     def create_gps_obd_images(self, parent):
-        result = Box(parent, width=208, height=48)
+        result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(48 * Gui.SCALE_FACTOR))
         #result.set_border(4, "darkgreen")
         return (ToggleImage(result, "resources/images/gps_ok.gif", "resources/images/gps_off.gif", align="left"),
                 ToggleImage(result, "resources/images/obd_ok.gif", "resources/images/obd_off.gif", align="right"))
 
     def create_temp_widget(self, parent):
-        result = Box(parent, width=212, height=112)
+        result = AlertBox(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(112 * Gui.SCALE_FACTOR))
         result.set_border(4, "darkgreen")
-        Text(result, "TEMP", size="24", color="white")
-        Text(result, "???", size="64", font=self.font, color="white")
+        Text(result, "TEMP", size=Gui.TEXT_SMALL, color="white")
+        Text(result, "???", size=Gui.TEXT_XL, font=self.font, color="white")
         return result
 
     def create_time_widget(self, parent):
-        result = Box(parent, width=212, height=112)
+        result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(112 * Gui.SCALE_FACTOR))
         result.set_border(4, "darkgreen")
-        Text(result, "TIME", size="24", font=self.font, color="white")
-        Text(result, "hh", size="64", font=self.font, color="white", align="left")
-        Text(result, ":", size="32", font=self.font, color="white", align="left")
-        Text(result, "mm", size="64", font=self.font, color="white", align="left")
-        # Text(result, "ss", size="64", font=self.font, color="grey", align="left")
+        Text(result, "TIME", size=Gui.TEXT_SMALL, font=self.font, color="white")
+        Text(result, "hh", size=Gui.TEXT_XL, font=self.font, color="white", align="left")
+        Text(result, ":", size=Gui.TEXT_MED, font=self.font, color="white", align="left")
+        Text(result, "mm", size=Gui.TEXT_XL, font=self.font, color="white", align="left")
+        # Text(result, "ss", size=Gui.TEXT_XL, font=self.font, color="grey", align="left")
         return result
 
     def create_speed_widget(self, parent):
-        result = Box(parent, width=212, height=100)
+        result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(100 * Gui.SCALE_FACTOR))
         result.set_border(4, "darkgreen")
-        Text(result, "???", size="64", font=self.font, color="white", align="left")
-        Text(result, "mph", size="16", color="white", font=self.font, align="left")
+        Text(result, "???", size=Gui.TEXT_XL, font=self.font, color="white", align="left")
+        Text(result, "mph", size=Gui.TEXT_TINY, color="white", font=self.font, align="left")
         return result
 
     def create_lap_widget(self, parent):
-        result = Box(parent, width=212, height=260)
+        result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(260 * Gui.SCALE_FACTOR))
         result.set_border(4, "darkgreen")
-        Text(result, "LAP", size="24", font=self.font, color="white")
-        Text(result, "---", size="32", font=self.font, color="white")
-        Text(result, "mm:ss", size="32", font=self.font, color="white")
+        Text(result, "LAP", size=Gui.TEXT_SMALL, font=self.font, color="white")
+        Text(result, "---", size=Gui.TEXT_MED, font=self.font, color="white")
+        Text(result, "mm:ss", size=Gui.TEXT_MED, font=self.font, color="white")
         Box(result, width=200, height=20)
-        Text(result, "Last Lap", size="16", font=self.font, color="white")
-        Text(result, "mm:ss", size="32", font=self.font, color="white")
+        Text(result, "Last Lap", size=Gui.TEXT_TINY, font=self.font, color="white")
+        Text(result, "mm:ss", size=Gui.TEXT_MED, font=self.font, color="white")
         return result
 
     def create_fuel_widget(self, parent):
         result = Box(parent)
         result.set_border(4, "darkgreen")
-        Text(result, "FUEL", size='24', color="lightgreen", font=self.font)
-        total_box = Box(result, height=100, width=212)
-        Text(total_box, "Total\nUsed", size='16', color="lightgreen", font=self.font, align="left")
-        Text(total_box, "--.--", size='32', color="lightgreen", font=self.font, align="left")
-        Text(total_box, "Gal", size='16', color="lightgreen", font=self.font, align="left")
+        Text(result, "FUEL", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
+        total_box = Box(result, height=int(100 * Gui.SCALE_FACTOR), width=int(Gui.COL_WIDTH * 0.8))
+        Text(total_box, "Total\nUsed", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left")
+        Text(total_box, "--.--", size=Gui.TEXT_MED, color="lightgreen", font=self.font, align="left")
+        Text(total_box, "Gal", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left")
 
-        # last_hour_box = Box(result, height=100, width=200)
-        # Text(last_hour_box, "Last\nHour", size='16', color="lightgreen", font=self.font, align="left")
-        # Text(last_hour_box, "--.--", size='32', color="lightgreen", font=self.font, align="left")
-        # Text(last_hour_box, "gph", size='16', color="lightgreen", font=self.font, align="left")
+        last_lap_box = Box(result, height=int(100 * Gui.SCALE_FACTOR), width=int(Gui.COL_WIDTH * 0.8))
+        Text(last_lap_box, "Last\nLap", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left")
+        Text(last_lap_box, "--.--", size=Gui.TEXT_MED, color="lightgreen", font=self.font, align="left")
+        Text(last_lap_box, "Gal", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left")
 
-        last_lap_box = Box(result, height=100, width=200)
-        Text(last_lap_box, "Last\nLap", size='16', color="lightgreen", font=self.font, align="left")
-        Text(last_lap_box, "--.--", size='32', color="lightgreen", font=self.font, align="left")
-        Text(last_lap_box, "Gal", size='16', color="lightgreen", font=self.font, align="left")
-
-        remaining_box = Box(result, height=100, width=200)
-        Text(remaining_box, "Rem.", size='16', color="lightgreen", font=self.font, align="left")
-        Text(remaining_box, "--.--", size='32', color="lightgreen", font=self.font, align="left")
-        Text(remaining_box, "%", size='16', color="lightgreen", font=self.font, align="left")
+        remaining_box = Box(result, height=int(100 * Gui.SCALE_FACTOR), width=int(Gui.COL_WIDTH * 0.8))
+        Text(remaining_box, "Rem.", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left")
+        Text(remaining_box, "--.--", size=Gui.TEXT_MED, color="lightgreen", font=self.font, align="left")
+        Text(remaining_box, "%", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left")
 
         return result
 
     def create_stint_end_instructions(self, parent):
         result = Box(parent)
         result.set_border(4, "darkgreen")
-        Text(result, "INSTRUCTIONS", size='24', color="lightgreen", font=self.font)
-        Text(result, "1. Loosen Belts", size='32', color="white", font=self.font)
-        Text(result, "2. Undo Belts", size='32', color="white", font=self.font)
-        Text(result, "3. Disc. Radio", size='32', color="white", font=self.font)
-        Text(result, "4. Stop in Pit", size='32', color="white", font=self.font)
-        Text(result, "5. No handbrake", size='32', color="white", font=self.font)
-        Text(result, "6. Kill engine", size='32', color="white", font=self.font)
-        Text(result, "7. Wheel Off", size='32', color="white", font=self.font)
-        Text(result, "8. Get Out!", size='32', color="white", font=self.font)
+        Text(result, "INSTRUCTIONS", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
+        Text(result, "1. Loosen Belts", size=Gui.TEXT_MED, color="white", font=self.font)
+        Text(result, "2. Undo Belts", size=Gui.TEXT_MED, color="white", font=self.font)
+        Text(result, "3. Disc. Radio", size=Gui.TEXT_MED, color="white", font=self.font)
+        Text(result, "4. Stop in Pit", size=Gui.TEXT_MED, color="white", font=self.font)
+        Text(result, "5. No handbrake", size=Gui.TEXT_MED, color="white", font=self.font)
+        Text(result, "6. Kill engine", size=Gui.TEXT_MED, color="white", font=self.font)
+        Text(result, "7. Wheel Off", size=Gui.TEXT_MED, color="white", font=self.font)
+        Text(result, "8. Get Out!", size=Gui.TEXT_MED, color="white", font=self.font)
         return result
 
     def create_stint_start_instructions(self, parent):
         result = Box(parent)
         result.set_border(4, "darkgreen")
-        Text(result, "INSTRUCTIONS", size='24', color="lightgreen", font=self.font)
-        Text(result, "1. Adjust Seat", size='32', color="white", font=self.font)
-        Text(result, "2. Wheel on", size='32', color="white", font=self.font)
-        Text(result, "3. Belts", size='32', color="white", font=self.font)
-        Text(result, "4. Radio", size='32', color="white", font=self.font)
-        Text(result, "5. Mirrors", size='32', color="white", font=self.font)
-        Text(result, "6. Water", size='32', color="white", font=self.font)
-        Text(result, "Gloves / Hans?", size='32', color="white", font=self.font)
+        Text(result, "INSTRUCTIONS", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
+        Text(result, "1. Adjust Seat", size=Gui.TEXT_MED, color="white", font=self.font)
+        Text(result, "2. Wheel on", size=Gui.TEXT_MED, color="white", font=self.font)
+        Text(result, "3. Belts", size=Gui.TEXT_MED, color="white", font=self.font)
+        Text(result, "4. Radio", size=Gui.TEXT_MED, color="white", font=self.font)
+        Text(result, "5. Mirrors", size=Gui.TEXT_MED, color="white", font=self.font)
+        Text(result, "6. Water", size=Gui.TEXT_MED, color="white", font=self.font)
+        Text(result, "Gloves / Hans?", size=Gui.TEXT_MED, color="white", font=self.font)
         return result
 
     def __updateTemp(self, provider: TemperatureProvider):
         val = provider.get_temp_f()
-        widget: Text = self.temp_widget.children[1]
-        widget.value = str(val)
-        if val < 180 :
-            widget.text_color = "white"
-            widget.bg = self.app.bg
-        elif val < 203 :
-            widget.text_color = "green"
-            widget.bg = self.app.bg
-        elif val < 215 :
-            widget.text_color = "orange"
-            widget.bg = self.app.bg
-        else :
-            widget.text_color = "red"
-            widget.bg = "white"
+        self.temp_widget.update_value(val)
 
     def __updateTime(self, provider: TimeProvider):
         self.time_widget.children[1].value = "{:02d}".format(provider.get_hours())

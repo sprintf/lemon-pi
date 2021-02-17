@@ -3,7 +3,7 @@ from lemon_pi.config.settings_pit import *
 RADIO_KEY = "mykey2"
 
 # provide a race id to track realtime results
-# zero means disabled
+# empty means disabled
 RACE_ID = ""
 
 # the race car we want to track

@@ -11,6 +11,7 @@ from lemon_pi.pit.event_defs import (
     TelemetryEvent, DumpLeaderboardEvent
 )
 from lemon_pi.shared.events import Event
+from lemon_pi.shared.gui_components import AlertBox
 from lemon_pi.shared.time_provider import TimeProvider
 
 logger = logging.getLogger(__name__)
@@ -50,7 +51,7 @@ class Gui():
 
         Box(self.main, height=64, width="fill", grid=[0,3])
 
-        self.temp = self.create_temp_gauge(self.main, grid=[0,4])
+        self.temp:AlertBox = self.create_temp_gauge(self.main, grid=[0,4])
         self.fuel = self.create_fuel_gauge(self.main, grid=[1,4])
 
         Box(self.main, height=64, width="fill", grid=[0,5])
@@ -120,9 +121,9 @@ class Gui():
             DumpLeaderboardEvent.emit()
 
     def create_temp_gauge(self, parent, grid):
-        result = Box(parent, grid=grid)
+        result = AlertBox(parent, grid=grid)
         BigText(result, "Temp", align="left")
-        self.coolant_temp = BigText(result, "???", align="right")
+        BigText(result, "???", align="right")
         return result
 
     def create_fuel_gauge(self, parent, grid):
@@ -224,7 +225,7 @@ class Gui():
         seconds = last_lap_time % 60
         entry = "{:03d} {:02d}:{:02d}   {:03d}".format(lap_count, minutes, seconds, last_lap_fuel )
         self.lap_list.insert(1, entry)
-        self.coolant_temp.value = coolant_temp
+        self.temp.update_value(coolant_temp)
         self.fuel_percent.value = fuel_percent
 
 # items to display

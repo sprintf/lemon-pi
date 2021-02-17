@@ -86,9 +86,11 @@ class Radio(Thread):
         # so we can survive the radio being plugged and unplugged
         if kwargs.get("ser"):
             self.ser = kwargs['ser']
-        else:
+        elif UsbDetector.detected(UsbDevice.LORA):
             self.ser = serial.Serial(self.choose_port(), baudrate=57600,
                                      stopbits=STOPBITS_ONE, parity=PARITY_NONE, bytesize=EIGHTBITS)
+        else:
+            logger.info("No LORA device connected")
         self.send_queue = Queue()
         self.send_thread = Thread(target=self.__send_outbound_messages__, daemon=True)
         self.receive_queue = Queue()
