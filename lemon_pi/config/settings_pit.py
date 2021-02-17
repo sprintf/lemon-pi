@@ -15,3 +15,8 @@ RADIO_CMD_COMPLETION_TIME = 0.1
 # it identifies the sender within this radio group
 RADIO_DEVICE = "pit"
 
+# temperature bands : display colorizes in these bands
+TEMP_BAND_LOW = 180
+TEMP_BAND_WARN = 205
+TEMP_BAND_HIGH = 215
+
