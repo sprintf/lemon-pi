@@ -44,6 +44,8 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
         self.last_timestamp = 0
         self.last_dist_to_line = 0
         LapInfoEvent.register_handler(self)
+        LeaveTrackEvent.register_handler(self)
+        EnterTrackEvent.register_handler(self)
 
     def update_position(self, lat:float, long:float, heading:float, time:float, speed:int) -> None:
         if (lat, long) == self.last_pos:
@@ -79,8 +81,9 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
             for target_metadata in self.track.targets.keys():
                 target = self.track.targets[target_metadata]
                 if target_metadata != START_FINISH:
-                    if self._crossed_line(lat, long, heading, time, target)[0]:
-                        target_metadata.event.emit(ts=time)
+                    crossed_target, cross_time = self._crossed_line(lat, long, heading, time, target)
+                    if crossed_target:
+                        target_metadata.event.emit(ts=cross_time)
 
     def handle_event(self, event, lap_count=0, ts=0):
         if event == LapInfoEvent:
@@ -98,6 +101,7 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
             self.on_track = False
         if event == EnterTrackEvent:
             self.on_track = True
+            self.lap_start_time = ts
 
     def _crossed_line(self, lat, long, heading, time:float, target:Target):
         if angular_difference(target.target_heading, heading) > 20:

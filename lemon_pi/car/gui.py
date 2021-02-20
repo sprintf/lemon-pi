@@ -5,7 +5,7 @@ from lemon_pi.car.event_defs import (
 
     LeaveTrackEvent, StateChangePittedEvent, StateChangeSettingOffEvent, CompleteLapEvent, OBDConnectedEvent,
     OBDDisconnectedEvent, GPSConnectedEvent, GPSDisconnectedEvent, RaceFlagStatusEvent, DriverMessageEvent,
-    DriverMessageAddendumEvent, ExitApplicationEvent)
+    DriverMessageAddendumEvent, ExitApplicationEvent, EnterTrackEvent)
 
 import logging
 import platform
@@ -111,6 +111,7 @@ class Gui(EventHandler):
         self.stint_starting_display = self.create_stint_start_instructions(self.col5)
 
         LeaveTrackEvent.register_handler(self)
+        EnterTrackEvent.register_handler(self)
         StateChangePittedEvent.register_handler(self)
         StateChangeSettingOffEvent.register_handler(self)
         CompleteLapEvent.register_handler(self)
@@ -148,7 +149,7 @@ class Gui(EventHandler):
             self.col4.hide()
             self.col5.show()
             return
-        if event == StateChangeSettingOffEvent:
+        if event == StateChangeSettingOffEvent or event == EnterTrackEvent:
             self.col3.show()
             self.col4.hide()
             self.col5.hide()
