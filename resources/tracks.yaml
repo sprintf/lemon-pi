@@ -29,6 +29,8 @@ tracks:
      start_finish_direction: "E"
      pit_entry_coords: "(35.488943,-119.547690),(35.489060,-119.547604)"
      pit_entry_direction: "SE"
+     pit_out_coords: "(35.489142,-119.542091),(35.489052,-119.542085)"
+     pit_out_direction: "E"
 
   -  name: "Oregon Raceway Park"
      start_finish_coords: "(45.363790,-120.744707),(45.363816,-120.744277)"

@@ -1,4 +1,4 @@
-from lemon_pi.car.track import TrackLocation
+from lemon_pi.car.track import TrackLocation, START_FINISH
 from lemon_pi.car.updaters import PositionUpdater, LapUpdater
 from lemon_pi.car.display_providers import LapProvider
 from lemon_pi.car.target import Target
@@ -6,7 +6,7 @@ from lemon_pi.car.event_defs import (
     LeaveTrackEvent,
     CompleteLapEvent,
     RadioSyncEvent,
-    LapInfoEvent
+    LapInfoEvent, EnterTrackEvent
 )
 
 from haversine import haversine, Unit
@@ -41,8 +41,6 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
         self.last_pos_time = 0.0
         self.lap_count = 999
         self.last_lap_time = 0
-        self.last_pit_in_time = 0
-        self.last_radio_sync_time = 0
         self.last_timestamp = 0
         self.last_dist_to_line = 0
         LapInfoEvent.register_handler(self)
@@ -53,7 +51,7 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
 
         logger.debug("updating position to {} {}".format(lat, long))
         self.last_pos = (lat, long)
-        crossed_line, cross_time = self._crossed_line(lat, long, heading, time, self.track.start_finish)
+        crossed_line, cross_time = self._crossed_line(lat, long, heading, time, self.track.get_start_finish_target())
         if crossed_line:
             # de-bounce hitting start finish line twice ... a better
             # approach might be to ensure car travels so far away from line
@@ -77,25 +75,12 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
 
                 if not self.track.is_radio_sync_defined():
                     RadioSyncEvent.emit()
-
-        elif self.track.is_pit_defined() and \
-            self._crossed_line(lat, long, heading, time, self.track.pit_in)[0]:
-            # de-bounce so that we don't re-enter the pits repeatedly
-            # we could move the time into the target object,
-            if time - self.last_pit_in_time > 30:
-                self.on_track = False
-                LeaveTrackEvent.emit()
-                logger.info("entered pits")
-                self.last_pit_in_time = time
-
-        elif self.track.is_radio_sync_defined() and \
-            self._crossed_line(lat, long, heading, time, self.track.radio_sync)[0]:
-            # de-bounce so that we don't re-enter the pits repeatedly
-            # we could move the time into the target object,
-            if time - self.last_radio_sync_time > 30:
-                RadioSyncEvent.emit()
-                logger.info("syncing radio")
-                self.last_radio_sync_time = time
+        else:
+            for target_metadata in self.track.targets.keys():
+                target = self.track.targets[target_metadata]
+                if target_metadata != START_FINISH:
+                    if self._crossed_line(lat, long, heading, time, target)[0]:
+                        target_metadata.event.emit(ts=time)
 
     def handle_event(self, event, lap_count=0, ts=0):
         if event == LapInfoEvent:
@@ -109,6 +94,10 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
             if not self.on_track:
                 self.last_lap_time = ts - self.lap_start_time
                 self.lap_start_time = ts
+        if event == LeaveTrackEvent:
+            self.on_track = False
+        if event == EnterTrackEvent:
+            self.on_track = True
 
     def _crossed_line(self, lat, long, heading, time:float, target:Target):
         if angular_difference(target.target_heading, heading) > 20:
