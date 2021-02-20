@@ -15,7 +15,7 @@ def _calc_mid(track:TrackLocation):
     sum_lat = 0
     sum_long = 0
     count = 0
-    for t in [track.pit_in, track.start_finish]:
+    for t in [track.get_pit_in_target(), track.get_start_finish_target()]:
         if t:
             count += 2
             sum_lat += t.lat_long1[0] + t.lat_long2[0]
@@ -31,28 +31,40 @@ def run():
                                        map_type="satellite",
                                        title=track.get_display_name())
         gmap.apikey = os.environ["GMAP_APIKEY"]
+        sf = track.get_start_finish_target()
         start_finish = zip(*[
-            track.start_finish.lat_long1,
-            track.start_finish.lat_long2,
+            sf.lat_long1,
+            sf.lat_long2,
         ])
         gmap.polygon(*start_finish, color='white', edge_width=20)
-        gmap.text(*track.start_finish.lat_long1, '   start/finish')
+        gmap.text(*sf.lat_long1, '   start/finish')
 
         if track.is_pit_defined():
+            pi = track.get_pit_in_target()
             pit_in = zip(*[
-                track.pit_in.lat_long1,
-                track.pit_in.lat_long2
+                pi.lat_long1,
+                pi.lat_long2
             ])
             gmap.polygon(*pit_in, color='blue', edge_width=20)
-            gmap.text(*track.pit_in.lat_long1, '   pit in')
+            gmap.text(*pi.lat_long1, '   pit in')
 
         if track.is_radio_sync_defined():
+            rs = track.get_radio_sync_target()
             radio = zip(*[
-                track.radio_sync.lat_long1,
-                track.radio_sync.lat_long2
+                rs.lat_long1,
+                rs.lat_long2
             ])
             gmap.polygon(*radio, color='purple', edge_width=20)
-            gmap.text(*track.radio_sync.lat_long1, '   radio')
+            gmap.text(*rs.lat_long1, '   radio')
+
+        if track.is_pit_out_defined():
+            po = track.get_pit_out_target()
+            pit_out = zip(*[
+                po.lat_long1,
+                po.lat_long2
+            ])
+            gmap.polygon(*pit_out, color='blue', edge_width=20)
+            gmap.text(*po.lat_long1, '   pit out')
 
         gmap.draw("tracks/{}.html".format(track.name.lower().replace(' ', '-')))
 

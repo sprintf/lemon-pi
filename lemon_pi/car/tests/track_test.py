@@ -8,8 +8,12 @@ class MyTestCase(unittest.TestCase):
         for t in tracks:
             self.assertTrue(t.track_width_feet() > 25)
             self.assertTrue(t.track_width_feet() < 150)
-            pit_to_sf1 = haversine(t.start_finish.lat_long1, t.pit_in.lat_long1, unit=Unit.MILES)
-            pit_to_sf2 = haversine(t.start_finish.lat_long2, t.pit_in.lat_long2, unit=Unit.MILES)
+            pit_to_sf1 = haversine(t.get_start_finish_target().lat_long1,
+                                   t.get_pit_in_target().lat_long1,
+                                   unit=Unit.MILES)
+            pit_to_sf2 = haversine(t.get_start_finish_target().lat_long2,
+                                   t.get_pit_in_target().lat_long2,
+                                   unit=Unit.MILES)
             # distance from pit to start finish is less than a mile
             self.assertTrue(pit_to_sf1 < 1)
             self.assertTrue(pit_to_sf2 < 1)

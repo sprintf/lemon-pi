@@ -1,5 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch
+import time
+
 
 from lemon_pi.car.event_defs import (
     MovingEvent,
@@ -9,9 +11,10 @@ from lemon_pi.car.state_machine import (
     StateMachine,
     State
 )
+from lemon_pi.shared.tests.lemon_pi_test_case import LemonPiTestCase
 
 
-class StateMachineTestCase(unittest.TestCase):
+class StateMachineTestCase(LemonPiTestCase):
 
     def test_initial_state(self):
         sm = StateMachine()
@@ -35,6 +38,8 @@ class StateMachineTestCase(unittest.TestCase):
         # then suppose we move and are then stationary again
         MovingEvent.emit()
         self.assertEqual(sm.state, State.LEAVING_PIT)
+        # force 10s to pass
+        CarStoppedEvent.last_event_time = time.time() - 11
         CarStoppedEvent.emit()
         self.assertEqual(sm.state, State.PARKED_IN_PIT)
 
