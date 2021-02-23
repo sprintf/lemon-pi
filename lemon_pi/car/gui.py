@@ -1,4 +1,4 @@
-from guizero import App, Text, Box, PushButton, Picture
+from guizero import App, Text, Box, PushButton, Picture, TextBox
 
 from lemon_pi.car.display_providers import *
 from lemon_pi.car.event_defs import (
@@ -334,27 +334,24 @@ class Gui(EventHandler):
         result = Box(parent)
         result.set_border(4, "darkgreen")
         Text(result, "INSTRUCTIONS", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
-        Text(result, "1. Loosen Belts", size=Gui.TEXT_MED, color="white", font=self.font)
-        Text(result, "2. Undo Belts", size=Gui.TEXT_MED, color="white", font=self.font)
-        Text(result, "3. Disc. Radio", size=Gui.TEXT_MED, color="white", font=self.font)
-        Text(result, "4. Stop in Pit", size=Gui.TEXT_MED, color="white", font=self.font)
-        Text(result, "5. No handbrake", size=Gui.TEXT_MED, color="white", font=self.font)
-        Text(result, "6. Kill engine", size=Gui.TEXT_MED, color="white", font=self.font)
-        Text(result, "7. Wheel Off", size=Gui.TEXT_MED, color="white", font=self.font)
-        Text(result, "8. Get Out!", size=Gui.TEXT_MED, color="white", font=self.font)
+        instructions = TextBox(result, multiline=True,
+                               width=parent.width - 8, height=parent.height - 24)
+        instructions.text_size = Gui.TEXT_MED
+        instructions.text_color = "white"
+        instructions.font = self.font
+        instructions.value = settings.ENTER_PIT_INSTRUCTIONS
         return result
 
     def create_stint_start_instructions(self, parent):
         result = Box(parent)
         result.set_border(4, "darkgreen")
         Text(result, "INSTRUCTIONS", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
-        Text(result, "1. Adjust Seat", size=Gui.TEXT_MED, color="white", font=self.font)
-        Text(result, "2. Wheel on", size=Gui.TEXT_MED, color="white", font=self.font)
-        Text(result, "3. Belts", size=Gui.TEXT_MED, color="white", font=self.font)
-        Text(result, "4. Radio", size=Gui.TEXT_MED, color="white", font=self.font)
-        Text(result, "5. Mirrors", size=Gui.TEXT_MED, color="white", font=self.font)
-        Text(result, "6. Water", size=Gui.TEXT_MED, color="white", font=self.font)
-        Text(result, "Gloves / Hans?", size=Gui.TEXT_MED, color="white", font=self.font)
+        instructions = TextBox(result, multiline=True,
+                               width=parent.width - 8, height=parent.height - 24)
+        instructions.text_size = Gui.TEXT_MED
+        instructions.text_color = "white"
+        instructions.font = self.font
+        instructions.value = settings.SET_OFF_INSTRUCTIONS
         return result
 
     def __updateTemp(self, provider: TemperatureProvider):
