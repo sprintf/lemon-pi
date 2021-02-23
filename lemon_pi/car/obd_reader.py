@@ -122,13 +122,13 @@ class ObdReader(Thread, TemperatureProvider):
     def is_working(self) -> bool:
         return self.working
 
-    def calc_fuel_rate(self, maf_value, fiddle_fiddle_percent):
+    def calc_fuel_rate(self, maf_value, fuel_fiddle_percent):
         raw_fuel_mass = maf_value / 14.64
         trim_adjustment = raw_fuel_mass * ((self.short_term_fuel_trim + self.long_term_fuel_trim) / 100)
         adjusted_fuel_mass = raw_fuel_mass + trim_adjustment
         ml_per_second = adjusted_fuel_mass * (1000/757)
-        if fiddle_fiddle_percent != 0:
-            adjustment = ml_per_second * (fiddle_fiddle_percent / 100)
+        if fuel_fiddle_percent != 0:
+            adjustment = ml_per_second * (fuel_fiddle_percent / 100)
             ml_per_second += adjustment
         return ml_per_second
 
