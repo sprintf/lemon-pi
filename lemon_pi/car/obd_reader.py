@@ -104,7 +104,8 @@ class ObdReader(Thread, TemperatureProvider):
         if cmd == obd.commands.COOLANT_TEMP:
             self.temp_f = int(response.value.to('degF').magnitude)
         elif cmd == obd.commands.MAF:
-            fuel_usage = self.calc_fuel_rate(response.value.to('gps').magnitude)
+            fuel_usage = self.calc_fuel_rate(response.value.to('gps').magnitude,
+                                             settings.FUEL_FIDDLE_PERCENT)
             self.fuel_listener.update_fuel(fuel_usage, response.time)
         elif cmd == obd.commands.SHORT_FUEL_TRIM_1:
             if response.value:
@@ -121,11 +122,14 @@ class ObdReader(Thread, TemperatureProvider):
     def is_working(self) -> bool:
         return self.working
 
-    def calc_fuel_rate(self, maf_value):
+    def calc_fuel_rate(self, maf_value, fiddle_factor_percent):
         raw_fuel_mass = maf_value / 14.64
         trim_adjustment = raw_fuel_mass * ((self.short_term_fuel_trim + self.long_term_fuel_trim) / 100)
         adjusted_fuel_mass = raw_fuel_mass + trim_adjustment
         ml_per_second = adjusted_fuel_mass * (1000/757)
+        if fiddle_factor_percent != 0:
+            adjustment = ml_per_second * (fiddle_factor_percent / 100)
+            ml_per_second += adjustment
         return ml_per_second
 
 if __name__ == "__main__":

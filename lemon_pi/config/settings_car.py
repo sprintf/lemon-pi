@@ -10,6 +10,11 @@ EXIT_BUTTON_ENABLED = False
 # the size of the vehicle's fuel tank
 FUEL_CAPACITY_US_GALLONS = 15
 
+# fuel fiddle percentage : in range -100 to +100
+# if you are using 10% more fuel than expected then set this to 10
+# if you are using 10% less fuel than expected then set this to -10
+FUEL_FIDDLE_PERCENT = 0
+
 # the time taken to complete a radio command
 RADIO_CMD_COMPLETION_TIME = 0.1
 
