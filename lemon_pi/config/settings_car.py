@@ -28,3 +28,23 @@ OBD_PROTOCOL = "3"
 TEMP_BAND_LOW = 180
 TEMP_BAND_WARN = 205
 TEMP_BAND_HIGH = 215
+
+# there's only room for 8 lines of text in here
+ENTER_PIT_INSTRUCTIONS = """1. Loosen Belts
+2. Undo Belts
+3. Disc. Radio
+4. Stop (no h-brake)
+5. Wheel Off
+6. Kill Switch
+7. Get Out!
+"""
+
+# no more than 8 lines of text here either
+SET_OFF_INSTRUCTIONS = """1. Adjust Seat
+2. Wheel On
+3. Belts
+4. Radio
+5. Mirrors
+6. Water
+Gloves? HANS?
+"""
