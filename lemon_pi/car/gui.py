@@ -314,11 +314,11 @@ class Gui(EventHandler):
         result.set_border(4, "darkgreen")
         Text(result, "FUEL (Gal)", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
         total_box = Box(result, height=int(100 * Gui.SCALE_FACTOR), width=int(Gui.COL_WIDTH * 0.8))
-        Text(total_box, "Total\nUsed", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left")
+        title1 = Text(total_box, "Total\nUsed", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left")
         Text(total_box, "--.--", size=Gui.TEXT_MED, color="lightgreen", font=self.font, align="left")
 
         last_lap_box = Box(result, height=int(100 * Gui.SCALE_FACTOR), width=int(Gui.COL_WIDTH * 0.8))
-        Text(last_lap_box, "Last\nLap", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left")
+        Text(last_lap_box, "Last\nLap", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left", width=title1.width)
         Text(last_lap_box, "--.--", size=Gui.TEXT_MED, color="lightgreen", font=self.font, align="left")
 
         remaining_box = Box(result, height=int(100 * Gui.SCALE_FACTOR), width=int(Gui.COL_WIDTH * 0.8))
