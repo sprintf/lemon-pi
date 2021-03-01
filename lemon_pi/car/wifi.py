@@ -14,7 +14,7 @@ class WifiManager:
         if platform.system() == "Linux":
             logger.info("detecting wifi...")
             response = WifiManager._command(['ifconfig', 'wlan0'])
-            if response.find("RUNNING") and response.find("inet "):
+            if "RUNNING" in response and "inet " in response:
                 logger.info("wifi operating")
                 return True
             else:
