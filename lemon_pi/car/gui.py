@@ -302,9 +302,9 @@ class Gui(EventHandler):
         result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(260 * Gui.SCALE_FACTOR))
         result.set_border(4, "darkgreen")
         Text(result, "LAP", size=Gui.TEXT_SMALL, font=self.font, color="white")
-        Text(result, "---", size=Gui.TEXT_MED, font=self.font, color="white")
+        Text(result, "---", size=Gui.TEXT_SMALL, font=self.font, color="white")
         Text(result, "mm:ss", size=Gui.TEXT_MED, font=self.font, color="white")
-        Box(result, width=200, height=20)
+        Box(result, width=200, height=16)
         Text(result, "Last Lap", size=Gui.TEXT_TINY, font=self.font, color="white")
         Text(result, "mm:ss", size=Gui.TEXT_MED, font=self.font, color="white")
         return result
