@@ -320,7 +320,7 @@ class Gui(EventHandler):
         last_lap_box = Box(result, height=int(100 * Gui.SCALE_FACTOR), width=int(Gui.COL_WIDTH * 0.8))
         Text(last_lap_box, "Last\nLap", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left")
         # a wee spacer to align this row with the one above
-        Box(last_lap_box, width=24 * Gui.SCALE_FACTOR, height=10, align="left")
+        Box(last_lap_box, width=12 * Gui.SCALE_FACTOR, height=10, align="left")
         Text(last_lap_box, "--.--", size=Gui.TEXT_MED, color="lightgreen", font=self.font, align="left")
 
         remaining_box = Box(result, height=int(100 * Gui.SCALE_FACTOR), width=int(Gui.COL_WIDTH * 0.8))
