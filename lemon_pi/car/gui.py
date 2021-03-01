@@ -302,9 +302,9 @@ class Gui(EventHandler):
         result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(260 * Gui.SCALE_FACTOR))
         result.set_border(4, "darkgreen")
         Text(result, "LAP", size=Gui.TEXT_SMALL, font=self.font, color="white")
-        Text(result, "---", size=Gui.TEXT_MED, font=self.font, color="white")
+        Text(result, "---", size=Gui.TEXT_SMALL, font=self.font, color="white")
         Text(result, "mm:ss", size=Gui.TEXT_MED, font=self.font, color="white")
-        Box(result, width=200, height=20)
+        Box(result, width=200, height=16)
         Text(result, "Last Lap", size=Gui.TEXT_TINY, font=self.font, color="white")
         Text(result, "mm:ss", size=Gui.TEXT_MED, font=self.font, color="white")
         return result
@@ -312,16 +312,16 @@ class Gui(EventHandler):
     def create_fuel_widget(self, parent):
         result = Box(parent)
         result.set_border(4, "darkgreen")
-        Text(result, "FUEL", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
+        Text(result, "FUEL (Gal)", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
         total_box = Box(result, height=int(100 * Gui.SCALE_FACTOR), width=int(Gui.COL_WIDTH * 0.8))
         Text(total_box, "Total\nUsed", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left")
         Text(total_box, "--.--", size=Gui.TEXT_MED, color="lightgreen", font=self.font, align="left")
-        Text(total_box, "Gal", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left")
 
         last_lap_box = Box(result, height=int(100 * Gui.SCALE_FACTOR), width=int(Gui.COL_WIDTH * 0.8))
         Text(last_lap_box, "Last\nLap", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left")
+        # a wee spacer to align this row with the one above
+        Box(last_lap_box, width=12 * Gui.SCALE_FACTOR, height=10, align="left")
         Text(last_lap_box, "--.--", size=Gui.TEXT_MED, color="lightgreen", font=self.font, align="left")
-        Text(last_lap_box, "Gal", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left")
 
         remaining_box = Box(result, height=int(100 * Gui.SCALE_FACTOR), width=int(Gui.COL_WIDTH * 0.8))
         Text(remaining_box, "Rem.", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left")
@@ -336,7 +336,7 @@ class Gui(EventHandler):
         Text(result, "INSTRUCTIONS", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
         instructions = TextBox(result, multiline=True,
                                width=parent.width - 8, height=parent.height - 24)
-        instructions.text_size = Gui.TEXT_MED
+        instructions.text_size = Gui.TEXT_SMALL
         instructions.text_color = "white"
         instructions.font = self.font
         instructions.value = settings.ENTER_PIT_INSTRUCTIONS
@@ -348,7 +348,7 @@ class Gui(EventHandler):
         Text(result, "INSTRUCTIONS", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
         instructions = TextBox(result, multiline=True,
                                width=parent.width - 8, height=parent.height - 24)
-        instructions.text_size = Gui.TEXT_MED
+        instructions.text_size = Gui.TEXT_SMALL
         instructions.text_color = "white"
         instructions.font = self.font
         instructions.value = settings.SET_OFF_INSTRUCTIONS
