@@ -3,6 +3,7 @@ import yaml
 import re
 from haversine import haversine, Unit
 
+from lemon_pi.car.update_tracks import TrackUpdater
 from lemon_pi.car.event_defs import LeaveTrackEvent, RadioSyncEvent, EnterTrackEvent
 from lemon_pi.car.target import Target
 
@@ -79,7 +80,8 @@ class TrackLocation:
 
 def read_tracks() -> [TrackLocation]:
     track_list = []
-    with open("resources/tracks.yaml") as yamlfile:
+    track_file, _ = TrackUpdater.get_track_file()
+    with open(track_file) as yamlfile:
         tracks = yaml.load(yamlfile, Loader=yaml.FullLoader)
         for track in tracks["tracks"]:
             track_data = TrackLocation(track["name"])

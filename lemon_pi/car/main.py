@@ -7,6 +7,7 @@ from lemon_pi.car.maf_analyzer import MafAnalyzer
 from lemon_pi.car.obd_reader import ObdReader
 from lemon_pi.car.lap_tracker import LapTracker
 from lemon_pi.car.radio_interface import RadioInterface
+from lemon_pi.car.update_tracks import TrackUpdater
 from lemon_pi.car.wifi import WifiManager
 from lemon_pi.shared.time_provider import LocalTimeProvider
 from lemon_pi.car.track import TrackLocation, read_tracks
@@ -55,10 +56,7 @@ if not "SETTINGS_MODULE" in os.environ:
 #  1. launch UI
 #  2. fire up OBD thread
 #  3. fire up GPS thread
-
-
-
-
+#  4. fire up Lora
 
 gui = Gui(settings.DISPLAY_WIDTH, settings.DISPLAY_HEIGHT)
 
@@ -66,6 +64,14 @@ def init():
     # detect USB devices (should just be Lora)
     UsbDetector.init()
 
+    # update tracks from web, if possible
+    if not WifiManager.check_wifi_enabled():
+        logger.info("enabling wifi")
+        WifiManager.enable_wifi()
+
+    TrackUpdater().update()
+
+    # turn wifi off now, to save battery
     WifiManager().disable_wifi()
 
     StateMachine()
