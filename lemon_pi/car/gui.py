@@ -336,7 +336,7 @@ class Gui(EventHandler):
         Text(result, "INSTRUCTIONS", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
         instructions = TextBox(result, multiline=True,
                                width=parent.width - 8, height=parent.height - 24)
-        instructions.text_size = Gui.TEXT_MED
+        instructions.text_size = Gui.TEXT_SMALL
         instructions.text_color = "white"
         instructions.font = self.font
         instructions.value = settings.ENTER_PIT_INSTRUCTIONS
@@ -348,7 +348,7 @@ class Gui(EventHandler):
         Text(result, "INSTRUCTIONS", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
         instructions = TextBox(result, multiline=True,
                                width=parent.width - 8, height=parent.height - 24)
-        instructions.text_size = Gui.TEXT_MED
+        instructions.text_size = Gui.TEXT_SMALL
         instructions.text_color = "white"
         instructions.font = self.font
         instructions.value = settings.SET_OFF_INSTRUCTIONS
