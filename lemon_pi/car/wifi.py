@@ -23,7 +23,7 @@ class WifiManager:
     def enable_wifi(self):
         if platform.system() == "Linux":
             WifiManager._command(['sudo', 'rfkill', 'unblock', 'wifi'])
-            time.sleep(3)
+            time.sleep(7)
 
     @classmethod
     def _command(self, args:[]):
