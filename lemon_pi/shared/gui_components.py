@@ -60,9 +60,10 @@ class AlertBox(Box):
                 child.text_color = color
 
 
-# a Fading Box starts off bright white, and then slowly
-# fades over a period of time. We use this to indicate the
-# freshness of radio pings and other transmissions
+# a Fading Box starts off as an empty box. When it is told
+# to brighten() then it does so and then fades darker over
+# a period of time. We use this to indicate the
+# freshness of radio pings and other radio receives
 class FadingBox(Box):
 
     def __init__(self, parent, bright=0xffffff, dim=0x202020, **kwargs):
