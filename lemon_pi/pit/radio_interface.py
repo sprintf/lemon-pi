@@ -4,7 +4,7 @@ from lemon_pi.pit.event_defs import (
     PittingEvent,
     PingEvent,
     TelemetryEvent,
-    SendMessageEvent
+    SendMessageEvent, RadioReceiveEvent
 )
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.generated.messages_pb2 import (
@@ -51,6 +51,7 @@ class RadioInterface(Thread, EventHandler):
             logger.info("received : {}".format(item.__repr__()))
             self.radio.receive_queue.task_done()
             self.convert_to_event(item)
+            RadioReceiveEvent.emit()
 
     def send_race_status(self, flag=""):
         logger.info("race status changed to {}".format(flag))

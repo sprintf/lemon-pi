@@ -43,5 +43,8 @@ TelemetryEvent = Event("telemetry")
 #   msg=
 SendMessageEvent = Event("send-message")
 
+#
+RadioReceiveEvent = Event("radio-rx")
+
 # dumo out the leaderboard to stdout
 DumpLeaderboardEvent = Event("dump-leaderboard")

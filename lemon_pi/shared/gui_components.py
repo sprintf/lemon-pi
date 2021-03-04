@@ -58,3 +58,32 @@ class AlertBox(Box):
         for child in self.children:
             if isinstance(child, Text):
                 child.text_color = color
+
+
+# a Fading Box starts off bright white, and then slowly
+# fades over a period of time. We use this to indicate the
+# freshness of radio pings and other transmissions
+class FadingBox(Box):
+
+    def __init__(self, parent, bright=0xffffff, dim=0x202020, **kwargs):
+        Box.__init__(self, parent, **kwargs)
+        self.bright_rgb = self.__split_rgb(bright)
+        self.dim_rgb = self.__split_rgb(dim)
+        self.bg = self.dim_rgb
+        self.set_border(4, "grey")
+        self.repeat(10000, self.__fade)
+
+    def brighten(self):
+        self.bg = self.bright_rgb
+
+    def __fade(self):
+        rgb_hex = int(self.bg[1:], 16)
+        (r, g, b) = self.__split_rgb(rgb_hex)
+        if r > self.dim_rgb[0]:
+            self.bg = (r - 16, g - 16, b - 16)
+
+    def __split_rgb(self, rgb_value):
+        r = (rgb_value & 0xff0000) >> 16
+        g = (rgb_value & 0xff00) >> 8
+        b = rgb_value & 0xff
+        return r, g, b

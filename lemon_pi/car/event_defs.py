@@ -64,4 +64,7 @@ RaceFlagStatusEvent = Event("flag-status")
 #   ts=
 LapInfoEvent = Event("lap-info")
 
+#
+RadioReceiveEvent = Event("radio-rx")
+
 

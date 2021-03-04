@@ -8,10 +8,10 @@ from lemon_pi.pit.event_defs import (
     RaceStatusEvent,
     PittingEvent,
     LapCompletedEvent,
-    TelemetryEvent, DumpLeaderboardEvent
+    TelemetryEvent, DumpLeaderboardEvent, RadioReceiveEvent
 )
 from lemon_pi.shared.events import Event
-from lemon_pi.shared.gui_components import AlertBox
+from lemon_pi.shared.gui_components import AlertBox, FadingBox
 from lemon_pi.shared.time_provider import TimeProvider
 
 logger = logging.getLogger(__name__)
@@ -66,6 +66,7 @@ class Gui():
         PittingEvent.register_handler(self)
         LapCompletedEvent.register_handler(self)
         TelemetryEvent.register_handler(self)
+        RadioReceiveEvent.register_handler(self)
 
     def display(self):
         self.root.when_key_pressed = self.handle_keyboard
@@ -86,6 +87,10 @@ class Gui():
 
         if event == TelemetryEvent:
             self.__update_car_data__(**kwargs)
+            return
+
+        if event == RadioReceiveEvent:
+            self.radio_signal.brighten()
             return
 
     def register_time_provider(self, provider:TimeProvider):
@@ -159,8 +164,11 @@ class Gui():
     def create_race_status(self, parent, grid):
         result = Box(parent, grid=grid)
         BigText(result, "Race:", align="left")
-        self.flag = Box(result, width=64, height=48)
+        self.flag = Box(result, width=64, height=48, align="left")
         self.flag.bg = "green"
+
+        BigText(result, "Radio:", align="left")
+        self.radio_signal = FadingBox(result, width=32, height=32, align="left")
         return result
 
     def create_status_message(self, parent, grid):
