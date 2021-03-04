@@ -146,7 +146,7 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
     def get_lap_timer(self) -> int:
         return int(time.time() - self.lap_start_time)
 
-    def get_last_lap_time(self) -> int:
+    def get_last_lap_time(self) -> float:
         return self.last_lap_time
 
 import csv

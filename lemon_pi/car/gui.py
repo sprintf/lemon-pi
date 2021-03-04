@@ -9,6 +9,8 @@ from lemon_pi.car.event_defs import (
 
 import logging
 import platform
+import random
+import time
 from python_settings import settings
 
 
@@ -240,6 +242,8 @@ class Gui(EventHandler):
             self.obd_image.on()
         if event_data.key == 'O':
             self.obd_image.off()
+        if event_data.key == 'l':
+            self.__updateLap(randomLapTimeProvider)
 
     def display(self):
         self.root.when_key_pressed = self.handle_keyboard
@@ -306,7 +310,7 @@ class Gui(EventHandler):
         Text(result, "mm:ss", size=Gui.TEXT_MED, font=self.font, color="white")
         Box(result, width=200, height=16)
         Text(result, "Last Lap", size=Gui.TEXT_TINY, font=self.font, color="white")
-        Text(result, "mm:ss", size=Gui.TEXT_MED, font=self.font, color="white")
+        Text(result, "mm:ss.S", size=Gui.TEXT_MED, font=self.font, color="white")
         return result
 
     def create_fuel_widget(self, parent):
@@ -380,9 +384,11 @@ class Gui(EventHandler):
             seconds = int(provider.get_lap_timer()) % 60
             self.lap_display.children[2].value = "{:02d}:{:02d}".format(minutes, seconds)
         if provider.get_last_lap_time() > 0:
-            minutes = int(provider.get_last_lap_time() / 60)
-            seconds = int(provider.get_last_lap_time()) % 60
-            self.lap_display.children[5].value = "{:02d}:{:02d}".format(minutes, seconds)
+            ll = provider.get_last_lap_time()
+            minutes = int(ll / 60)
+            seconds = int(ll) % 60
+            millis = int((ll - int(ll)) * 10)
+            self.lap_display.children[5].value = "{:02d}:{:02d}.{:01d}".format(minutes, seconds, millis)
 
     def __updateFuel(self, provider: FuelProvider):
         # children offsets:
@@ -405,5 +411,20 @@ class Gui(EventHandler):
             Exception("no font defined for {}".format(platform))
 
 
+    ### test classes
+class RandomLapTimeProvider(LapProvider):
 
+    def __init__(self):
+        self.start_time = time.time()
+
+    def get_last_lap_time(self) -> float:
+        return random.randint(10000, 30000) / 100
+
+    def get_lap_timer(self) -> int:
+        return int(time.time() - self.start_time)
+
+    def get_lap_count(self) -> int:
+        return 145
+
+randomLapTimeProvider = RandomLapTimeProvider()
 

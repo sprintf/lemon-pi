@@ -40,7 +40,8 @@ class LapProvider():
     def get_lap_timer(self) -> int:
         pass
 
-    def get_last_lap_time(self) -> int:
+    # return seconds and millis for last lap
+    def get_last_lap_time(self) -> float:
         pass
 
 
