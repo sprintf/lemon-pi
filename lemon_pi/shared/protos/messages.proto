@@ -117,6 +117,16 @@ message EnteringPits {
 
 }
 
+message SetFuelLevel {
+  int32 seq_num = 1;
+
+  int32 timestamp = 2;
+
+  string sender = 3;
+
+  int32 percent_full = 4;
+}
+
 //  ********************
 //  **** IMPORTANT *****
 //  ********************

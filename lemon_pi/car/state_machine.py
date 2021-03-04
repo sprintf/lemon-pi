@@ -39,7 +39,7 @@ class StateMachine(EventHandler):
                 StateChangeSettingOffEvent.emit()
                 return
             if event == OBDConnectedEvent:
-                RefuelEvent.emit()
+                RefuelEvent.emit(percent_full=100)
                 return
 
         if self.state == State.ON_TRACK:

@@ -27,10 +27,9 @@ class MafAnalyzer(FuelUsageUpdater, LapUpdater, FuelProvider, EventHandler):
         self.cached_fuel_usage_time = 0.0
         RefuelEvent.register_handler(self)
 
-    def handle_event(self, event, **kwargs):
+    def handle_event(self, event, percent_full=100, **kwargs):
         logger.info("refuelling")
-        self.total_fuel_used_ml = 0.0
-        self.buffer_values = []
+        self.set_fuel_percent_remaining(percent_full)
 
     def update_lap(self, lap_count: int, last_lap_time: float):
         if lap_count > 0:
@@ -70,11 +69,17 @@ class MafAnalyzer(FuelUsageUpdater, LapUpdater, FuelProvider, EventHandler):
         return ml_per_hour
 
     def get_fuel_percent_remaining(self) -> int:
-        if self.total_fuel_used_ml == 0:
-            return -1
+        full_tank_ml = self._get_full_tank_ml()
+        return 100 - int((self.total_fuel_used_ml / full_tank_ml) * 100)
+
+    def set_fuel_percent_remaining(self, percent_remaining):
+        full_tank_ml = self._get_full_tank_ml()
+        self.total_fuel_used_ml = (100 - percent_remaining) * (full_tank_ml / 100)
+        self.buffer_values = []
+
+    def _get_full_tank_ml(self) -> int:
         # there's 3785 millilitres in a gallon
-        full_tank_ml = int(settings.FUEL_CAPACITY_US_GALLONS * 3785)
-        return 100 - (int)((self.total_fuel_used_ml / full_tank_ml) * 100)
+        return int(settings.FUEL_CAPACITY_US_GALLONS * 3785)
 
     # get a value in grams per second at a certain time
     def update_fuel(self, ml_per_second:float, time:float):
