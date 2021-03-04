@@ -3,9 +3,10 @@ from unittest.mock import patch, Mock
 
 from lemon_pi.car.radio_interface import RadioInterface
 from lemon_pi.shared.generated.messages_pb2 import SetFuelLevel
+from lemon_pi.shared.tests.lemon_pi_test_case import LemonPiTestCase
 
 
-class RadioInterfaceTestCase(unittest.TestCase):
+class RadioInterfaceTestCase(LemonPiTestCase):
 
     @patch("lemon_pi.car.event_defs.RefuelEvent.emit")
     def test_refuel_message(self, refuel_event):
