@@ -5,7 +5,7 @@ from lemon_pi.car.event_defs import (
 
     LeaveTrackEvent, StateChangePittedEvent, StateChangeSettingOffEvent, CompleteLapEvent, OBDConnectedEvent,
     OBDDisconnectedEvent, GPSConnectedEvent, GPSDisconnectedEvent, RaceFlagStatusEvent, DriverMessageEvent,
-    DriverMessageAddendumEvent, ExitApplicationEvent, EnterTrackEvent)
+    DriverMessageAddendumEvent, ExitApplicationEvent, EnterTrackEvent, RadioReceiveEvent)
 
 import logging
 import platform
@@ -15,7 +15,7 @@ from python_settings import settings
 
 
 from lemon_pi.shared.events import EventHandler
-from lemon_pi.shared.gui_components import AlertBox
+from lemon_pi.shared.gui_components import AlertBox, FadingBox
 from lemon_pi.shared.time_provider import TimeProvider
 
 logger = logging.getLogger(__name__)
@@ -103,7 +103,7 @@ class Gui(EventHandler):
         Box(self.col2, height=24, width=int(Gui.COL_WIDTH * 0.8))
 
         # adding obd + gps images
-        (self.gps_image, self.obd_image) = self.create_gps_obd_images(self.col2)
+        (self.gps_image, self.radio_signal, self.obd_image) = self.create_gps_obd_images(self.col2)
         # add a quit button
         if settings.EXIT_BUTTON_ENABLED:
             PushButton(self.col2, image="resources/images/exitbutton.gif", command=self.quit)
@@ -124,6 +124,7 @@ class Gui(EventHandler):
         RaceFlagStatusEvent.register_handler(self)
         DriverMessageEvent.register_handler(self)
         DriverMessageAddendumEvent.register_handler(self)
+        RadioReceiveEvent.register_handler(self)
 
     def present_main_app(self):
         self.splash.destroy()
@@ -155,6 +156,10 @@ class Gui(EventHandler):
             self.col3.show()
             self.col4.hide()
             self.col5.hide()
+            return
+
+        if event == RadioReceiveEvent:
+            self.radio_signal.brighten()
             return
 
         if event == RaceFlagStatusEvent:
@@ -244,6 +249,8 @@ class Gui(EventHandler):
             self.obd_image.off()
         if event_data.key == 'l':
             self.__updateLap(randomLapTimeProvider)
+        if event_data.key == 'p':
+            self.handle_event(RadioReceiveEvent)
 
     def display(self):
         self.root.when_key_pressed = self.handle_keyboard
@@ -274,8 +281,18 @@ class Gui(EventHandler):
     def create_gps_obd_images(self, parent):
         result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(48 * Gui.SCALE_FACTOR))
         #result.set_border(4, "darkgreen")
-        return (ToggleImage(result, "resources/images/gps_ok.gif", "resources/images/gps_off.gif", align="left"),
-                ToggleImage(result, "resources/images/obd_ok.gif", "resources/images/obd_off.gif", align="right"))
+        gps = ToggleImage(result,
+                          "resources/images/gps_ok.gif",
+                          "resources/images/gps_off.gif",
+                          align="left")
+        Box(result, width=32, height=32, align="left")
+        Text(result, "Radio", size=Gui.TEXT_TINY, color="darkgreen", align="left")
+        radio = FadingBox(result, width=32, height=32, align="left")
+        obd = ToggleImage(result,
+                          "resources/images/obd_ok.gif",
+                          "resources/images/obd_off.gif",
+                          align="right")
+        return gps, radio, obd
 
     def create_temp_widget(self, parent):
         result = AlertBox(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(112 * Gui.SCALE_FACTOR))

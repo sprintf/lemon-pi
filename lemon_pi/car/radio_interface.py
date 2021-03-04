@@ -11,7 +11,7 @@ from lemon_pi.car.event_defs import (
     DriverMessageEvent,
     DriverMessageAddendumEvent,
     RaceFlagStatusEvent,
-    LapInfoEvent
+    LapInfoEvent, RadioReceiveEvent
 )
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.generated.messages_pb2 import (
@@ -78,6 +78,7 @@ class RadioInterface(Thread, EventHandler):
                 logger.exception("got an exception in radio_interface")
 
     def process_incoming(self, msg):
+        RadioReceiveEvent.emit()
         if type(msg) == RaceStatus:
             logger.info("got race status message...{}".format(msg))
             RaceFlagStatusEvent.emit(flag=RaceFlagStatus.Name(msg.flag_status))
