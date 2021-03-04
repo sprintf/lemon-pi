@@ -7,11 +7,12 @@ from lemon_pi.pit.radio_interface import RadioInterface
 from lemon_pi.shared.generated.messages_pb2 import Ping, EnteringPits, CarTelemetry, RaceFlagStatus
 from python_settings import settings
 import lemon_pi.config.test_settings as my_local_settings
+from lemon_pi.shared.tests.lemon_pi_test_case import LemonPiTestCase
 
 if not settings.configured:
     settings.configure(my_local_settings)
 
-class RadioInterfaceTestCase(unittest.TestCase):
+class RadioInterfaceTestCase(LemonPiTestCase):
 
     @patch("lemon_pi.shared.radio.Radio")
     def test_flags(self, radio):
