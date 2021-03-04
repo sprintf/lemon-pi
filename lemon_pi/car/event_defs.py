@@ -39,6 +39,7 @@ GPSConnectedEvent = Event("GPS-Connected")
 GPSDisconnectedEvent = Event("GPS-Disconnected")
 
 ### Refuel event
+# percent_full=
 RefuelEvent = Event("Refuel")
 
 ### Car has come to a halt

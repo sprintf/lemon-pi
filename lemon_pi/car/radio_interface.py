@@ -11,7 +11,7 @@ from lemon_pi.car.event_defs import (
     DriverMessageEvent,
     DriverMessageAddendumEvent,
     RaceFlagStatusEvent,
-    LapInfoEvent, RadioReceiveEvent
+    LapInfoEvent, RadioReceiveEvent, RefuelEvent
 )
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.generated.messages_pb2 import (
@@ -21,7 +21,7 @@ from lemon_pi.shared.generated.messages_pb2 import (
     Ping,
     RacePosition,
     EnteringPits,
-    RaceFlagStatus)
+    RaceFlagStatus, SetFuelLevel)
 
 from python_settings import settings
 
@@ -118,6 +118,12 @@ class RadioInterface(Thread, EventHandler):
             # it's more for corrective purposes, so the display doesn't get stuck in a bad
             # state if a flag message is missed
             RaceFlagStatusEvent.emit(flag=RaceFlagStatus.Name(msg.flag_status))
+        elif type(msg) == SetFuelLevel:
+            logger.info("got fuel level adjustment...{}".format(msg))
+            if msg.percent_full == 0:
+                RefuelEvent.emit(percent_full=100)
+            else:
+                RefuelEvent.emit(percent_full=msg.percent_full)
         else:
             logger.warning("got unexpected message : {}".format(type(msg)))
 

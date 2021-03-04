@@ -6,7 +6,7 @@ from lemon_pi.shared.generated.messages_pb2 import (
     RaceStatus,
     RacePosition,
     CarTelemetry,
-    EnteringPits)
+    EnteringPits, SetFuelLevel)
 
 
 class ProtobufEnum(Enum):
@@ -16,6 +16,8 @@ class ProtobufEnum(Enum):
    RacePosition = 3
    CarTelemetry = 4
    EnteringPits = 5
+   SetFuelLevel = 6
+   # Add next item here AND fill in if statement below (seems lame)
 
 class UnknownRadioMessage(Exception):
     pass
@@ -34,6 +36,8 @@ def create_instance(msg:ProtobufEnum):
         return CarTelemetry()
     elif msg == ProtobufEnum.EnteringPits:
         return EnteringPits()
+    elif msg == ProtobufEnum.SetFuelLevel:
+        return SetFuelLevel()
     raise UnknownRadioMessage()
 
 
