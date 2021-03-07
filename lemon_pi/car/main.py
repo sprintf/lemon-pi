@@ -118,7 +118,7 @@ def init():
     logger.info("awaiting location to choose track")
     while not gps.is_working() or gps.get_lat_long() == (0, 0):
         time.sleep(1)
-    closest_track = min(tracks, key=lambda x: haversine(gps.get_lat_long(), x.start_finish.midpoint))
+    closest_track = min(tracks, key=lambda x: haversine(gps.get_lat_long(), x.get_start_finish_target().midpoint))
     logger.info("closest track selected : {}".format(closest_track))
     lap_tracker = LapTracker(closest_track, MA)
     gps.register_position_listener(lap_tracker)
