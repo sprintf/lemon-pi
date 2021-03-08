@@ -50,7 +50,7 @@ def run():
         # start the radio thread
         try:
             radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY)
-            RadioInterface(radio)
+            RadioInterface(radio).start()
             radio.start()
             gui.progress(85)
         except KeyError:
