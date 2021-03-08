@@ -40,7 +40,7 @@ class Gui():
         self.splash_progress = Text(self.splash, "0%", size=100, color="green")
 
         self.main = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, layout="grid", visible=False)
-        self.main.set_border(6, color="green")
+        self.main.set_border(6, color="darkgreen")
 
         self.time_widget = self.create_clock(self.main, grid=[0,0])
         self.race_status = self.create_race_status(self.main, grid=[1,0])
@@ -164,7 +164,8 @@ class Gui():
     def create_race_status(self, parent, grid):
         result = Box(parent, grid=grid)
         BigText(result, "Race:", align="left")
-        self.flag = Box(result, width=64, height=48, align="left")
+        self.flag = Box(result, width=32, height=32, align="left")
+        self.flag.set_border(4, "grey")
         self.flag.bg = "green"
 
         BigText(result, "Radio:", align="left")
