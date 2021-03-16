@@ -21,7 +21,7 @@ from lemon_pi.shared.generated.messages_pb2 import (
     Ping,
     RacePosition,
     EnteringPits,
-    RaceFlagStatus, SetFuelLevel)
+    RaceFlagStatus, SetFuelLevel, ToPitMessage)
 
 from python_settings import settings
 
@@ -56,17 +56,19 @@ class RadioInterface(Thread, EventHandler):
 
     def handle_event(self, event, **kwargs):
         if event == RadioSyncEvent:
-            telemetry = CarTelemetry()
-            telemetry.coolant_temp = self.temp_provider.get_temp_f()
-            telemetry.last_lap_time = self.lap_provider.get_last_lap_time()
-            telemetry.lap_count = self.lap_provider.get_lap_count()
-            telemetry.last_lap_fuel_usage = self.fuel_provider.get_fuel_used_last_lap_ml()
-            telemetry.fuel_remaining_percent = self.fuel_provider.get_fuel_percent_remaining()
+            msg = ToPitMessage()
+            msg.telemetry.coolant_temp = self.temp_provider.get_temp_f()
+            msg.telemetry.last_lap_time = self.lap_provider.get_last_lap_time()
+            msg.telemetry.lap_count = self.lap_provider.get_lap_count()
+            msg.telemetry.last_lap_fuel_usage = self.fuel_provider.get_fuel_used_last_lap_ml()
+            msg.telemetry.fuel_remaining_percent = self.fuel_provider.get_fuel_percent_remaining()
             # we send the event asynchronously, because the radio can take multiple seconds
             # to transmit, so there is no guarantee that this message will be sent exactly now
-            self.radio.send_async(telemetry)
+            self.radio.send_async(msg)
         if event == LeaveTrackEvent:
-            self.radio.send_async(EnteringPits())
+            msg = ToPitMessage()
+            msg.pitting.timestamp = 1
+            self.radio.send_async(msg)
 
     def run(self):
         while True:

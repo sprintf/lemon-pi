@@ -1,8 +1,7 @@
 
 import blowfish
-from lemon_pi.shared.radio_message import (
-    ProtobufEnum, create_instance
-)
+
+from lemon_pi.shared.generated.messages_pb2 import ToCarMessage, ToPitMessage
 
 from google.protobuf.message import Message
 from google.protobuf.message import DecodeError
@@ -22,11 +21,10 @@ class MessageDecoder:
         self.key = key
         self.cipher = blowfish.Cipher(key.encode("UTF-8")) if len(key) else None
 
-    def decode(self, payload:[bytes]) -> Message:
+    def decode(self, payload:[bytes], instance: Message) -> Message:
         if not payload[0:2] == b"LP":
             raise NoiseException()
-        instance = create_instance(ProtobufEnum(int(payload[2])))
-        encrypted_payload = payload[len("LPx"):]
+        encrypted_payload = payload[len("LP"):]
         # what about exceptions from this
         try:
             payload = self.__do_decrypt(encrypted_payload)
@@ -35,7 +33,11 @@ class MessageDecoder:
             # "RuntimeWarning: Unexpected end-group tag: Not all data was converted"
             if parse_len < len(payload):
                 raise DecodeError()
-            return instance
+            if isinstance(instance, ToCarMessage) and instance.HasField("to_car"):
+                return getattr(instance, instance.WhichOneof("to_car"))
+            if isinstance(instance, ToPitMessage) and instance.HasField("to_pit"):
+                return getattr(instance, instance.WhichOneof("to_pit"))
+            raise("unexpected message error")
         except ValueError:
             # this means the decryption failed
             raise LPiNoiseException()
@@ -49,9 +51,3 @@ class MessageDecoder:
         else:
             return encrypted_payload
 
-if __name__ == "__main__":
-    raw = "radio_rx  4C50697879675965642B4B69585A645551393635532F58697A35696967613154617269783437624E6646304F6C3379662B764959465244357A39357056486D316A514248524A55385778652B7745512F7A43586F31733D"
-    decoder = MessageDecoder("")
-    raw = raw[10:]
-    raw = bytes(bytearray.fromhex(raw))
-    decoder.decode(raw)

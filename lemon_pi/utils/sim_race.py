@@ -10,6 +10,7 @@ import time
 # Utility that can play through a recorded file of a race, at a faster simulated speed
 from lemon_pi.pit.radio_interface import RadioInterface
 from lemon_pi.pit.strategy_analyzer import StrategyAnalyzer
+from lemon_pi.shared.generated.messages_pb2 import ToPitMessage
 from lemon_pi.shared.radio import Radio
 from lemon_pi.shared.usb_detector import UsbDetector
 
@@ -54,7 +55,7 @@ if not "SETTINGS_MODULE" in os.environ:
 if __name__ == "__main__":
     UsbDetector().init()
 
-    radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY)
+    radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY, ToPitMessage())
     radio.start()
 
     ri = RadioInterface(radio)

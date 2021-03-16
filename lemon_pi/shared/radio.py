@@ -18,7 +18,7 @@ from lemon_pi.shared.message_decoder import (
     LPiNoiseException
 )
 
-from lemon_pi.shared.generated.messages_pb2 import Ping
+from lemon_pi.shared.generated.messages_pb2 import Ping, ToCarMessage
 
 from google.protobuf.message import Message
 
@@ -72,10 +72,11 @@ class Radio(Thread):
     # frequencies we can use
     FREQ = [9233, 9239, 9245, 9251, 9257, 9263, 9269, 9275]
 
-    def __init__(self, sender:str, key:str, ping_freq=45, **kwargs):
+    def __init__(self, sender:str, key:str, base_message, ping_freq=45, **kwargs):
         Thread.__init__(self, daemon=True)
         self.encoder = MessageEncoder(sender, key)
         self.decoder = MessageDecoder(key)
+        self.base_message = base_message
         self.frequency = self.__pick_radio_freq__(key)
         self.transmitting = False
         self.protocol = None
@@ -187,7 +188,7 @@ class Radio(Thread):
             # 4c5069 is "LPi" our prefix
             if data.startswith("radio_rx  4C50"):
                 try:
-                    message:Message = self.radio.decoder.decode(bytearray.fromhex(data[10:]))
+                    message:Message = self.radio.decoder.decode(bytearray.fromhex(data[10:]), self.radio.base_message)
                     logger.info("lag = {:.1f}s".format(time.time() - message.timestamp))
                     logger.info("received " + message.__repr__())
                     self.radio.metrics.received += 1
@@ -268,7 +269,7 @@ if __name__ == "__main__":
                         datefmt='%Y-%m-%d %H:%M:%S',
                         level=logging.INFO)
     UsbDetector.init()
-    radio = Radio("car-181", "abracadabra", ping_freq=30)
+    radio = Radio("car-181", "abracadabra", ToCarMessage(), ping_freq=30)
     radio.receive_loop()
 
 

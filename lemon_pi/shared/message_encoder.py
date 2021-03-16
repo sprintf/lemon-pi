@@ -3,7 +3,7 @@ import time
 import blowfish
 
 from google.protobuf.message import Message
-from lemon_pi.shared.radio_message import ProtobufEnum
+from lemon_pi.shared.generated.messages_pb2 import ToCarMessage, ToPitMessage
 
 
 class MessageTooLongException(Exception):
@@ -20,16 +20,26 @@ class MessageEncoder:
 
     def encode(self, msg:Message) -> [bytes]:
         self.seq += 1
-        msg.seq_num = self.seq
-        msg.sender = self.sender
-        msg.timestamp = int(time.time())
+        subfield = None
+        if isinstance(msg, ToCarMessage):
+            subfield = msg.WhichOneof("to_car")
+            pass
+        if isinstance(msg, ToPitMessage):
+            subfield = msg.WhichOneof("to_pit")
+            pass
+
+        subfield_attr = getattr(msg, subfield)
+        setattr(subfield_attr, "seq_num", self.seq)
+        setattr(subfield_attr, "sender", self.sender)
+        setattr(subfield_attr, "timestamp", int(time.time()))
+
         payload = msg.SerializeToString()
         encrypted_payload = self.__do_encrypt(payload)
         # IDEA : if it's too long take out the sender and the timestamp?
         if len(encrypted_payload) > 240:
             raise MessageTooLongException()
         name = type(msg).__name__
-        return b"LP" + bytes([ProtobufEnum[name].value]) + encrypted_payload
+        return b"LP" + encrypted_payload
 
     def __do_encrypt(self, payload):
         if self.cipher:

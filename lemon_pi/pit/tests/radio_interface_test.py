@@ -28,9 +28,9 @@ class RadioInterfaceTestCase(LemonPiTestCase):
         radio.send_async = MagicMock()
         ri.handle_event(LapCompletedEvent, car='1', laps=2, position=3)
         fields = radio.send_async.call_args.args[0]
-        self.assertEqual("1", fields.car_number)
-        self.assertEqual(2, fields.lap_count)
-        self.assertEqual(3, fields.position)
+        self.assertEqual("1", fields.race_position.car_number)
+        self.assertEqual(2, fields.race_position.lap_count)
+        self.assertEqual(3, fields.race_position.position)
 
     @patch("lemon_pi.shared.radio.Radio")
     def test_race_position_behind(self, radio):
@@ -38,11 +38,11 @@ class RadioInterfaceTestCase(LemonPiTestCase):
         radio.send_async = MagicMock()
         ri.handle_event(LapCompletedEvent, car='1', laps=2, position=3, ahead="181", gap="5 laps")
         fields = radio.send_async.call_args.args[0]
-        self.assertEqual("1", fields.car_number)
-        self.assertEqual(2, fields.lap_count)
-        self.assertEqual(3, fields.position)
-        self.assertEqual("181", fields.car_ahead.car_number)
-        self.assertEqual("5 laps", fields.car_ahead.gap_text)
+        self.assertEqual("1", fields.race_position.car_number)
+        self.assertEqual(2, fields.race_position.lap_count)
+        self.assertEqual(3, fields.race_position.position)
+        self.assertEqual("181", fields.race_position.car_ahead.car_number)
+        self.assertEqual("5 laps", fields.race_position.car_ahead.gap_text)
 
     @patch("lemon_pi.shared.radio.Radio")
     def test_race_position_with_flag(self, radio):
@@ -50,11 +50,11 @@ class RadioInterfaceTestCase(LemonPiTestCase):
         radio.send_async = MagicMock()
         ri.handle_event(LapCompletedEvent, car='1', laps=2, position=3, ahead="181", flag="Green")
         fields = radio.send_async.call_args.args[0]
-        self.assertEqual("1", fields.car_number)
-        self.assertEqual(2, fields.lap_count)
-        self.assertEqual(3, fields.position)
-        self.assertEqual("181", fields.car_ahead.car_number)
-        self.assertEqual(RaceFlagStatus.GREEN, fields.flag_status)
+        self.assertEqual("1", fields.race_position.car_number)
+        self.assertEqual(2, fields.race_position.lap_count)
+        self.assertEqual(3, fields.race_position.position)
+        self.assertEqual("181", fields.race_position.car_ahead.car_number)
+        self.assertEqual(RaceFlagStatus.GREEN, fields.race_position.flag_status)
 
     def test_ping_processing(self):
         ri = RadioInterface(MagicMock())
