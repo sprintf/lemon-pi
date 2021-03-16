@@ -10,6 +10,7 @@ from lemon_pi.pit.datasource.datasource1 import DataSource
 from lemon_pi.pit.datasource.datasource_handler import DataSourceHandler
 from lemon_pi.pit.leaderboard import RaceOrder
 from lemon_pi.pit.strategy_analyzer import StrategyAnalyzer
+from lemon_pi.shared.generated.messages_pb2 import ToPitMessage
 from lemon_pi.shared.radio import Radio
 from lemon_pi.shared.time_provider import LocalTimeProvider
 from lemon_pi.shared.usb_detector import UsbDetector
@@ -50,7 +51,7 @@ def run():
 
         # start the radio thread
         try:
-            radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY)
+            radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY, ToPitMessage())
             RadioInterface(radio).start()
             radio.start()
             gui.progress(85)

@@ -6,7 +6,7 @@ import time
 from python_settings import settings
 
 from lemon_pi.shared.generated.messages_pb2 import (
-    SetFuelLevel
+    SetFuelLevel, ToPitMessage
 )
 from lemon_pi.shared.radio import Radio
 from lemon_pi.shared.usb_detector import UsbDetector
@@ -26,7 +26,7 @@ if len(sys.argv) != 2:
 
 UsbDetector().init()
 
-radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY)
+radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY, ToPitMessage())
 radio.start()
 
 msg = SetFuelLevel()

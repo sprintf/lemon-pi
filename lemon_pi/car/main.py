@@ -9,6 +9,7 @@ from lemon_pi.car.lap_tracker import LapTracker
 from lemon_pi.car.radio_interface import RadioInterface
 from lemon_pi.car.update_tracks import TrackUpdater
 from lemon_pi.car.wifi import WifiManager
+from lemon_pi.shared.generated.messages_pb2 import ToCarMessage
 from lemon_pi.shared.time_provider import LocalTimeProvider
 from lemon_pi.car.track import TrackLocation, read_tracks
 from lemon_pi.car.state_machine import StateMachine
@@ -80,7 +81,7 @@ def init():
     MA = MafAnalyzer(lap_logger)
     obd = ObdReader(MA)
     gps = GpsReader()
-    radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY)
+    radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY, ToCarMessage())
     radio_interface = RadioInterface(radio, obd, None, MA)
 
     # start a background thread to pull in gps data

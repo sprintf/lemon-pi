@@ -8,13 +8,11 @@ from lemon_pi.pit.event_defs import (
 )
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.generated.messages_pb2 import (
-    RaceStatus,
-    RacePosition,
     EnteringPits,
     Ping,
     CarTelemetry,
-    DriverMessage,
-    RaceFlagStatus
+    RaceFlagStatus,
+    ToCarMessage
 )
 from lemon_pi.shared.radio import Radio
 from python_settings import settings
@@ -55,9 +53,9 @@ class RadioInterface(Thread, EventHandler):
 
     def send_race_status(self, flag=""):
         logger.info("race status changed to {}".format(flag))
-        status = RaceStatus()
-        status.flag_status = self.set_flag_status(flag)
-        self.radio.send_async(status)
+        msg = ToCarMessage()
+        msg.race_status.flag_status = self.set_flag_status(flag)
+        self.radio.send_async(msg)
 
     @classmethod
     def set_flag_status(cls, flag):
@@ -73,27 +71,27 @@ class RadioInterface(Thread, EventHandler):
                            laps=0, ahead=None, gap="", last_lap_time=0, flag=""):
         logger.info("car: {} completed lap {} in pos {}({}) last = {}".
                     format(car, laps, position, class_position, last_lap_time))
-        pos = RacePosition()
-        pos.car_number = car
-        pos.position = position
-        pos.position_in_class = class_position
-        pos.lap_count = laps
-        pos.flag_status = self.set_flag_status(flag)
+        msg = ToCarMessage()
+        msg.race_position.car_number = car
+        msg.race_position.position = position
+        msg.race_position.position_in_class = class_position
+        msg.race_position.lap_count = laps
+        msg.race_position.flag_status = self.set_flag_status(flag)
         if ahead:
-            pos.car_ahead.car_number = ahead
-            pos.car_ahead.gap_text = gap
-        delayed_send = Thread(target=self.__delayed_send__, args=(pos, settings.RACE_DATA_SEND_DELAY_SEC))
+            msg.race_position.car_ahead.car_number = ahead
+            msg.race_position.car_ahead.gap_text = gap
+        delayed_send = Thread(target=self.__delayed_send__, args=(msg, settings.RACE_DATA_SEND_DELAY_SEC))
         if settings.RACE_DATA_SEND_DELAY_SEC > 0:
             delayed_send.start()
         else:
             # run it in foreground for unittests
             delayed_send.run()
 
-    def send_driver_message(self, car="", msg=""):
-        message = DriverMessage()
-        message.text = msg
-        message.car_number = car
-        self.radio.send_async(message)
+    def send_driver_message(self, car="", text=""):
+        msg = ToCarMessage()
+        msg.message.text = text
+        msg.message.car_number = car
+        self.radio.send_async(msg)
 
     @classmethod
     def convert_to_event(cls, proto_msg):

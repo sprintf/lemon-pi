@@ -130,11 +130,20 @@ message SetFuelLevel {
   int32 percent_full = 4;
 }
 
-//  ********************
-//  **** IMPORTANT *****
-//  ********************
-//
-//  As you add new definitions in here, you will need
-//  to add constructor mappings into shared/radio_message.py
-//  that's really only for messages that arrive at tha car
+message ToCarMessage {
+  oneof to_car {
+    Ping ping = 1;
+    DriverMessage message = 2;
+    RaceStatus race_status = 3;
+    RacePosition race_position = 4;
+    SetFuelLevel set_fuel = 5;
+  }
+}
 
+message ToPitMessage {
+  oneof to_pit {
+    Ping ping = 1;
+    CarTelemetry telemetry = 2;
+    EnteringPits pitting = 3;
+  }
+}
