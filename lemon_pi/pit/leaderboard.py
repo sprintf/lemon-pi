@@ -4,25 +4,50 @@
 # the leaderboard is a double linked list, where each element
 # contains a pointer to the `car_in_front` and another to the
 # `car_behind`.
+from enum import Enum
+
 from lemon_pi.pit.event_defs import DumpLeaderboardEvent
 from lemon_pi.shared.events import EventHandler
 
+
+class PositionEnum(Enum):
+    OVERALL = 1
+    IN_CLASS = 2
 
 class CarPosition:
 
     NOT_STARTED = 99999
 
-    def __init__(self, car_number, name):
+    def __init__(self, car_number, name, class_id=None):
         self.car_number = car_number
         self.team_driver_name = name
+        self.class_id = class_id
         self.position = CarPosition.NOT_STARTED
+        self.class_position = CarPosition.NOT_STARTED
         self.laps_completed = 0
-        self.last_lap_time = None
+        # float, seconds and parts of seconds
+        self.last_lap_time: float = None
         self.last_lap_timestamp = None
+        # float, seconds and parts of seconds
         self.fastest_lap_time = None
         self.fastest_lap = None
         self.car_in_front = None
         self.car_behind = None
+
+    def get_car_in_front(self, position_mode:PositionEnum):
+        if position_mode == PositionEnum.OVERALL:
+            return self.car_in_front
+        else:
+            cursor: CarPosition = self.car_in_front
+            while cursor and cursor.class_id != self.class_id:
+                cursor = cursor.car_in_front
+            return cursor
+
+    def get_position(self):
+        return self.position
+
+    def get_position_in_class(self):
+        return self.class_position
 
     def __repr__(self):
         return "#{} {}th laps:{} by {} last: {} best: {} on lap {}".format(self.car_number, self.position,
@@ -61,17 +86,37 @@ class RaceOrder(EventHandler):
     def __init__(self):
         self.first = None
         self.number_lookup = {}
+        self.class_lookup = {}
         DumpLeaderboardEvent.register_handler(self)
 
     def handle_event(self, event, **kwargs):
         if event == DumpLeaderboardEvent:
             print(self.__repr__())
 
+    def lookup(self, car_number) -> CarPosition:
+        return self.number_lookup.get(car_number)
+
+    def get_car_in_position(self, position):
+        cursor: CarPosition = self.first
+        loop = 0
+        while cursor and loop <= position:
+            if cursor.position == position:
+                return cursor
+            cursor = cursor.car_behind
+            loop += 1
+        return None
+
     def add_car(self, car: CarPosition):
         existing = self.number_lookup.get(car.car_number)
         if not existing:
             self.number_lookup[car.car_number] = car
             self.first = self.__append__(self.first, car)
+
+    def add_class(self, id, name):
+        self.class_lookup[id] = name
+
+    def has_multiple_classes(self) -> bool:
+        return len(self.class_lookup) > 1
 
     def size(self):
         return len(self.number_lookup)
@@ -90,18 +135,22 @@ class RaceOrder(EventHandler):
         self.cleanup()
         #self.__check_data_structure__()
 
-    def update_last_lap(self, car_number, last_lap_time):
+    def update_last_lap(self, car_number, last_lap_time: float):
+        if not isinstance(last_lap_time, float):
+            raise Exception("lap time is not a float")
         car = self.number_lookup.get(car_number)
         if not car:
             raise Exception
         car.last_lap_time = last_lap_time
 
-    def update_fastest_lap(self, car_number, fastest_lap_number, fastest_lap):
+    def update_fastest_lap(self, car_number, fastest_lap_number, fastest_lap_time: float):
+        if not isinstance(fastest_lap_time, float):
+            raise Exception("lap time is not a float")
         car = self.number_lookup.get(car_number)
         if not car:
             raise Exception
         car.fastest_lap = fastest_lap_number
-        car.fastest_lap_time = fastest_lap
+        car.fastest_lap_time = fastest_lap_time
 
     def update_lap_timestamp(self, car_number, timestamp):
         car = self.number_lookup.get(car_number)
@@ -256,6 +305,15 @@ class RaceOrder(EventHandler):
             if scan.laps_completed == 0:
                 scan.position = CarPosition.NOT_STARTED
             scan = scan.car_behind
+        if self.has_multiple_classes():
+            for race_class in self.class_lookup.keys():
+                scan: CarPosition = self.first
+                pos = 1
+                while scan and scan.position != CarPosition.NOT_STARTED:
+                    if scan.class_id == race_class:
+                        scan.class_position = pos
+                        pos += 1
+                    scan = scan.car_behind
 
     def __repr__(self):
         result = ""
@@ -264,5 +322,7 @@ class RaceOrder(EventHandler):
             result = result + "\n" + repr(scan)
             scan = scan.car_behind
         return result
+
+
 
 

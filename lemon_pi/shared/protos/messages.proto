@@ -86,6 +86,9 @@ message RacePosition {
   // display forever, we send the race status in each RacePosition update
   RaceFlagStatus flag_status = 8;
 
+  // position in the class of car. Zero if there are no classes
+  int32 position_in_class = 9;
+
 }
 
 message CarTelemetry {
