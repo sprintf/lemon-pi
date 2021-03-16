@@ -13,9 +13,10 @@ RaceStatusEvent = Event("race-flag")
 #   car=
 #   laps=
 #   position=
+#   class_position=
 #   ahead=   optional (only if someone ahead)
 #   gap=     "-" if nobody ahead
-#   last_lap_time=  text of lap time
+#   last_lap_time=  float value : seconds of last lap
 #   flag=
 LapCompletedEvent = Event("lap-completed")
 
@@ -45,6 +46,10 @@ SendMessageEvent = Event("send-message")
 
 #
 RadioReceiveEvent = Event("radio-rx")
+
+# emit() sends out
+# seconds=
+TargetTimeEvent = Event("target-time")
 
 # dumo out the leaderboard to stdout
 DumpLeaderboardEvent = Event("dump-leaderboard")

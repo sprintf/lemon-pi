@@ -8,7 +8,7 @@ from lemon_pi.pit.event_defs import (
     RaceStatusEvent,
     PittingEvent,
     LapCompletedEvent,
-    TelemetryEvent, DumpLeaderboardEvent, RadioReceiveEvent
+    TelemetryEvent, DumpLeaderboardEvent, RadioReceiveEvent, TargetTimeEvent
 )
 from lemon_pi.shared.events import Event
 from lemon_pi.shared.gui_components import AlertBox, FadingBox
@@ -42,31 +42,39 @@ class Gui():
         self.main = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, layout="grid", visible=False)
         self.main.set_border(6, color="darkgreen")
 
-        self.time_widget = self.create_clock(self.main, grid=[0,0])
-        self.race_status = self.create_race_status(self.main, grid=[1,0])
-        self.status_message = self.create_status_message(self.main, grid=[0, 1])
-
-        self.timer = self.create_lap_timer(self.main, grid=[0,2])
-        self.lap_fuel = self.create_lap_fuel(self.main, grid=[1,2])
-
-        Box(self.main, height=64, width="fill", grid=[0,3])
-
-        self.temp:AlertBox = self.create_temp_gauge(self.main, grid=[0,4])
-        self.fuel = self.create_fuel_gauge(self.main, grid=[1,4])
-
-        Box(self.main, height=64, width="fill", grid=[0,5])
-
-        self.message = self.create_message_field(self.main, grid=[0,6])
-
-        Box(self.main, height=64, width="fill", grid=[0,7])
-
-        self.lap_list:ListBox = self.create_lap_list(self.main, grid=[0,8])
+        row = 0
+        self.time_widget = self.create_clock(self.main, grid=[0, row])
+        self.race_status = self.create_race_status(self.main, grid=[1, row])
+        row += 1
+        self.status_message = self.create_status_message(self.main, grid=[0, row])
+        row += 1
+        self.timer = self.create_lap_timer(self.main, grid=[0, row])
+        self.lap_fuel = self.create_lap_fuel(self.main, grid=[1, row])
+        row += 1
+        Box(self.main, height=64, width="fill", grid=[0, row])
+        row += 1
+        self.target_time = self.create_target_time(self.main, grid=[0, row])
+        self.position_widget = self.create_position_display(self.main, grid=[1, row])
+        row += 1
+        Box(self.main, height=64, width="fill", grid=[0, row])
+        row += 1
+        self.temp:AlertBox = self.create_temp_gauge(self.main, grid=[0, row])
+        self.fuel = self.create_fuel_gauge(self.main, grid=[1, row])
+        row += 1
+        Box(self.main, height=64, width="fill", grid=[0, row])
+        row += 1
+        self.message = self.create_message_field(self.main, grid=[0, row])
+        row += 1
+        Box(self.main, height=64, width="fill", grid=[0, row])
+        row += 1
+        self.lap_list:ListBox = self.create_lap_list(self.main, grid=[0, row])
 
         RaceStatusEvent.register_handler(self)
         PittingEvent.register_handler(self)
         LapCompletedEvent.register_handler(self)
         TelemetryEvent.register_handler(self)
         RadioReceiveEvent.register_handler(self)
+        TargetTimeEvent.register_handler(self)
 
     def display(self):
         self.root.when_key_pressed = self.handle_keyboard
@@ -91,6 +99,14 @@ class Gui():
 
         if event == RadioReceiveEvent:
             self.radio_signal.brighten()
+            return
+
+        if event == LapCompletedEvent:
+            self.__update_position(**kwargs)
+            return
+
+        if event == TargetTimeEvent:
+            self.__update_target_time(**kwargs)
             return
 
     def register_time_provider(self, provider:TimeProvider):
@@ -159,6 +175,20 @@ class Gui():
         result = Box(parent, grid=grid)
         self.lap_fuel = BigText(result, "NN", align="left")
         BigText(result, "g", align="left")
+        return result
+
+    def create_target_time(self, parent, grid):
+        result = Box(parent, grid=grid)
+        BigText(result, "Target:", align="left")
+        self.target_time_field = BigText(result, "mm:ss", align="left")
+        return result
+
+    def create_position_display(self, parent, grid):
+        result = Box(parent, grid=grid)
+        BigText(result, "Pos:", align="left")
+        self.race_position = BigText(result, "P", align="left")
+        BigText(result, "Class:", align="left")
+        self.class_position = BigText(result, "C", align="left")
         return result
 
     def create_race_status(self, parent, grid):
@@ -238,20 +268,13 @@ class Gui():
         self.temp.update_value(coolant_temp)
         self.fuel_percent.value = fuel_percent
 
-# items to display
-# last time we heard from car
-# race flag color
-# car data :
-#    temp; last lap; laps; recent laps
-#    fuel used + lap time
-# fuel remaining
-# est pit time
-#   mean fuel used over last 3 laps
-# pitting flag
+    def __update_position(self, position=0):
+        self.race_position.value = position
+        #self.class_position = ???
 
-# Race overall:
-#  time
-#  flag status
-#  message board <message sent> | <car 181 pitting>
+    def __update_target_time(self, seconds=0.0):
+        self.target_time_field.value = "{:02d}:{:02d}".\
+            format(int(seconds / 60), int(seconds) % 60)
+
 
 

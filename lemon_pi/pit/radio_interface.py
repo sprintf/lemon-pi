@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 class RadioInterface(Thread, EventHandler):
 
-    def __init__(self, radio:Radio):
+    def __init__(self, radio: Radio):
         Thread.__init__(self, daemon=True)
         self.radio = radio
         RaceStatusEvent.register_handler(self)
@@ -59,7 +59,8 @@ class RadioInterface(Thread, EventHandler):
         status.flag_status = self.set_flag_status(flag)
         self.radio.send_async(status)
 
-    def set_flag_status(self, flag):
+    @classmethod
+    def set_flag_status(cls, flag):
         try:
             # this can fail with an empty string, in which case it remains
             # set to UNKNOWN
@@ -68,11 +69,14 @@ class RadioInterface(Thread, EventHandler):
             pass
         return RaceFlagStatus.UNKNOWN
 
-    def send_lap_completed(self, car="", position=0, laps=0, ahead=None, gap="", last_lap_time=0, flag=""):
-        logger.info("car: {} completed lap {} in pos {}".format(car, laps, position))
+    def send_lap_completed(self, car="", position=0, class_position=0,
+                           laps=0, ahead=None, gap="", last_lap_time=0, flag=""):
+        logger.info("car: {} completed lap {} in pos {}({}) last = {}".
+                    format(car, laps, position, class_position, last_lap_time))
         pos = RacePosition()
         pos.car_number = car
         pos.position = position
+        pos.position_in_class = class_position
         pos.lap_count = laps
         pos.flag_status = self.set_flag_status(flag)
         if ahead:
@@ -91,7 +95,8 @@ class RadioInterface(Thread, EventHandler):
         message.car_number = car
         self.radio.send_async(message)
 
-    def convert_to_event(self, proto_msg):
+    @classmethod
+    def convert_to_event(cls, proto_msg):
         if type(proto_msg) == EnteringPits:
             PittingEvent.emit(car=proto_msg.sender)
             return
@@ -113,4 +118,3 @@ class RadioInterface(Thread, EventHandler):
     def __delayed_send__(self, pos, delay):
         time.sleep(delay)
         self.radio.send_async(pos)
-

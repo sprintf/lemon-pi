@@ -9,6 +9,7 @@ from lemon_pi.pit.radio_interface import RadioInterface
 from lemon_pi.pit.datasource.datasource1 import DataSource
 from lemon_pi.pit.datasource.datasource_handler import DataSourceHandler
 from lemon_pi.pit.leaderboard import RaceOrder
+from lemon_pi.pit.strategy_analyzer import StrategyAnalyzer
 from lemon_pi.shared.radio import Radio
 from lemon_pi.shared.time_provider import LocalTimeProvider
 from lemon_pi.shared.usb_detector import UsbDetector
@@ -33,7 +34,7 @@ logging.basicConfig(format='%(asctime)s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO)
 
-if not "SETTINGS_MODULE" in os.environ:
+if "SETTINGS_MODULE" not in os.environ:
     os.environ["SETTINGS_MODULE"] = "lemon_pi.config.local_settings_pit"
 
 
@@ -63,6 +64,9 @@ def run():
             leaderboard = RaceOrder()
             # filter race updates down to updates related to our car
             updater = DataSourceHandler(leaderboard, settings.TARGET_CAR)
+            # provide a strategy analyzer
+            sa = StrategyAnalyzer(leaderboard, settings.TARGET_CAR)
+            sa.start()
             # start reading the race state
             ds = DataSource(settings.RACE_ID, updater)
             # and keep a thread going reading the race state
@@ -73,6 +77,7 @@ def run():
 
     Thread(target=init, daemon=True).start()
     gui.display()
+
 
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(name)s %(message)s',

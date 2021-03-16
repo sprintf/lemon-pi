@@ -2,13 +2,14 @@ import os
 import logging
 
 from lemon_pi.pit.datasource.datasource_handler import DataSourceHandler
-from lemon_pi.pit.leaderboard import RaceOrder
+from lemon_pi.pit.leaderboard import RaceOrder, PositionEnum
 from datetime import datetime
 from python_settings import settings
 import time
 
 # Utility that can play through a recorded file of a race, at a faster simulated speed
 from lemon_pi.pit.radio_interface import RadioInterface
+from lemon_pi.pit.strategy_analyzer import StrategyAnalyzer
 from lemon_pi.shared.radio import Radio
 from lemon_pi.shared.usb_detector import UsbDetector
 
@@ -61,5 +62,10 @@ if __name__ == "__main__":
 
     leaderboard = RaceOrder()
 
-    handler = DataSourceHandler(leaderboard, "444")
-    sim_race("../../resources/test/test-file.dat", handler, 5)
+    car_number = "909"
+    sa = StrategyAnalyzer(leaderboard, car_number)
+    sa.set_position_mode(PositionEnum.IN_CLASS)
+    sa.start()
+
+    handler = DataSourceHandler(leaderboard, car_number)
+    sim_race("../../resources/test/test-file.dat", handler, 10)
