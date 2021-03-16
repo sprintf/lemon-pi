@@ -23,10 +23,8 @@ class MessageEncoder:
         subfield = None
         if isinstance(msg, ToCarMessage):
             subfield = msg.WhichOneof("to_car")
-            pass
         if isinstance(msg, ToPitMessage):
             subfield = msg.WhichOneof("to_pit")
-            pass
 
         subfield_attr = getattr(msg, subfield)
         setattr(subfield_attr, "seq_num", self.seq)

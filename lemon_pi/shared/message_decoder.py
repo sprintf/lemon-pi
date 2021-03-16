@@ -37,7 +37,10 @@ class MessageDecoder:
                 return getattr(instance, instance.WhichOneof("to_car"))
             if isinstance(instance, ToPitMessage) and instance.HasField("to_pit"):
                 return getattr(instance, instance.WhichOneof("to_pit"))
-            raise("unexpected message error")
+            raise RuntimeWarning("decoding failed")
+        except RuntimeWarning:
+            # this also means the decryption failed
+            raise LPiNoiseException()
         except ValueError:
             # this means the decryption failed
             raise LPiNoiseException()

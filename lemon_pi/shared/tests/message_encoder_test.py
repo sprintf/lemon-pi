@@ -3,7 +3,7 @@ import unittest
 from lemon_pi.shared.message_encoder import MessageEncoder
 from lemon_pi.shared.message_decoder import MessageDecoder
 
-from lemon_pi.shared.generated.messages_pb2 import Ping, SetFuelLevel, ToCarMessage
+from lemon_pi.shared.generated.messages_pb2 import ToCarMessage
 
 
 class EncoderTestCase(unittest.TestCase):
