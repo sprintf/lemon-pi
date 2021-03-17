@@ -193,7 +193,7 @@ class Gui(EventHandler):
         # when the car behind us crosses the line we get an update on the time
         # between them and us, so we add this to the message on show
         if event == DriverMessageAddendumEvent:
-            self.msg_area.text_size = Gui.TEXT_MED
+            self.msg_area.text_size = Gui.TEXT_SMALL
             self.msg_area.value = self.msg_area.value + kwargs.get("text")
             return
 
