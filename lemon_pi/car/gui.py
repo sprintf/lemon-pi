@@ -165,10 +165,12 @@ class Gui(EventHandler):
         if event == RaceFlagStatusEvent:
             # if it's green, make sure the background of the speed dial is black
             flag = kwargs.get("flag")
+            self.speed_heading_widget.text_color = "white"
             if flag == "GREEN":
                 self.speed_heading_widget.bg = "black"
             elif flag == "YELLOW":
                 self.speed_heading_widget.bg = "yellow"
+                self.speed_heading_widget.text_color = "black"
             elif flag == "RED":
                 self.speed_heading_widget.bg = "red"
             elif flag == "BLACK":
@@ -177,7 +179,7 @@ class Gui(EventHandler):
                 logger.warning("unknown flag state : {}".format(flag))
 
         if event == DriverMessageEvent:
-            self.msg_area.text_size = 48
+            self.msg_area.text_size = Gui.TEXT_LARGE
             self.msg_area.value = kwargs.get("text")
             duration_secs = kwargs.get("duration_secs")
             self.msg_area.bg = "purple"
@@ -191,7 +193,7 @@ class Gui(EventHandler):
         # when the car behind us crosses the line we get an update on the time
         # between them and us, so we add this to the message on show
         if event == DriverMessageAddendumEvent:
-            self.msg_area.text_size = 32
+            self.msg_area.text_size = Gui.TEXT_MED
             self.msg_area.value = self.msg_area.value + kwargs.get("text")
             return
 

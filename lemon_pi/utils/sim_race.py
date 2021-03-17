@@ -69,4 +69,4 @@ if __name__ == "__main__":
     sa.start()
 
     handler = DataSourceHandler(leaderboard, car_number)
-    sim_race("../../resources/test/test-file.dat", handler, 10)
+    sim_race("../../resources/test/test-file.dat", handler, 5)
