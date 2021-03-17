@@ -18,7 +18,7 @@ from lemon_pi.shared.message_decoder import (
     LPiNoiseException
 )
 
-from lemon_pi.shared.generated.messages_pb2 import Ping, ToCarMessage
+from lemon_pi.shared.generated.messages_pb2 import ToCarMessage, ToPitMessage
 
 from google.protobuf.message import Message
 
@@ -231,7 +231,12 @@ class Radio(Thread):
                 sleep = random.randint(-10, 10)
                 time.sleep(self.ping_freq + sleep)
                 if time.time() - self.last_transmit > (self.ping_freq / 2):
-                    self.send_message(protocol, Ping())
+                    if isinstance(self.base_message, ToCarMessage):
+                        ping = ToPitMessage()
+                    else:
+                        ping = ToCarMessage()
+                    ping.ping.timestamp = 1
+                    self.send_message(protocol, ping)
                 if time.time() - last_status_log_time > 60:
                     logger.info("Status : {}".format(self.metrics.__repr__()))
                     self.metrics.reset()
@@ -251,17 +256,20 @@ class Radio(Thread):
             logger.info("TX complete")
 
     def send_message(self, protocol, msg:Message):
-        logger.debug("turning off receive")
-        protocol.send_cmd("radio rxstop")
-        protocol.transmitting = True
-        protocol.send_cmd("sys set pindig GPIO11 1")
-        payload = self.encoder.encode(msg).hex()
-        logger.info("sending {}".format(type(msg)))
-        protocol.send_cmd("radio tx %s" % payload)
-        self.metrics.send_attempt += 1
-        self.last_transmit = time.time()
-        protocol.send_cmd("sys set pindig GPIO11 0")
-        logger.debug("message sent")
+        try:
+            logger.debug("turning off receive")
+            protocol.send_cmd("radio rxstop")
+            protocol.transmitting = True
+            protocol.send_cmd("sys set pindig GPIO11 1")
+            payload = self.encoder.encode(msg).hex()
+            logger.info("sending {}".format(type(msg)))
+            protocol.send_cmd("radio tx %s" % payload)
+            self.metrics.send_attempt += 1
+            self.last_transmit = time.time()
+            protocol.send_cmd("sys set pindig GPIO11 0")
+            logger.debug("message sent")
+        except Exception as e:
+            logger.exception("something went wrong")
 
 
 if __name__ == "__main__":

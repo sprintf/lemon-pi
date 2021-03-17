@@ -30,7 +30,7 @@ class TrackUpdater:
             if e.code == 304:
                 logger.info("track up to date")
             else:
-                raise e
+                logger.warning("track data unavailable/forbidden : {}".format(e.code))
         except urllib.error.URLError as e:
             logger.info("no wifi. no tracks updated")
 
