@@ -1,7 +1,9 @@
 import os
 import logging
+from threading import Thread
 
 from lemon_pi.pit.datasource.datasource_handler import DataSourceHandler
+from lemon_pi.pit.gui import Gui
 from lemon_pi.pit.leaderboard import RaceOrder, PositionEnum
 from datetime import datetime
 from python_settings import settings
@@ -51,12 +53,19 @@ if not "SETTINGS_MODULE" in os.environ:
     os.environ["SETTINGS_MODULE"] = "lemon_pi.config.local_settings_pit"
 
 
+def run_sim(gui, leaderboard, car_number):
+    gui.progress(100)
+    handler = DataSourceHandler(leaderboard, car_number)
+    sim_race("../../resources/test/test-file.dat", handler, 5)
+
 
 if __name__ == "__main__":
     UsbDetector().init()
 
     radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY, ToPitMessage())
     radio.start()
+
+    time.sleep(3)
 
     ri = RadioInterface(radio)
     ri.start()
@@ -68,5 +77,7 @@ if __name__ == "__main__":
     sa.set_position_mode(PositionEnum.IN_CLASS)
     sa.start()
 
-    handler = DataSourceHandler(leaderboard, car_number)
-    sim_race("../../resources/test/test-file.dat", handler, 5)
+    gui = Gui()
+    gui.set_target_car(car_number)
+    Thread(target=run_sim, args=[gui, leaderboard, car_number], daemon=True).start()
+    gui.display()

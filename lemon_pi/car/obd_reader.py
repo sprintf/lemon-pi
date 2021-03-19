@@ -82,20 +82,10 @@ class ObdReader(Thread, TemperatureProvider):
 
         result = obd.OBD(port, protocol=settings.OBD_PROTOCOL)
         status = result.status()
-        if status == obd.OBDStatus.NOT_CONNECTED or \
-           status == obd.OBDStatus.ELM_CONNECTED:
+        if status != obd.OBDStatus.CAR_CONNECTED:
             result.close()
             return None
         OBDConnectedEvent.emit()
-
-        cmds = result.query(obd.commands.PIDS_A)
-        logger.debug("available PIDS_A commands {}".format(cmds.value))
-
-        cmds = result.query(obd.commands.PIDS_B)
-        logger.debug("available PIDS_B commands {}".format(cmds.value))
-
-        cmds = result.query(obd.commands.PIDS_C)
-        logger.debug("available PIDS_C commands {}".format(cmds.value))
 
         return result
 

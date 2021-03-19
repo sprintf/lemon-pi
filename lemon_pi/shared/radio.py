@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import time
+import os
 import random
 import serial
 from zlib import adler32
@@ -83,15 +84,6 @@ class Radio(Thread):
         self.metrics = RadioMetrics()
         self.last_transmit = 0
         self.ping_freq = ping_freq
-        # TODO this should move into an init function that also gets called on disconnect
-        # so we can survive the radio being plugged and unplugged
-        if kwargs.get("ser"):
-            self.ser = kwargs['ser']
-        elif UsbDetector.detected(UsbDevice.LORA):
-            self.ser = serial.Serial(self.choose_port(), baudrate=57600,
-                                     stopbits=STOPBITS_ONE, parity=PARITY_NONE, bytesize=EIGHTBITS)
-        else:
-            logger.info("No LORA device connected")
         self.send_queue = Queue()
         self.send_thread = Thread(target=self.__send_outbound_messages__, daemon=True)
         self.receive_queue = Queue()
@@ -113,8 +105,9 @@ class Radio(Thread):
     def __radio_ready__(self):
         logger.info("radio is ready!")
         logger.info("using frequency {}".format(self.frequency))
-        self.send_thread.start()
-        logger.info("send thread started")
+        if not self.send_thread.is_alive():
+            self.send_thread.start()
+            logger.info("send thread started")
 
     class PrintLines(LineReader):
 
@@ -123,6 +116,7 @@ class Radio(Thread):
             self.radio = None
             self.transmitting = False
             self.initialized = False
+            self.disconnected = False
 
         def set_radio(self, radio):
             self.radio = radio
@@ -212,6 +206,7 @@ class Radio(Thread):
             if exc:
                 logger.exception(exc)
             logger.info("port closed")
+            self.disconnected = True
 
         def send_cmd(self, cmd, delay=0):
             if delay == 0:
@@ -221,26 +216,43 @@ class Radio(Thread):
             time.sleep(delay)
 
     def receive_loop(self):
-        with ReaderThread(self.ser, self.PrintLines) as protocol:
 
-            self.protocol = protocol
-            protocol.set_radio(self)
+        serial_connection = None
 
-            last_status_log_time = time.time()
-            while (1):
-                sleep = random.randint(-10, 10)
-                time.sleep(self.ping_freq + sleep)
-                if time.time() - self.last_transmit > (self.ping_freq / 2):
-                    if isinstance(self.base_message, ToCarMessage):
-                        ping = ToPitMessage()
-                    else:
-                        ping = ToCarMessage()
-                    ping.ping.timestamp = 1
-                    self.send_message(protocol, ping)
-                if time.time() - last_status_log_time > 60:
-                    logger.info("Status : {}".format(self.metrics.__repr__()))
-                    self.metrics.reset()
-                    last_status_log_time = time.time()
+        while True:
+
+            if serial_connection:
+                # if we have a serial connection then we're reinitializing it
+                UsbDetector.init()
+
+            if UsbDetector.detected(UsbDevice.LORA):
+                serial_connection = serial.Serial(self.choose_port(), baudrate=57600,
+                                         stopbits=STOPBITS_ONE, parity=PARITY_NONE, bytesize=EIGHTBITS)
+            else:
+                logger.info("No LORA device connected, waiting 30s")
+                time.sleep(30)
+
+            with ReaderThread(serial_connection, self.PrintLines) as protocol:
+
+                self.protocol = protocol
+                protocol.set_radio(self)
+
+                last_status_log_time = time.time()
+                while not protocol.disconnected:
+                    sleep = random.randint(-10, 10)
+                    time.sleep(self.ping_freq + sleep)
+                    if time.time() - self.last_transmit > (self.ping_freq / 2):
+                        if isinstance(self.base_message, ToCarMessage):
+                            ping = ToPitMessage()
+                        else:
+                            ping = ToCarMessage()
+                        ping.ping.timestamp = 1
+                        self.send_message(protocol, ping)
+                    if time.time() - last_status_log_time > 60:
+                        logger.info("Status : {}".format(self.metrics.__repr__()))
+                        self.metrics.reset()
+                        last_status_log_time = time.time()
+                logger.warning("disconnect detected")
 
     def send_async(self, msg:Message):
         self.send_queue.put(msg)
@@ -273,6 +285,10 @@ class Radio(Thread):
 
 
 if __name__ == "__main__":
+
+    if not "SETTINGS_MODULE" in os.environ:
+        os.environ["SETTINGS_MODULE"] = "lemon_pi.config.local_settings_pit"
+
     logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
                         level=logging.INFO)

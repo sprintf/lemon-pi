@@ -406,8 +406,8 @@ class Gui(EventHandler):
             ll = provider.get_last_lap_time()
             minutes = int(ll / 60)
             seconds = int(ll) % 60
-            millis = int((ll - int(ll)) * 10)
-            self.lap_display.children[5].value = "{:02d}:{:02d}.{:01d}".format(minutes, seconds, millis)
+            tenths = int((ll - int(ll)) * 10)
+            self.lap_display.children[5].value = "{:02d}:{:02d}.{:01d}".format(minutes, seconds, tenths)
 
     def __updateFuel(self, provider: FuelProvider):
         # children offsets:
@@ -437,7 +437,7 @@ class RandomLapTimeProvider(LapProvider):
         self.start_time = time.time()
 
     def get_last_lap_time(self) -> float:
-        return random.randint(10000, 30000) / 100
+        return random.randint(100000, 300000) / 1000
 
     def get_lap_timer(self) -> int:
         return int(time.time() - self.start_time)

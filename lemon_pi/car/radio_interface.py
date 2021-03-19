@@ -11,17 +11,19 @@ from lemon_pi.car.event_defs import (
     DriverMessageEvent,
     DriverMessageAddendumEvent,
     RaceFlagStatusEvent,
-    LapInfoEvent, RadioReceiveEvent, RefuelEvent
+    LapInfoEvent,
+    RadioReceiveEvent,
+    RefuelEvent
 )
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.generated.messages_pb2 import (
-    CarTelemetry,
     RaceStatus,
     DriverMessage,
     Ping,
     RacePosition,
-    EnteringPits,
-    RaceFlagStatus, SetFuelLevel, ToPitMessage)
+    RaceFlagStatus,
+    SetFuelLevel,
+    ToPitMessage)
 
 from python_settings import settings
 

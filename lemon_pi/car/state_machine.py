@@ -30,7 +30,7 @@ class StateMachine(EventHandler):
         CompleteLapEvent.register_handler(self)
         OBDConnectedEvent.register_handler(self)
 
-    def handle_event(self, event, speed=0, lat_long=None):
+    def handle_event(self, event, speed=0, lat_long=None, ts=0):
         # upon power on we assume we're in the pit, so this
         # isn't a completely reliable state
         if self.state == State.PARKED_IN_PIT:
