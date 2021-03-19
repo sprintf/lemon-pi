@@ -17,25 +17,24 @@ from lemon_pi.shared.time_provider import TimeProvider
 logger = logging.getLogger(__name__)
 
 
-presses = 0
-
 class BigText(Text):
 
     def __init__(self, parent, text, **kwargs):
         Text.__init__(self, parent, text, size=32, color="white", **kwargs)
 
 
-class Gui():
+class Gui:
 
     WIDTH = 1200
     HEIGHT = 800
 
     def __init__(self):
         self.root = App("Lemon-Pit",
-                       bg="black",
-                       width=Gui.WIDTH,
-                       height=Gui.HEIGHT)
+                        bg="black",
+                        width=Gui.WIDTH,
+                        height=Gui.HEIGHT)
 
+        self.target_car = None
         self.splash = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, border=200)
         self.splash_progress = Text(self.splash, "0%", size=100, color="green")
 
@@ -58,7 +57,7 @@ class Gui():
         row += 1
         Box(self.main, height=64, width="fill", grid=[0, row])
         row += 1
-        self.temp:AlertBox = self.create_temp_gauge(self.main, grid=[0, row])
+        self.temp: AlertBox = self.create_temp_gauge(self.main, grid=[0, row])
         self.fuel = self.create_fuel_gauge(self.main, grid=[1, row])
         row += 1
         Box(self.main, height=64, width="fill", grid=[0, row])
@@ -67,7 +66,7 @@ class Gui():
         row += 1
         Box(self.main, height=64, width="fill", grid=[0, row])
         row += 1
-        self.lap_list:ListBox = self.create_lap_list(self.main, grid=[0, row])
+        self.lap_list: ListBox = self.create_lap_list(self.main, grid=[0, row])
 
         RaceStatusEvent.register_handler(self)
         PittingEvent.register_handler(self)
@@ -83,7 +82,19 @@ class Gui():
     def shutdown(self):
         self.root.destroy()
 
-    def handle_event(self, event:Event, flag=None, car="", **kwargs):
+    def handle_lap_completed(self,
+                             position=0,
+                             class_position=0,
+                             laps=0,
+                             last_lap_time=0,
+                             ahead="",
+                             gap="",
+                             flag=""):
+        self.__update_position(position=position, class_position=class_position)
+        self.__update_car_data__(lap_count=laps, last_lap_time=last_lap_time)
+        self.lap_count.value = laps + 1
+
+    def handle_event(self, event: Event, flag=None, car="", **kwargs):
         if event == RaceStatusEvent:
             self.flag.bg = flag.lower()
             return
@@ -102,15 +113,17 @@ class Gui():
             return
 
         if event == LapCompletedEvent:
-            self.__update_position(**kwargs)
+            # is this for us? (it could be the following car)
+            if car == self.target_car:
+                self.handle_lap_completed(**kwargs)
             return
 
         if event == TargetTimeEvent:
             self.__update_target_time(**kwargs)
             return
 
-    def register_time_provider(self, provider:TimeProvider):
-        self.time_widget.repeat(1000, self.__updateTime, args=[provider])
+    def register_time_provider(self, provider: TimeProvider):
+        self.time_widget.repeat(1000, self.__update_time, args=[provider])
         self.time_widget.repeat(500, self.__update_time_beat)
 
     def progress(self, percent):
@@ -128,20 +141,11 @@ class Gui():
             self.shutdown()
             return
 
-        if event_data.key == "l":
-            global presses
-            self.__update_car_data__(car="181",
-                                     lap_count=1 + presses,
-                                     coolant_temp=190 + presses,
-                                     last_lap_time=124 - presses,
-                                     last_lap_fuel=312 + presses,
-                                     fuel_percent=98 - presses)
-            presses += 1
-
-        if event_data.key == 'd':
+        if event_data.key == 'D':
             DumpLeaderboardEvent.emit()
 
-    def create_temp_gauge(self, parent, grid):
+    @staticmethod
+    def create_temp_gauge(parent, grid):
         result = AlertBox(parent, grid=grid)
         result.set_range(settings.TEMP_BAND_LOW, settings.TEMP_BAND_WARN, settings.TEMP_BAND_HIGH)
         BigText(result, "Temp", align="left")
@@ -187,7 +191,7 @@ class Gui():
         result = Box(parent, grid=grid)
         BigText(result, "Pos:", align="left")
         self.race_position = BigText(result, "P", align="left")
-        BigText(result, "Class:", align="left")
+        BigText(result, " class:", align="left")
         self.class_position = BigText(result, "C", align="left")
         return result
 
@@ -207,7 +211,8 @@ class Gui():
         self.status = BigText(result, "", align="left")
         return result
 
-    def create_lap_list(self, parent, grid):
+    @staticmethod
+    def create_lap_list(parent, grid):
         result = ListBox(parent, grid=grid, scrollbar=True, height=200, width=450)
         result.text_color = "white"
         result.text_size = 32
@@ -218,7 +223,7 @@ class Gui():
     def send_message(self):
         # validate not too long
         text = self.message.children[1].value.strip()
-        if len(text) > 0 and len(text) < 20:
+        if len(text) > 0 and len(text) < 30:
             SendMessageEvent.emit(msg=self.message.children[1].value, car=settings.TARGET_CAR)
             self.message.children[1].value = ""
             self.__show_message(text="message sent", duration_secs=1)
@@ -234,13 +239,13 @@ class Gui():
         return result
 
     def __update_time_beat(self):
-        beat : Text = self.time_widget.children[1]
+        beat: Text = self.time_widget.children[1]
         if beat.text_color == "white":
             beat.text_color = self.main.bg
         else:
             beat.text_color = "white"
 
-    def __updateTime(self, provider: TimeProvider):
+    def __update_time(self, provider: TimeProvider):
         self.time_widget.children[0].value = "{:02d}".format(provider.get_hours())
         self.time_widget.children[2].value = "{:02d}".format(provider.get_minutes())
 
@@ -260,21 +265,38 @@ class Gui():
         self.status.value = text
 
     def __update_car_data__(self, car="", coolant_temp=0, lap_count=0,
-                            last_lap_time=0, last_lap_fuel=0, fuel_percent = -1):
+                            last_lap_time=0, last_lap_fuel=0, fuel_percent=-1):
         minutes = int(last_lap_time / 60)
-        seconds = last_lap_time % 60
-        entry = "{:03d} {:02d}:{:02d}   {:03d}".format(lap_count, minutes, seconds, last_lap_fuel )
-        self.lap_list.insert(1, entry)
-        self.temp.update_value(coolant_temp)
-        self.fuel_percent.value = fuel_percent
+        seconds = int(last_lap_time) % 60
+        entry = "{:03d} {:02d}:{:02d}   {:03d}".format(lap_count, minutes, seconds, last_lap_fuel)
 
-    def __update_position(self, position=0):
+        # always 1 in here for the title row
+        if len(self.lap_list.items) > 1:
+            top_entry = self.lap_list.items[1]
+            top_lap = int(top_entry.split(' ')[0])
+            if top_lap == lap_count:
+                if last_lap_fuel > 0:
+                    self.lap_list.insert(1, entry)
+                    self.lap_list.remove(2)
+            else:
+                self.lap_list.insert(1, entry)
+        else:
+            self.lap_list.insert(1, entry)
+        if coolant_temp > 0:
+            self.temp.update_value(coolant_temp)
+        if fuel_percent > 0:
+            self.fuel_percent.value = fuel_percent
+
+    def __update_position(self, position=0, class_position=0):
         self.race_position.value = position
-        #self.class_position = ???
+        self.class_position.value = class_position
 
     def __update_target_time(self, seconds=0.0):
         self.target_time_field.value = "{:02d}:{:02d}".\
             format(int(seconds / 60), int(seconds) % 60)
+
+    def set_target_car(self, car_number):
+        self.target_car = car_number
 
 
 

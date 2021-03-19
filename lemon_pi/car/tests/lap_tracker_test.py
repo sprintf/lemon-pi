@@ -55,5 +55,19 @@ class TestAngularDifference(unittest.TestCase):
         lt.update_position(35.4889, -119.5458, 90, now + 61, 50)
         leave_track_event.assert_called_once()
 
+    @patch("lemon_pi.car.event_defs.RadioSyncEvent.emit")
+    def test_radio_sync_detection(self, radio_sync_event):
+        bw = TrackLocation("bw")
+        sf = Target("start-finiah", (35.489031,-119.544530), (35.488713,-119.544510), "E")
+        bw.set_start_finish_target(sf)
+        pi = Target("radio", (35.489031,-119.546), (35.488713,-119.546), "E")
+        bw.set_radio_sync_target(pi)
+        lt = LapTracker(bw, Mock())
+        lt.on_track = True
+        now = time.time()
+        lt.update_position(35.4889, -119.5462, 90, now + 60, 50)
+        lt.update_position(35.4889, -119.5458, 90, now + 61, 50)
+        radio_sync_event.assert_called_once()
+
 if __name__ == '__main__':
     unittest.main()

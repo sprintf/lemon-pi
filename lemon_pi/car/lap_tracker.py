@@ -76,7 +76,7 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                 self.lap_start_time = cross_time
 
                 if not self.track.is_radio_sync_defined():
-                    RadioSyncEvent.emit()
+                    RadioSyncEvent.emit(ts=cross_time)
         else:
             for target_metadata in self.track.targets.keys():
                 target = self.track.targets[target_metadata]

@@ -11,17 +11,19 @@ from lemon_pi.car.event_defs import (
     DriverMessageEvent,
     DriverMessageAddendumEvent,
     RaceFlagStatusEvent,
-    LapInfoEvent, RadioReceiveEvent, RefuelEvent
+    LapInfoEvent,
+    RadioReceiveEvent,
+    RefuelEvent
 )
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.generated.messages_pb2 import (
-    CarTelemetry,
     RaceStatus,
     DriverMessage,
     Ping,
     RacePosition,
-    EnteringPits,
-    RaceFlagStatus, SetFuelLevel, ToPitMessage)
+    RaceFlagStatus,
+    SetFuelLevel,
+    ToPitMessage)
 
 from python_settings import settings
 
@@ -84,11 +86,11 @@ class RadioInterface(Thread, EventHandler):
         if type(msg) == RaceStatus:
             logger.info("got race status message...{}".format(msg))
             RaceFlagStatusEvent.emit(flag=RaceFlagStatus.Name(msg.flag_status))
-            if msg.flag_status == RaceStatus.RED:
+            if msg.flag_status == RaceFlagStatus.RED:
                 DriverMessageEvent.emit(text="Race Red Flagged", duration_secs=10)
-            if msg.flag_status == RaceStatus.BLACK:
+            if msg.flag_status == RaceFlagStatus.BLACK:
                 DriverMessageEvent.emit(text="Race Black Flagged", duration_secs=10)
-            if msg.flag_status == RaceStatus.YELLOW:
+            if msg.flag_status == RaceFlagStatus.YELLOW:
                 DriverMessageEvent.emit(text="Course Yellow", duration_secs=10)
         elif type(msg) == DriverMessage:
             logger.info("got race driver message...{}".format(msg))
@@ -102,8 +104,9 @@ class RadioInterface(Thread, EventHandler):
             logger.info("got race position message...{}".format(msg))
             # is this about us directly?
             if msg.car_number == settings.CAR_NUMBER:
+                position_text = self.format_position(msg)
                 if msg.car_ahead.car_number:
-                    text = "P{} ▲ {} by {}".format(msg.position, msg.car_ahead.car_number, msg.car_ahead.gap_text)
+                    text = "{}  ▲ #{} by {}".format(position_text, msg.car_ahead.car_number, msg.car_ahead.gap_text)
                     DriverMessageEvent.emit(text=text, duration_secs=120)
                 else:
                     # we're in the lead, there's no-one ahead
@@ -113,7 +116,7 @@ class RadioInterface(Thread, EventHandler):
             else:
                 # this might be the following car behind us ... it might also be for a different car in our team
                 if msg.car_ahead and msg.car_ahead.car_number == settings.CAR_NUMBER:
-                    text = " ▼ {} by {}".format(msg.car_number, msg.car_ahead.gap_text)
+                    text = " ▼ #{} by {}".format(msg.car_number, msg.car_ahead.gap_text)
                     DriverMessageAddendumEvent.emit(text=text)
             # now that this message also contains the race flag status we can emit it
             # unlike the similar message above this does not mean that the status has changed
@@ -128,6 +131,11 @@ class RadioInterface(Thread, EventHandler):
                 RefuelEvent.emit(percent_full=msg.percent_full)
         else:
             logger.warning("got unexpected message : {}".format(type(msg)))
+
+    def format_position(self, msg: RacePosition):
+        if msg.position_in_class > 0 and msg.position_in_class != msg.position:
+            return "P{} ({})".format(msg.position, msg.position_in_class)
+        return "P{}".format(msg.position)
 
 
 

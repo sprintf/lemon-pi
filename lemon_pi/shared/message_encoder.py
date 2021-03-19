@@ -26,6 +26,9 @@ class MessageEncoder:
         if isinstance(msg, ToPitMessage):
             subfield = msg.WhichOneof("to_pit")
 
+        if subfield is None:
+            raise Exception("no particular message type indicated")
+
         subfield_attr = getattr(msg, subfield)
         setattr(subfield_attr, "seq_num", self.seq)
         setattr(subfield_attr, "sender", self.sender)
@@ -36,7 +39,6 @@ class MessageEncoder:
         # IDEA : if it's too long take out the sender and the timestamp?
         if len(encrypted_payload) > 240:
             raise MessageTooLongException()
-        name = type(msg).__name__
         return b"LP" + encrypted_payload
 
     def __do_encrypt(self, payload):

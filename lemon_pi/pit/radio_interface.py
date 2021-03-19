@@ -87,11 +87,11 @@ class RadioInterface(Thread, EventHandler):
             # run it in foreground for unittests
             delayed_send.run()
 
-    def send_driver_message(self, car="", text=""):
-        msg = ToCarMessage()
-        msg.message.text = text
-        msg.message.car_number = car
-        self.radio.send_async(msg)
+    def send_driver_message(self, car="", msg=""):
+        wrapper = ToCarMessage()
+        wrapper.message.text = msg
+        wrapper.message.car_number = car
+        self.radio.send_async(wrapper)
 
     @classmethod
     def convert_to_event(cls, proto_msg):

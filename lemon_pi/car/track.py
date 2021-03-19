@@ -74,6 +74,9 @@ class TrackLocation:
     def get_radio_sync_target(self) -> Target:
         return self.targets[RADIO_SYNC]
 
+    def set_radio_sync_target(self, t:Target):
+        self.targets[RADIO_SYNC] = t
+
     def __repr__(self):
         return self.name
 

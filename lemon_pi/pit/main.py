@@ -1,6 +1,7 @@
 
 import os
 import logging
+import time
 from logging.handlers import RotatingFileHandler
 from threading import Thread
 from python_settings import settings
@@ -54,6 +55,7 @@ def run():
             radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY, ToPitMessage())
             RadioInterface(radio).start()
             radio.start()
+            time.sleep(3)
             gui.progress(85)
         except KeyError:
             print("ERROR : Lora radio device not detected")
@@ -65,6 +67,7 @@ def run():
             leaderboard = RaceOrder()
             # filter race updates down to updates related to our car
             updater = DataSourceHandler(leaderboard, settings.TARGET_CAR)
+            gui.set_target_car(settings.TARGET_CAR)
             # provide a strategy analyzer
             sa = StrategyAnalyzer(leaderboard, settings.TARGET_CAR)
             sa.start()
