@@ -86,11 +86,11 @@ class RadioInterface(Thread, EventHandler):
         if type(msg) == RaceStatus:
             logger.info("got race status message...{}".format(msg))
             RaceFlagStatusEvent.emit(flag=RaceFlagStatus.Name(msg.flag_status))
-            if msg.flag_status == RaceStatus.RED:
+            if msg.flag_status == RaceFlagStatus.RED:
                 DriverMessageEvent.emit(text="Race Red Flagged", duration_secs=10)
-            if msg.flag_status == RaceStatus.BLACK:
+            if msg.flag_status == RaceFlagStatus.BLACK:
                 DriverMessageEvent.emit(text="Race Black Flagged", duration_secs=10)
-            if msg.flag_status == RaceStatus.YELLOW:
+            if msg.flag_status == RaceFlagStatus.YELLOW:
                 DriverMessageEvent.emit(text="Course Yellow", duration_secs=10)
         elif type(msg) == DriverMessage:
             logger.info("got race driver message...{}".format(msg))
