@@ -237,7 +237,6 @@ class Radio(Thread):
                 self.protocol = protocol
                 protocol.set_radio(self)
 
-                last_status_log_time = time.time()
                 while not protocol.disconnected:
                     sleep = random.randint(-10, 10)
                     time.sleep(self.ping_freq + sleep)
@@ -247,25 +246,26 @@ class Radio(Thread):
                         else:
                             ping = ToCarMessage()
                         ping.ping.timestamp = 1
-                        self.send_message(protocol, ping)
-                    if time.time() - last_status_log_time > 60:
-                        logger.info("Status : {}".format(self.metrics.__repr__()))
-                        self.metrics.reset()
-                        last_status_log_time = time.time()
+                        self.send_async(ping)
                 logger.warning("disconnect detected")
 
     def send_async(self, msg:Message):
         self.send_queue.put(msg)
 
     def __send_outbound_messages__(self):
+        last_status_log_time = time.time()
         while True:
             msg = self.send_queue.get()
             self.send_message(self.protocol, msg)
             self.send_queue.task_done()
-            logger.info("awaiting TX completion")
+            logger.debug("awaiting TX completion")
             while self.protocol.transmitting:
                 time.sleep(0.1)
-            logger.info("TX complete")
+            logger.debug("TX complete")
+            if time.time() - last_status_log_time > 60:
+                logger.info("Status : {}".format(self.metrics.__repr__()))
+                self.metrics.reset()
+                last_status_log_time = time.time()
 
     def send_message(self, protocol, msg:Message):
         try:
