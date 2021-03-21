@@ -28,7 +28,12 @@ class AlertBox(Box):
         self.error_value = error
 
     def update_value(self, value:int):
-        self.children[1].value = str(value)
+        # a value of -1 is returned if the temperate is more than
+        # a minute old
+        if value > 0:
+            self.children[1].value = str(value)
+        else:
+            self.children[1].value = '?'
         if value < self.low_value:
             self._low()
         elif value < self.warn_value:
