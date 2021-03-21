@@ -393,8 +393,15 @@ class Gui(EventHandler):
             beat.text_color = "white"
 
     def __updateSpeed(self, provider: SpeedProvider):
-        self.speed_heading_widget.children[0].value = "{:02d}".format(provider.get_speed())
-        # self.speed_heading_widget.children[2].value = str(provider.get_heading())
+        speed = provider.get_speed()
+        self.speed_heading_widget.children[0].value = "{:02d}".format(speed)
+        # if we're doing more than 30 then make sure the fuel display is showing.
+        # this only happens when testing on the streets
+        if speed > 30:
+            if not self.col3.visible():
+                self.col4.hide()
+                self.col5.hide()
+                self.col3.show()
 
     def __updateLap(self, provider: LapProvider):
         self.lap_display.children[1].value = provider.get_lap_count()
