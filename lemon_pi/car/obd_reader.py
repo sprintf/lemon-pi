@@ -131,7 +131,7 @@ class ObdReader(Thread, TemperatureProvider):
             raise RuntimeWarning("no handler for {}".format(cmd))
 
     def get_temp_f(self) -> int:
-        if time.time - self.temp_time > 60:
+        if time.time() - self.temp_time > 60:
             return -1
         return self.temp_f
 
