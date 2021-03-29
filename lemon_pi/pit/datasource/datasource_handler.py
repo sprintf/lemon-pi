@@ -30,6 +30,7 @@ class DataSourceHandler:
                     if bits[0] == "$G" and len(bits) == 5:
                         # "$G" indicates a cars position and number of laps completed
                         # print(bits)
+                        # $G,14,"128",24,"00:59:45.851"
                         car_number = bits[2].strip('"')
                         laps_completed = None
                         if bits[3].isnumeric():
@@ -55,6 +56,7 @@ class DataSourceHandler:
                         position = int(bits[3].strip('"'))
                         last_lap_time = self._convert_to_s(bits[4].strip('"'))
                         flag = bits[5].strip('" ')
+                        self.leaderboard.update_position(car_number, position, laps)
                         if car_number == self.target_car:
                             target = self.leaderboard.number_lookup.get(self.target_car)
                             ahead = target.car_in_front

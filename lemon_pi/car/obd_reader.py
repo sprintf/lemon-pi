@@ -36,6 +36,7 @@ class ObdReader(Thread, TemperatureProvider):
     def __init__(self, fuel_listener: FuelUsageUpdater):
         Thread.__init__(self)
         self.working = False
+        self.no_data_count = 0
         self.temp_f = 0
         # the time the temperature was last read from OBD
         self.temp_time = 0
@@ -60,8 +61,10 @@ class ObdReader(Thread, TemperatureProvider):
             try:
                 connection = self.connect(connection)
                 if connection is None:
+                    logger.info("no connection, waiting 30s")
                     time.sleep(30)
                     continue
+                self.no_data_count = 0
 
                 while connection.status() == obd.OBDStatus.CAR_CONNECTED and not self.finished:
                     now = time.time()
@@ -72,6 +75,15 @@ class ObdReader(Thread, TemperatureProvider):
                                 self.working = True
                                 self.last_update_time[cmd] = r.time
                                 self.process_result(cmd, r)
+                                self.no_data_count = 0
+                            else:
+                                logger.info("no data, waiting")
+                                time.sleep(0.5)
+                                # after 10 of these close the connection
+                                self.no_data_count += 1
+                                if self.no_data_count > 10:
+                                    logger.info("giving up")
+                                    connection.close()
                     # I think we need MAF as fast as poss
                     # time.sleep(1)
             except Exception as e:
@@ -82,8 +94,7 @@ class ObdReader(Thread, TemperatureProvider):
                 OBDDisconnectedEvent.emit()
                 time.sleep(10)
 
-    @staticmethod
-    def connect(old_connection):
+    def connect(self, old_connection):
         port = UsbDetector.get(UsbDevice.OBD)
         if not port:
             return None
@@ -104,8 +115,11 @@ class ObdReader(Thread, TemperatureProvider):
         if cmds.value:
             logger.debug("available PIDS_A commands {}".format(cmds.value))
             OBDConnectedEvent.emit()
+            return result
+        else:
+            result.close()
 
-        return result
+        return None
 
     def process_result(self, cmd, response: OBDResponse):
         if response.value is None:

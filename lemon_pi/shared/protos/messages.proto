@@ -128,6 +128,18 @@ message SetFuelLevel {
   string sender = 3;
 
   int32 percent_full = 4;
+
+  string car_number = 5;
+}
+
+message RemoteReboot {
+  int32 seq_num = 1;
+
+  int32 timestamp = 2;
+
+  string sender = 3;
+
+  string car_number = 4;
 }
 
 message ToCarMessage {
@@ -137,6 +149,7 @@ message ToCarMessage {
     RaceStatus race_status = 3;
     RacePosition race_position = 4;
     SetFuelLevel set_fuel = 5;
+    RemoteReboot reboot = 6;
   }
 }
 

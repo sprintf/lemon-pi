@@ -53,7 +53,7 @@ class AlertBox(Box):
 
     def _info(self):
         self.bg = self.orig_bg
-        self._set_text_color("green")
+        self._set_text_color("lightgreen")
 
     def _low(self):
         self.bg = self.orig_bg
