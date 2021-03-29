@@ -32,6 +32,7 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
         self.position_listener = None
         self.log = log_to_file
         self.finished = False
+        self.part_synced = False
         self.time_synced = False
         self.sequential_timesync_errors = 0
         ExitApplicationEvent.register_handler(self)
@@ -56,6 +57,18 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
                             lag: timedelta = abs(datetime.now(tz=timezone.utc) - \
                                                  gps_datetime)
 
+                            if self.part_synced:
+                                # we have set the clock to the GPS a moment ago...whatever
+                                # the drift is due to the time taken to set the system clock
+                                logger.info("fine tuning clock from GPS by {}...".format(lag.seconds))
+                                epoch = int(gps_datetime.timestamp()) + lag.seconds
+                                subprocess.run(['sudo', 'date', '-u', '-s' '@{}'.format(epoch)])
+                                logger.info("time adjusted to {}".format(datetime.now()))
+                                self.part_synced = False
+                                self.time_synced = True
+                                self.sequential_timesync_errors = 0
+                                continue
+
                             # we find there's a 1s difference between SKY and TPV messages that
                             # come in.  We could ignore SKY, but for now we allow a 2s drift
                             if lag.total_seconds() > 2:
@@ -65,7 +78,7 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
                                     logger.info("setting clock from GPS...")
                                     epoch = int(gps_datetime.timestamp())
                                     subprocess.run(['sudo', 'date', '-u', '-s' '@{}'.format(epoch)])
-                                    self.time_synced = True
+                                    self.part_synced = True
                                     logger.info("time corrected to {}".format(datetime.now()))
                                 else:
                                     logger.warning("GPS Data time lag = {}  (skipping)".format(lag.total_seconds()))

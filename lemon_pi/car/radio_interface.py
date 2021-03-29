@@ -1,3 +1,4 @@
+import subprocess
 from threading import Thread
 
 from lemon_pi.car.display_providers import (
@@ -13,7 +14,8 @@ from lemon_pi.car.event_defs import (
     RaceFlagStatusEvent,
     LapInfoEvent,
     RadioReceiveEvent,
-    RefuelEvent
+    RefuelEvent,
+    ExitApplicationEvent
 )
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.generated.messages_pb2 import (
@@ -23,7 +25,7 @@ from lemon_pi.shared.generated.messages_pb2 import (
     RacePosition,
     RaceFlagStatus,
     SetFuelLevel,
-    ToPitMessage)
+    ToPitMessage, RemoteReboot)
 
 from python_settings import settings
 
@@ -125,10 +127,26 @@ class RadioInterface(Thread, EventHandler):
             RaceFlagStatusEvent.emit(flag=RaceFlagStatus.Name(msg.flag_status))
         elif type(msg) == SetFuelLevel:
             logger.info("got fuel level adjustment...{}".format(msg))
+            # for a multi-car team we only want to show the message to the car it
+            # was intended for
+            if msg.car_number != settings.CAR_NUMBER:
+                logger.info("it's not for me, ignoring")
+                return
             if msg.percent_full == 0:
                 RefuelEvent.emit(percent_full=100)
             else:
                 RefuelEvent.emit(percent_full=msg.percent_full)
+        elif type(msg) == RemoteReboot:
+            # for a multi-car team we only want to show the message to the car it
+            # was intended for
+            if msg.car_number != settings.CAR_NUMBER:
+                logger.info("it's not for me, ignoring")
+                return
+            logger.info("got remote reboot going down".format(msg))
+            ExitApplicationEvent.emit()
+            logger.info("told system to shut down ... now rebooting lemon-pi")
+            subprocess.run(['sudo', 'reboot', 'now'])
+            logger.info("goodbye, cruel world...")
         else:
             logger.warning("got unexpected message : {}".format(type(msg)))
 
