@@ -6,7 +6,7 @@ import time
 from python_settings import settings
 
 from lemon_pi.shared.generated.messages_pb2 import (
-    SetFuelLevel, ToPitMessage, RemoteReboot
+    ToPitMessage, ToCarMessage
 )
 from lemon_pi.shared.radio import Radio
 from lemon_pi.shared.usb_detector import UsbDetector
@@ -29,8 +29,8 @@ UsbDetector().init()
 radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY, ToPitMessage())
 radio.start()
 
-msg = RemoteReboot()
-msg.car_number = sys.argv[1]
+msg = ToCarMessage()
+msg.reboot.car_number = sys.argv[1]
 
 radio.send_async(msg)
 
