@@ -109,7 +109,9 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
 
         dist = int(haversine(target.midpoint, (lat, long), unit=Unit.FEET))
         logger.debug("distance to target = {} feet".format(dist))
-        if dist < 100:
+        # needs to be 200 feet or less. At 100mph a car covers 150 feet per second, and
+        # some gps devices are only providing updates once per second
+        if dist < 200:
             # grab a point that we're heading towards
             point_ahead = geometry.get_point_on_heading((lat, long), heading)
 
