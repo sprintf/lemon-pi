@@ -264,7 +264,7 @@ class Gui:
         self.status.after(duration_secs * 1000, self.__remove_message)
         self.status.value = text
 
-    def __update_car_data__(self, car="", coolant_temp=0, lap_count=0,
+    def __update_car_data__(self, car="", coolant_temp=0, lap_count=0, ts=0,
                             last_lap_time=0, last_lap_fuel=0, fuel_percent=-1):
         minutes = int(last_lap_time / 60)
         seconds = int(last_lap_time) % 60
