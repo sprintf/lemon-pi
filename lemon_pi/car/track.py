@@ -14,16 +14,17 @@ logger = logging.getLogger(__name__)
 
 class TargetMetaData:
 
-    def __init__(self, field_name, file_field_name, event):
+    def __init__(self, field_name, file_field_name, event, multiple=False):
         self.field_name = field_name
         self.file_field_name = file_field_name
         self.event = event
+        self.multiple = multiple
 
 
 START_FINISH = TargetMetaData("start_finish", "start_finish", None)
 PIT_ENTRY = TargetMetaData("pit_in", "pit_entry", LeaveTrackEvent)
 PIT_OUT = TargetMetaData("pit_out", "pit_out", EnterTrackEvent)
-RADIO_SYNC = TargetMetaData("radio_sync", "radio_sync", RadioSyncEvent)
+RADIO_SYNC = TargetMetaData("radio_sync", "radio_sync", RadioSyncEvent, multiple=True)
 
 
 TARGETS = [START_FINISH, PIT_ENTRY, PIT_OUT, RADIO_SYNC]
@@ -71,11 +72,16 @@ class TrackLocation:
     def is_radio_sync_defined(self) -> bool:
         return self.targets.get(RADIO_SYNC) is not None
 
-    def get_radio_sync_target(self) -> Target:
+    def get_radio_sync_targets(self) -> [Target]:
         return self.targets[RADIO_SYNC]
 
-    def set_radio_sync_target(self, t:Target):
-        self.targets[RADIO_SYNC] = t
+    def add_target(self, tmd:TargetMetaData, target:Target):
+        if not tmd.multiple:
+            self.targets[tmd] = target
+        else:
+            if not self.targets.get(tmd):
+                self.targets[tmd] = []
+            self.targets[tmd].append(target)
 
     def __repr__(self):
         return self.name
@@ -90,15 +96,12 @@ def read_tracks() -> [TrackLocation]:
             track_data = TrackLocation(track["name"])
 
             for tmd in TARGETS:
-                if track.get(tmd.file_field_name + "_coords"):
-                    coords = track[tmd.file_field_name + "_coords"]
-                    points = re.findall("[-+]?\d+.\d+", coords)
-                    assert len(points) == 4, "expected 4 points"
-                    target = Target(tmd.field_name,
-                                    (float(points[0]), float(points[1])),
-                                    (float(points[2]), float(points[3])),
-                                    track[tmd.file_field_name + "_direction"])
-                    track_data.targets[tmd] = target
+                _read_target(tmd, track, track_data)
+
+            radio_list = track.get("radio_sync_list")
+            if radio_list:
+                for waypoint in radio_list:
+                    _read_target(RADIO_SYNC, waypoint, track_data)
 
             # we must have a start/finish .. everything else is optional
             assert track_data.targets[START_FINISH]
@@ -108,6 +111,19 @@ def read_tracks() -> [TrackLocation]:
 
             track_list.append(track_data)
     return track_list
+
+
+def _read_target(tmd: TargetMetaData, track, track_data):
+    if track.get(tmd.file_field_name + "_coords"):
+        coords = track[tmd.file_field_name + "_coords"]
+        points = re.findall("[-+]?\d+.\d+", coords)
+        assert len(points) == 4, "expected 4 points"
+        target = Target(tmd.field_name,
+                        (float(points[0]), float(points[1])),
+                        (float(points[2]), float(points[3])),
+                        track[tmd.file_field_name + "_direction"])
+        track_data.add_target(tmd, target)
+
 
 if __name__ == "__main__":
     print(len(read_tracks()))

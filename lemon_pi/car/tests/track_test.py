@@ -18,5 +18,9 @@ class MyTestCase(unittest.TestCase):
             self.assertTrue(pit_to_sf1 < 1)
             self.assertTrue(pit_to_sf2 < 1)
 
+        thunderhill = next(filter(lambda track: track.name == "Thunderhill", tracks), None)
+        self.assertTrue(thunderhill.is_radio_sync_defined())
+        self.assertEqual(2, len(thunderhill.get_radio_sync_targets()))
+
 if __name__ == '__main__':
     unittest.main()

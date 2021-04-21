@@ -6,7 +6,7 @@ import time
 
 from lemon_pi.car.lap_tracker import angular_difference, LapTracker
 from lemon_pi.car.target import Target
-from lemon_pi.car.track import TrackLocation
+from lemon_pi.car.track import TrackLocation, RADIO_SYNC
 
 
 class TestAngularDifference(unittest.TestCase):
@@ -61,7 +61,7 @@ class TestAngularDifference(unittest.TestCase):
         sf = Target("start-finiah", (35.489031,-119.544530), (35.488713,-119.544510), "E")
         bw.set_start_finish_target(sf)
         pi = Target("radio", (35.489031,-119.546), (35.488713,-119.546), "E")
-        bw.set_radio_sync_target(pi)
+        bw.add_target(RADIO_SYNC, pi)
         lt = LapTracker(bw, Mock())
         lt.on_track = True
         now = time.time()
