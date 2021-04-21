@@ -1,4 +1,4 @@
-from lemon_pi.car.track import TrackLocation, START_FINISH
+from lemon_pi.car.track import TrackLocation, START_FINISH, TargetMetaData
 from lemon_pi.car.updaters import PositionUpdater, LapUpdater
 from lemon_pi.car.display_providers import LapProvider
 from lemon_pi.car.target import Target
@@ -75,15 +75,18 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                         self.listener.update_lap(self.lap_count, self.last_lap_time)
                 self.lap_start_time = cross_time
 
-                if not self.track.is_radio_sync_defined():
-                    RadioSyncEvent.emit(ts=cross_time)
+                RadioSyncEvent.emit(ts=cross_time)
         else:
             for target_metadata in self.track.targets.keys():
-                target = self.track.targets[target_metadata]
+                if not target_metadata.multiple:
+                    targets = [self.track.targets[target_metadata]]
+                else:
+                    targets = self.track.targets[target_metadata]
                 if target_metadata != START_FINISH:
-                    crossed_target, cross_time = self._crossed_line(lat, long, heading, time, target)
-                    if crossed_target:
-                        target_metadata.event.emit(ts=cross_time)
+                    for target in targets:
+                        crossed_target, cross_time = self._crossed_line(lat, long, heading, time, target)
+                        if crossed_target:
+                            target_metadata.event.emit(ts=cross_time)
 
     def handle_event(self, event, lap_count=0, ts=0):
         if event == LapInfoEvent:

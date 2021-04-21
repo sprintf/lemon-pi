@@ -49,13 +49,13 @@ def run():
             gmap.text(*pi.lat_long1, '   pit in')
 
         if track.is_radio_sync_defined():
-            rs = track.get_radio_sync_target()
-            radio = zip(*[
-                rs.lat_long1,
-                rs.lat_long2
-            ])
-            gmap.polygon(*radio, color='purple', edge_width=20)
-            gmap.text(*rs.lat_long1, '   radio')
+            for rs in track.get_radio_sync_targets():
+                radio = zip(*[
+                    rs.lat_long1,
+                    rs.lat_long2
+                ])
+                gmap.polygon(*radio, color='purple', edge_width=20)
+                gmap.text(*rs.lat_long1, '   radio')
 
         if track.is_pit_out_defined():
             po = track.get_pit_out_target()
