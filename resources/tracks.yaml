@@ -16,8 +16,8 @@ tracks:
          radio_sync_coords: "(39.539930,-122.336541),(39.539739,-122.336530)"
          radio_sync_direction: "E"
        - "cyclone":
-         radio_sync_coords: "(39.541169,-122.329419),(39.540990,-122.329437)"
-         radio_sync_direction: "W"
+         radio_sync_coords: "(39.540813,-122.329284),(39.540820,-122.329086)"
+         radio_sync_direction: "N"
 
   -  name: "Thunderhill West"
      start_finish_coords: "(39.537447,-122.338924),(39.537470,-122.338567)"
