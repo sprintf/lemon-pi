@@ -115,6 +115,7 @@ tracks:
     start_finish_direction: "W"
     pit_entry_coords: "(37.876678,-122.294578),(37.876685,-122.294460)"
     pit_entry_direction: "N"
-    # hidden: "true"
+    hidden: "true"
+
 
 
