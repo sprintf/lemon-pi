@@ -66,6 +66,7 @@ class Gui(EventHandler):
             Gui.TEXT_LARGE = 64
             Gui.TEXT_XL = 72
 
+        self.start_time = 0
         self.font = self.__identify_font(platform.system())
         self.root = App("Lemon-Pi",
                        bg="black",
@@ -76,6 +77,11 @@ class Gui(EventHandler):
         Box(self.splash, width=Gui.WIDTH, height=int(100 * Gui.SCALE_FACTOR))
         Picture(self.splash, image="resources/images/perplexuslogoslpash.gif")
         Text(self.splash, "Powered by Normtronix", size=Gui.TEXT_SMALL, font=self.font, color="white")
+
+        Box(self.splash, width=Gui.WIDTH, height=int(50 * Gui.SCALE_FACTOR))
+        splash_lower = Box(self.splash, width=Gui.WIDTH, height=107, align="right")
+        Picture(splash_lower, image="resources/images/argonaut.gif", align="right")
+        Text(splash_lower, "in conjunction with", size=Gui.TEXT_SMALL, font=self.font, color="white", align="right")
 
         self.app = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, visible=False)
 
@@ -127,6 +133,11 @@ class Gui(EventHandler):
         RadioReceiveEvent.register_handler(self)
 
     def present_main_app(self):
+        # sleep up to 5 seconds
+        elapsed_time = time.time() - self.start_time
+        logger.info("elapsed time to initialize = {}".format(elapsed_time))
+        if elapsed_time < 5:
+            time.sleep(5 - elapsed_time)
         self.splash.destroy()
         self.app.visible = True
 
@@ -259,6 +270,7 @@ class Gui(EventHandler):
         # on raspberry pi we go full screen
         if platform.system() == "Linux":
             self.root.set_full_screen()
+        self.start_time = time.time()
         self.root.display()
         # don't put any code here ... the display loop never returns
 

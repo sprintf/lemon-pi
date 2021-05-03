@@ -109,4 +109,12 @@ tracks:
      radio_sync_direction: "SE"
      hidden: "true"
 
+# this is a hidden test track, for argonaut
+  - name: "Argonaut Test Track"
+    start_finish_coords: "(37.876975,-122.294408),(37.876842,-122.294372)"
+    start_finish_direction: "W"
+    pit_entry_coords: "(37.876678,-122.294578),(37.876685,-122.294460)"
+    pit_entry_direction: "N"
+    # hidden: "true"
+
 
