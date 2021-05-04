@@ -26,6 +26,8 @@ def run():
     tracks = read_tracks()
 
     for track in tracks:
+        if track.hidden:
+            continue
         mid_lat, mid_long = _calc_mid(track)
         gmap = gmplot.GoogleMapPlotter(mid_lat, mid_long, 17,
                                        map_type="satellite",
