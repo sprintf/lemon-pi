@@ -45,7 +45,8 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
         while not self.finished:
             try:
                 logger.info("connecting to GPS...")
-                session = gps(mode=WATCH_ENABLE)
+                session = gps()
+                self.init_gps_connection(session)
 
                 while not self.finished:
                     try:
@@ -136,17 +137,38 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
     def register_position_listener(self, listener: PositionUpdater):
         self.position_listener = listener
 
+    @staticmethod
+    def init_gps_connection(session: gps):
+        # read anything that's out there
+        session.read()
+        session.send('?DEVICES;')
+        code = session.read()
+        logger.debug("got code {}".format(code))
+        response = session.data
+        logger.debug("got response {}".format(response))
+        ublox = response['devices'][0]
+        if 'driver' in ublox and 'blox' in ublox['driver']:
+            logger.info("detected ublox device, setting baud rate to 115200")
+            # setting cycle to more than 1.0 means we see the same coordinate
+            # position delivered multiple times in a row
+            session.send('?DEVICE={"class":"DEVICE","bps":115200}')
+            code = session.read()
+            logger.debug("got code {}".format(code))
+            response = session.data
+            logger.debug("got response {}".format(response))
+        session.send('?WATCH={"enable":true,"json":true}')
+
 
 if __name__ == "__main__":
 
     logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
-                        level=logging.INFO)
+                        level=logging.DEBUG)
 
     class FileLogger(PositionUpdater):
 
         def __init__(self):
-            self.file = open("traces/trace-{}.csv".format(int(time.time())), mode="w")
+            self.file = open("../../traces/trace-{}.csv".format(int(time.time())), mode="w")
 
         def update_position(self, lat:float, long:float, heading:float, time:float, speed:int) -> None:
             self.file.write("{},{},{},{},{}\n".format(time, lat, long, heading, speed))
