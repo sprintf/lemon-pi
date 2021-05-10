@@ -41,9 +41,9 @@ tracks:
 
   -  name: "Oregon Raceway Park"
      start_finish_coords: "(45.363790,-120.744707),(45.363816,-120.744277)"
-     start_finish_direction: "N"
-     pit_entry_coords: "(45.363325,-120.744259),(45.363247,-120.744166)"
-     pit_entry_direction: "NE"
+     start_finish_direction: "S"
+     pit_entry_coords: "(45.365624, -120.744398),(45.365573, -120.744325)"
+     pit_entry_direction: "SW"
 
   -  name: "The Ridge"
      start_finish_coords: "(47.254785,-123.192485),(47.254622,-123.192489)"
