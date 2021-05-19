@@ -1,6 +1,6 @@
 #!/bin/bash
 . venv/bin/activate
 export PYTHONPATH=`pwd`
-./gen-protos.sh
-python3 lemon_pi/pit/main.py
+bin/gen-protos.sh
+python lemon_pi/pit/lemon-pi-pit.py
 

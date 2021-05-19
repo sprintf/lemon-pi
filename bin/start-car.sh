@@ -2,6 +2,6 @@
 cd /home/pi/lemon-pi
 . venv/bin/activate
 export PYTHONPATH=`pwd`
-./gen-protos.sh
-python3 lemon_pi/car/main.py
+bin/gen-protos.sh
+python lemon_pi/car/main.py
 

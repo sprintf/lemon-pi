@@ -6,4 +6,4 @@ A large message of 256 bytes (the largest supported by Lora) can take 6 seconds 
 
 Protobuf is fiddly, but it produces the tightest packed messages 
 
-When you make changes in this directory, you need to run ./gen-protos.sh (in the root directory) then it will generate the source files needed in order to run
+When you make changes in this directory, you need to run bin/gen-protos.sh (in the root directory) then it will generate the source files needed in order to run
