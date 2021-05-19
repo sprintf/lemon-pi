@@ -3,7 +3,6 @@ name: Build iOS Distribution
 
 on:
   push:
-    branch: [ "main" ]
     tags: [ "release*" ]
 
 jobs:
@@ -29,7 +28,7 @@ jobs:
           export PYTHONPATH='.'
       - name: Generate protobufs
         run: |
-          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/protoc-3.14.0-osx-x86-64.zip
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/protoc-3.14.0-osx-x86_64.zip
           unzip protoc-*.zip -d protoc
           export PATH="protoc/bin:$PATH"
           bin/gen-protos.sh

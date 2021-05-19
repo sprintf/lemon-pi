@@ -1,9 +1,8 @@
 
-name: Build iOS Distribution
+name: Build Windows Distribution
 
 on:
   push:
-    branch: [ "main" ]
     tags: [ "release*" ]
 
 jobs:
@@ -32,13 +31,12 @@ jobs:
           $WebClient = New-Object System.Net.WebClient
           $WebClient.DownloadFile("https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/protoc-3.14.0-win64.zip","protoc-win64.zip")
           unzip protoc-*.zip -d protoc
-          SET PATH="protoc/bin;%PATH%"
+          $env:Path += ";protoc\bin"
           bin/gen-protos.bat
       - name: Create a distribution
         id: dist
         run: |
-          pyinstaller --add-data 'lemon_pi/config/:lemon_pi/config' \
-                      lemon_pi/pit/lemon-pi-pit.py
+          pyinstaller --add-data "lemon_pi/config/;lemon_pi/config" lemon_pi\pit\lemon-pi-pit.py
 
           Compress-Archive -Path dist\* -DestinationPath lemon-pi-pit-win.zip
 
