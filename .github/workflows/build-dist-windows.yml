@@ -1,0 +1,53 @@
+
+name: Build iOS Distribution
+
+on:
+  push:
+    branch: [ "main" ]
+    tags: [ "release*" ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: setup source
+        id: build-release
+        env:
+          GMAP_APIKEY : ${{ secrets.GMAP_APIKEY }}
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+          SET PYTHONPATH=%CD%
+      - name: Generate protobufs
+        run: |
+          $WebClient = New-Object System.Net.WebClient
+          $WebClient.DownloadFile("https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/protoc-3.14.0-win64.zip","protoc-win64.zip")
+          unzip protoc-*.zip -d protoc
+          SET PATH="protoc/bin;%PATH%"
+          bin/gen-protos.bat
+      - name: Create a distribution
+        id: dist
+        run: |
+          pyinstaller --add-data 'lemon_pi/config/:lemon_pi/config' \
+                      lemon_pi/pit/lemon-pi-pit.py
+
+          Compress-Archive -Path dist\* -DestinationPath lemon-pi-pit-win.zip
+
+      - id: upload-release
+        if: steps.dist.outcome == 'success'
+        uses: google-github-actions/upload-cloud-storage@main
+        with:
+          credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+          path: lemon-pi-pit-win.zip
+          destination: perplexus/public/dist
+
+

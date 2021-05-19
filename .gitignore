@@ -1,6 +1,8 @@
 .DS_Store
 .idea
 __pycache__
+build
+dist
 logs
 venv
 traces
