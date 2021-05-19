@@ -36,8 +36,7 @@ jobs:
       - name: Create a distribution
         id: dist
         run: |
-          pyinstaller --add-data "lemon_pi\config\:lemon_pi\config" ^
-                      lemon_pi/pit/lemon-pi-pit.py
+          pyinstaller --add-data lemon_pi/config/:lemon_pi/config lemon_pi/pit/lemon-pi-pit.py
 
           Compress-Archive -Path dist\* -DestinationPath lemon-pi-pit-win.zip
 
