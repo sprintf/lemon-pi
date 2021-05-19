@@ -32,7 +32,7 @@ jobs:
           wget https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/protoc-3.14.0-osx-x86-64.zip
           unzip protoc-*.zip -d protoc
           export PATH="protoc/bin:$PATH"
-          ./gen-protos.sh
+          bin/gen-protos.sh
       - name: Create a distribution
         id: dist
         run: |
