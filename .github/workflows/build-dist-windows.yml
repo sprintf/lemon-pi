@@ -1,9 +1,8 @@
 
-name: Build iOS Distribution
+name: Build Windows Distribution
 
 on:
   push:
-    branch: [ "main" ]
     tags: [ "release*" ]
 
 jobs:

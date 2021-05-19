@@ -3,7 +3,6 @@ name: Build iOS Distribution
 
 on:
   push:
-    branch: [ "main" ]
     tags: [ "release*" ]
 
 jobs:
