@@ -161,7 +161,14 @@ class Radio(Thread):
 
             # we see invalid_param messages when there is insufficient delay between
             # commands we send to the radio
-            if data == "ok" or data == 'busy' or data == 'invalid_param':
+            if data == "ok":
+                return
+
+            # there are race conditions where we get a bust sending because we're
+            # still receiving. If that happens then we're not sending
+            if data == 'busy' or data == 'invalid_param':
+                if self.transmitting:
+                    self.transmitting = False
                 return
 
             if data == "radio_err":
@@ -256,7 +263,7 @@ class Radio(Thread):
         last_status_log_time = time.time()
         while True:
             msg = self.send_queue.get()
-            self.send_message(self.protocol, msg)
+            self.send_message_with_retry(self.protocol, msg)
             self.send_queue.task_done()
             logger.debug("awaiting TX completion")
             while self.protocol.transmitting:
@@ -267,21 +274,37 @@ class Radio(Thread):
                 self.metrics.reset()
                 last_status_log_time = time.time()
 
-    def send_message(self, protocol, msg:Message):
+    def send_message_with_retry(self, protocol, msg:Message):
         try:
-            logger.debug("turning off receive")
-            protocol.send_cmd("radio rxstop")
-            protocol.transmitting = True
-            protocol.send_cmd("sys set pindig GPIO11 1")
-            payload = self.encoder.encode(msg).hex()
-            logger.info("sending {}".format(type(msg)))
-            protocol.send_cmd("radio tx %s" % payload)
-            self.metrics.send_attempt += 1
-            self.last_transmit = time.time()
-            protocol.send_cmd("sys set pindig GPIO11 0")
-            logger.debug("message sent")
-        except Exception as e:
-            logger.exception("something went wrong")
+            self.send_message(protocol, msg)
+        except Exception:
+            logger.warning("send failed, retrying in 1000ms")
+            time.sleep(1000)
+            try:
+                self.send_message(protocol, msg)
+            except Exception:
+                logger.error("failed to send message {}".format(msg))
+
+    def send_message(self, protocol, msg:Message):
+        logger.debug("turning off receive")
+        protocol.send_cmd("radio rxstop")
+        protocol.transmitting = True
+        protocol.send_cmd("sys set pindig GPIO11 1")
+        payload = self.encoder.encode(msg).hex()
+        logger.info("sending {}".format(type(msg)))
+        protocol.send_cmd("radio tx %s" % payload)
+        self.metrics.send_attempt += 1
+        self.last_transmit = time.time()
+        protocol.send_cmd("sys set pindig GPIO11 0")
+        logger.debug("message sent")
+        # if we are not still transmitting then we lost a race
+        # condition to a read that overlapped
+        if not protocol.transmitting:
+            raise SendFailedException()
+
+
+class SendFailedException(RuntimeError):
+    pass
 
 
 if __name__ == "__main__":
