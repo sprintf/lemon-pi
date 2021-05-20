@@ -279,7 +279,7 @@ class Radio(Thread):
             self.send_message(protocol, msg)
         except Exception:
             logger.warning("send failed, retrying in 1000ms")
-            time.sleep(1000)
+            time.sleep(1)
             try:
                 self.send_message(protocol, msg)
             except Exception:
