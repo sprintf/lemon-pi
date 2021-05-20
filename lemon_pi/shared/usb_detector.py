@@ -47,8 +47,7 @@ class UsbDetector:
         return UsbDetector.__instance.usb_map.get(device_type) is not None
 
     def __scan__(self):
-        glob_pattern = self.__get_dev_pattern__()
-        devices = glob.glob(glob_pattern)
+        devices = self.get_connected_serial_devices()
         logger.info("found usb serial devices : {}".format(devices))
 
         # step 0 ... throw out already classified
@@ -103,11 +102,33 @@ class UsbDetector:
 
         self.last_scan_time = time.time()
 
-    def __get_dev_pattern__(self):
-        if platform.system() == "Linux":
-            return "/dev/ttyUSB*"
+    @staticmethod
+    def get_connected_serial_devices():
+        os_type = platform.system()
+        if os_type == "Linux":
+            return glob.glob("/dev/ttyUSB*")
+        elif os_type == "Darwin":
+            return glob.glob("/dev/tty.usbserial*")
+        elif os_type == "Windows":
+            return UsbDetector.__get_windows_com_devices()
         else:
-            return "/dev/tty.usbserial*"
+            raise Exception("unknown platform: {}".format(os_type))
+
+    @staticmethod
+    def __get_windows_com_devices():
+        connected_devices = []
+        for c in range(1, 16):
+            try:
+                device = "COM{}".format(c)
+                with serial.Serial(device, baudrate=38400, timeout=2) as ser:
+                    connected_devices.append(device)
+            except FileNotFoundError as f:
+                pass
+        return connected_devices
+
+
+
+
 
 
 if __name__ == "__main__":
