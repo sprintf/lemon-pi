@@ -312,11 +312,11 @@ if __name__ == "__main__":
     if not "SETTINGS_MODULE" in os.environ:
         os.environ["SETTINGS_MODULE"] = "lemon_pi.config.local_settings_pit"
 
-    logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
+    logging.basicConfig(format='%(asctime)s.%(msecs)03d %(name)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
                         level=logging.INFO)
     UsbDetector.init()
-    radio = Radio("car-181", "abracadabra", ToCarMessage(), ping_freq=30)
+    radio = Radio("car-181", "mykey", ToPitMessage(), ping_freq=10)
     radio.receive_loop()
 
 
