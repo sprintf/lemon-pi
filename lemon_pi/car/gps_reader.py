@@ -120,7 +120,7 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
                 logger.exception("issue with GPS, reconnecting.")
                 self.working = False
                 GPSDisconnectedEvent.emit()
-                time.sleep(10)
+                time.sleep(30)
 
     def get_speed(self) -> int:
         return self.speed_mph
@@ -146,12 +146,15 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
         logger.debug("got code {}".format(code))
         response = session.data
         logger.debug("got response {}".format(response))
-        ublox = response['devices'][0]
-        if 'driver' in ublox and 'blox' in ublox['driver']:
-            logger.info("detected ublox device, setting baud rate to 115200")
+        devices = response['devices']
+        if len(devices) == 0:
+            raise Exception("no gps device")
+        gps = devices[0]
+        if 'driver' in gps:
+            logger.info("detected GPS device, setting baud rate to 57600")
             # setting cycle to more than 1.0 means we see the same coordinate
             # position delivered multiple times in a row
-            session.send('?DEVICE={"class":"DEVICE","bps":115200}')
+            session.send('?DEVICE={"class":"DEVICE","bps":57600}')
             code = session.read()
             logger.debug("got code {}".format(code))
             response = session.data
@@ -161,7 +164,7 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
 
 if __name__ == "__main__":
 
-    logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
+    logging.basicConfig(format='%(asctime)s.%(msecs)03d %(name)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
                         level=logging.DEBUG)
 
