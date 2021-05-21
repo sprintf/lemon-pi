@@ -147,11 +147,11 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
         response = session.data
         logger.debug("got response {}".format(response))
         ublox = response['devices'][0]
-        if 'driver' in ublox and 'blox' in ublox['driver']:
-            logger.info("detected ublox device, setting baud rate to 115200")
+        if 'driver' in ublox:
+            logger.info("detected GPS device, setting baud rate to 57600")
             # setting cycle to more than 1.0 means we see the same coordinate
             # position delivered multiple times in a row
-            session.send('?DEVICE={"class":"DEVICE","bps":115200}')
+            session.send('?DEVICE={"class":"DEVICE","bps":57600}')
             code = session.read()
             logger.debug("got code {}".format(code))
             response = session.data
