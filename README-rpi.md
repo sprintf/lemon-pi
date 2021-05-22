@@ -27,7 +27,7 @@ cd lemon-pi
 5. [optional, depending on your obd device]
 
 ```sh
-git clone https://github.com/brendan-w/python-obd.git
+git clone https://github.com/sprintf/python-obd.git
 ```
 
 6. setup venv
