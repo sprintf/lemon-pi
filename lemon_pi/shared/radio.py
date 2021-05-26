@@ -278,8 +278,11 @@ class Radio(Thread):
         try:
             self.send_message(protocol, msg)
         except Exception:
-            logger.warning("send failed, retrying in 1000ms")
-            time.sleep(1)
+            # it takes around 600ms to send, so if we collided we will wait
+            # a random amount of time and then try again
+            sleeptime = 0.6 * random.randint(0, 4)
+            logger.warning("send failed, retrying in {:.1f}s".format(sleeptime))
+            time.sleep(sleeptime)
             try:
                 self.send_message(protocol, msg)
             except Exception:
@@ -291,7 +294,7 @@ class Radio(Thread):
         protocol.transmitting = True
         protocol.send_cmd("sys set pindig GPIO11 1")
         payload = self.encoder.encode(msg).hex()
-        logger.info("sending {}".format(type(msg)))
+        logger.debug("sending {}".format(msg.__repr__()))
         protocol.send_cmd("radio tx %s" % payload)
         self.metrics.send_attempt += 1
         self.last_transmit = time.time()

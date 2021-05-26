@@ -44,10 +44,11 @@ TelemetryEvent = Event("telemetry")
 #   msg=
 SendMessageEvent = Event("send-message")
 
-#
+#   car=
 RadioReceiveEvent = Event("radio-rx")
 
 # emit() sends out
+# car=
 # seconds=
 TargetTimeEvent = Event("target-time")
 

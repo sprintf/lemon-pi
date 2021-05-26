@@ -1,6 +1,6 @@
 
 DISPLAY_WIDTH = 1024
-DISPLAY_HEIGHT = 600
+DISPLAY_HEIGHT = 576
 
 # enable for touchscreens, by default disabled
 EXIT_BUTTON_ENABLED = False

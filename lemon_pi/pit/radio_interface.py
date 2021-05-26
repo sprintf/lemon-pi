@@ -49,7 +49,7 @@ class RadioInterface(Thread, EventHandler):
             logger.info("received : {}".format(item.__repr__()))
             self.radio.receive_queue.task_done()
             self.convert_to_event(item)
-            RadioReceiveEvent.emit()
+            RadioReceiveEvent.emit(car=item.sender)
 
     def send_race_status(self, flag=""):
         logger.info("race status changed to {}".format(flag))
@@ -109,7 +109,7 @@ class RadioInterface(Thread, EventHandler):
         elif type(proto_msg) == Ping:
             PingEvent.emit(car=proto_msg.sender, ts=proto_msg.timestamp)
         else:
-            logger.error("unknown radio message {}".format(type(proto_msg)))
+            logger.info("unknown radio message {}".format(type(proto_msg)))
 
     # sleep for a moment before sending data to the car so it doesn't collide with
     # data coming from the car as it passes the line

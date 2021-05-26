@@ -7,7 +7,7 @@ from lemon_pi.shared.message_decoder import (
     NoiseException,
     LPiNoiseException
 )
-from lemon_pi.shared.generated.messages_pb2 import ToCarMessage
+from lemon_pi.shared.generated.messages_pb2 import ToCarMessage, ToPitMessage
 
 
 class DecoderTestCase(unittest.TestCase):
@@ -25,6 +25,18 @@ class DecoderTestCase(unittest.TestCase):
         m = MessageDecoder("team-1")
         with self.assertRaises(LPiNoiseException):
             m.decode(msg, ToCarMessage())
+
+    def test_decoding_message_from_other_car(self):
+        e = MessageEncoder("car-1", "pswd")
+        msg = ToPitMessage()
+        msg.pitting.seq_num = 1
+        msg.pitting.timestamp = 2
+        msg.pitting.sender = "car-1"
+        msg = e.encode(msg)
+        m = MessageDecoder("pswd")
+        result = m.decode(msg, ToCarMessage())
+        print(result)
+
 
 
 

@@ -1,13 +1,13 @@
 from lemon_pi.config.settings_pit import *
 
-RADIO_KEY = "mykey2"
+RADIO_KEY = "mykey"
 
 # provide a race id to track realtime results
 # empty means disabled
-RACE_ID = ""
+RACE_ID = "37872"
 
-# the race car we want to track
-# zero means no tracking
+# the race cars we want to track
+# [] means no tracking
 # must be set in conjunction with a RACE_ID
 # this needs to be the ID of the car in the eyes of the race data (not what you call your car)
-TARGET_CAR = "999"
+TARGET_CARS = ["23", "62"]
