@@ -34,7 +34,7 @@ logger.info("Lemon-Pit : starting up")
 
 logging.basicConfig(format='%(asctime)s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
-                    level=logging.DEBUG)
+                    level=logging.INFO)
 
 if "SETTINGS_MODULE" not in os.environ:
     os.environ["SETTINGS_MODULE"] = "lemon_pi.config.local_settings_pit"
