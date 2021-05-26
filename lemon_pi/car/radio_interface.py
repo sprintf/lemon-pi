@@ -148,7 +148,7 @@ class RadioInterface(Thread, EventHandler):
             subprocess.run(['sudo', 'reboot', 'now'])
             logger.info("goodbye, cruel world...")
         else:
-            logger.warning("got unexpected message : {}".format(type(msg)))
+            logger.info("got unexpected message : {}".format(type(msg)))
 
     def format_position(self, msg: RacePosition):
         if msg.position_in_class > 0 and msg.position_in_class != msg.position:

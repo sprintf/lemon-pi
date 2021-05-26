@@ -41,7 +41,7 @@ if "SETTINGS_MODULE" not in os.environ:
 
 
 def run():
-    gui = Gui()
+    gui = Gui(settings.TARGET_CARS)
     gui.register_time_provider(LocalTimeProvider())
 
     def init():
@@ -66,10 +66,9 @@ def run():
             # create a leaderboard
             leaderboard = RaceOrder()
             # filter race updates down to updates related to our car
-            updater = DataSourceHandler(leaderboard, settings.TARGET_CAR)
-            gui.set_target_car(settings.TARGET_CAR)
+            updater = DataSourceHandler(leaderboard, settings.TARGET_CARS)
             # provide a strategy analyzer
-            sa = StrategyAnalyzer(leaderboard, settings.TARGET_CAR)
+            sa = StrategyAnalyzer(leaderboard, settings.TARGET_CARS)
             sa.start()
             # start reading the race state
             ds = DataSource(settings.RACE_ID, updater)
@@ -86,5 +85,5 @@ def run():
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
-                        level=logging.DEBUG)
+                        level=logging.INFO)
     run()

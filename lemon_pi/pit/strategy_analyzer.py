@@ -18,10 +18,10 @@ import time
 #
 class StrategyAnalyzer(EventHandler, Thread):
 
-    def __init__(self, leaderboard: RaceOrder, target_car):
+    def __init__(self, leaderboard: RaceOrder, target_cars: [str]):
         Thread.__init__(self, daemon=True)
         self.leaderboard = leaderboard
-        self.target_car = target_car
+        self.target_cars = target_cars
         self.next_lap_target = 0
         self.position_mode = PositionEnum.OVERALL
         self.analysis_queue = Queue()
@@ -42,7 +42,7 @@ class StrategyAnalyzer(EventHandler, Thread):
                                   car=data['car_number'])
 
     def handle_event(self, event, car="181", **kwargs):
-        if event == LapCompletedEvent and car == self.target_car:
+        if event == LapCompletedEvent and car in self.target_cars:
             if self.running:
                 self.analysis_queue.put({"event": event,
                                          "car_number": car,
@@ -54,15 +54,12 @@ class StrategyAnalyzer(EventHandler, Thread):
 
     def _do_handle_event(self, event, car="181"):
         if event == LapCompletedEvent:
-            if car == self.target_car:
-                self.next_lap_target = self.calc_target_time()
-                # print("sending target time = {:02}:{:02}".
-                #       format(int(self.next_lap_target / 60),
-                #              int(self.next_lap_target) % 60))
-                TargetTimeEvent.emit(seconds=self.next_lap_target)
+            if car in self.target_cars:
+                self.next_lap_target = self.calc_target_time(car)
+                TargetTimeEvent.emit(car=car, seconds=self.next_lap_target)
 
-    def calc_target_time(self):
-        car: CarPosition = self.leaderboard.lookup(self.target_car)
+    def calc_target_time(self, car_number):
+        car: CarPosition = self.leaderboard.lookup(car_number)
         if car:
             lap_times = []
             count = 0
@@ -77,8 +74,8 @@ class StrategyAnalyzer(EventHandler, Thread):
                 # if only 1 car ahead then simplify to close 1s per lap
                 return lap_times[0] - 1
             else:
-                print("in class position {} ({})".format(count + 1, car.class_position))
-                print("times ahead = {}".format(lap_times))
+                # print("in class position {} ({})".format(count + 1, car.class_position))
+                # print("times ahead = {}".format(lap_times))
                 # choose the median of the 10 cars ahead
                 return median(lap_times)
 

@@ -1,14 +1,16 @@
 from lemon_pi.pit.event_defs import RaceStatusEvent, LapCompletedEvent
 from lemon_pi.pit.leaderboard import RaceOrder, CarPosition
 from datetime import datetime
+import logging
 
+logger = logging.getLogger(__name__)
 
 class DataSourceHandler:
 
-    def __init__(self, leaderboard: RaceOrder, target_car):
+    def __init__(self, leaderboard: RaceOrder, target_cars: [str]):
         self.leaderboard = leaderboard
         self.race_flag = ""
-        self.target_car = target_car
+        self.target_cars: [str] = target_cars
 
     def handle_message(self, raw_line):
         try:
@@ -57,8 +59,8 @@ class DataSourceHandler:
                         last_lap_time = self._convert_to_s(bits[4].strip('"'))
                         flag = bits[5].strip('" ')
                         self.leaderboard.update_position(car_number, position, laps)
-                        if car_number == self.target_car:
-                            target = self.leaderboard.number_lookup.get(self.target_car)
+                        if car_number in self.target_cars:
+                            target = self.leaderboard.number_lookup.get(car_number)
                             ahead = target.car_in_front
                             gap = target.gap(ahead)
                             self.emit_lap_completed(car_number, laps, position,
@@ -69,13 +71,13 @@ class DataSourceHandler:
                             if not this_car:
                                 return
                             ahead = this_car.car_in_front
-                            if ahead and ahead.car_number == self.target_car:
+                            if ahead and ahead.car_number in self.target_cars:
                                 gap = this_car.gap(ahead)
                                 self.emit_lap_completed(car_number, laps, position,
                                                         this_car.class_position, ahead,
                                                         gap, last_lap_time, flag)
         except Exception as e:
-            print(e)
+            logger.exception("issue parsing '{}'".format(raw_line))
 
     @classmethod
     def emit_lap_completed(cls, car_number, laps, position, class_position, ahead, gap, last_lap_time, flag):
