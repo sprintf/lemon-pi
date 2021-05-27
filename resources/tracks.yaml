@@ -9,15 +9,15 @@ tracks:
   -  name: "Thunderhill"
      start_finish_coords: "(39.538475,-122.331300),(39.538480,-122.331113)"
      start_finish_direction: "S"
-     pit_entry_coords: "(39.543792,-122.331770),(39.543737,-122.331823)"
-     pit_entry_direction: "SE"
+     pit_entry_coords: "(39.542489,-122.331372),(39.542488,-122.331315)"
+     pit_entry_direction: "S"
      radio_sync_list:
        - "west cut":
          radio_sync_coords: "(39.539930,-122.336541),(39.539739,-122.336530)"
          radio_sync_direction: "E"
-       - "cyclone":
-         radio_sync_coords: "(39.540813,-122.329284),(39.540820,-122.329086)"
-         radio_sync_direction: "N"
+       - "turn 8":
+         radio_sync_coords: "(39.545072,-122.332619),(39.544949,-122.332622)"
+         radio_sync_direction: "W"
 
   -  name: "Thunderhill West"
      start_finish_coords: "(39.537447,-122.338924),(39.537470,-122.338567)"
@@ -109,13 +109,6 @@ tracks:
      radio_sync_direction: "SE"
      hidden: "true"
 
-# this is a hidden test track, for argonaut
-  - name: "Argonaut Test Track"
-    start_finish_coords: "(37.876975,-122.294408),(37.876842,-122.294372)"
-    start_finish_direction: "W"
-    pit_entry_coords: "(37.876678,-122.294578),(37.876685,-122.294460)"
-    pit_entry_direction: "N"
-    hidden: "true"
 
 
 
