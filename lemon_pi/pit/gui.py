@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 NUMBER = 'num'
 LAP = 'lap'
 POS = 'pos'
-CLASS_POS = 'class'
 TEMP = 'temp'
 LAP_TIME = 'lap_t'
 TARGET_TIME = 'target_t'
@@ -61,19 +60,17 @@ class Gui:
         self.car_area = Box(self.main, align="top", width="fill", layout="grid")
         BigText(self.car_area, "Car", color="lightgreen", grid=[0, 0])
         BigText(self.car_area, "Lap", color="lightgreen", grid=[1, 0])
-        BigText(self.car_area, "Pos", color="lightgreen", grid=[2, 0])
-        BigText(self.car_area, "Class", color="lightgreen", grid=[3, 0])
+        BigText(self.car_area, "Position", color="lightgreen", grid=[2, 0])
         BigText(self.car_area, "Last lap", color="lightgreen", grid=[4, 0])
-        BigText(self.car_area, "Target", color="lightgreen", grid=[5, 0])
-        BigText(self.car_area, "Temp", color="lightgreen", grid=[6, 0])
-        BigText(self.car_area, "Fuel", color="lightgreen", grid=[7, 0])
-        BigText(self.car_area, "comms", color="lightgreen", grid=[8, 0])
+        BigText(self.car_area, " Target", color="lightgreen", grid=[5, 0])
+        BigText(self.car_area, " Temp", color="lightgreen", grid=[6, 0])
+        BigText(self.car_area, " Fuel", color="lightgreen", grid=[7, 0])
+        BigText(self.car_area, "   Comms", color="lightgreen", grid=[8, 0])
         for row, car in enumerate(self.target_cars):
             self.car_data[car] = {}
             self.car_data[car][NUMBER] = BigText(self.car_area, text=car, grid=[0, row + 1]) # car number
             self.car_data[car][LAP] = BigText(self.car_area, text="0", grid=[1, row + 1]) # lap
             self.car_data[car][POS] = BigText(self.car_area, text="", grid=[2, row + 1]) # pos
-            self.car_data[car][CLASS_POS] = BigText(self.car_area, text="", grid=[3, row + 1]) # class pos
             self.car_data[car][LAP_TIME] = BigText(self.car_area, text="HH:MM", grid=[4, row + 1]) # last lap
             self.car_data[car][TARGET_TIME] = BigText(self.car_area, text="", grid=[5, row + 1]) # last lap
             self.car_data[car][TEMP] = self.create_temp_gauge(self.car_area, grid=[6, row + 1]) # temp
@@ -162,8 +159,6 @@ class Gui:
             self.splash_progress.value = "{}%".format(percent)
 
     def handle_keyboard(self, event_data):
-        logger.info("Key Pressed : {}".format(event_data.key))
-
         # check if we got a CTRL-C
         if ord(event_data.key) == 3:
             self.shutdown()
@@ -177,7 +172,7 @@ class Gui:
         result = AlertBox(parent, grid=grid)
         result.set_range(settings.TEMP_BAND_LOW, settings.TEMP_BAND_WARN, settings.TEMP_BAND_HIGH)
         BigText(result, " ", align="left")
-        BigText(result, "???", align="left")
+        BigText(result, "?", align="left")
         BigText(result, "°F", align="right")
         return result
 
@@ -237,13 +232,16 @@ class Gui:
         tb.text_size = 32
 
         target_car = ButtonGroup(result, options=self.target_cars, align="left")
-        target_car.bg = "white"
+        target_car.bg = "grey"
         target_car.text_color = "black"
-        target_car.text_size = 32
+        target_car.text_size = 24
         if len(self.target_cars) <= 1:
             target_car.visible = False
 
         pb = PushButton(result, text="Send", align="left")
+        pb.text_size = 24
+        pb.text_color = "white"
+        pb.bg = "black"
         pb.when_clicked = self.send_message
         return result
 
@@ -297,11 +295,12 @@ class Gui:
         if coolant_temp > 0:
             self.car_data[car][TEMP].update_value(coolant_temp)
         if fuel_percent > 0:
-            self.car_data[car][FUEL].value = fuel_percent
+            self.car_data[car][FUEL].value = "{}%".format(fuel_percent)
 
     def __update_position(self, car="", position=0, class_position=0):
-        self.car_data[car][POS].value = position
-        self.car_data[car][CLASS_POS].value = class_position
+        if class_position > 0 and class_position != position:
+            self.car_data[car][POS].value = "P{} ({})".format(position, class_position)
+        self.car_data[car][POS].value = "P{}".format(position)
 
     def __update_target_time(self, car="", seconds=0.0):
         self.car_data[car][TARGET_TIME].value = "{:02d}:{:02d}".format(int(seconds / 60), int(seconds) % 60)
