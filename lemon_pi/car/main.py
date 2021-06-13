@@ -1,6 +1,8 @@
 
 import time, os
 from threading import Thread
+
+from lemon_pi.car.button import Button
 from lemon_pi.car.gui import Gui
 from lemon_pi.car.gps_reader import GpsReader
 from lemon_pi.car.maf_analyzer import MafAnalyzer
@@ -116,6 +118,9 @@ def init():
     # show the main application
     gui.present_main_app()
 
+    # bring in a button listener, to read the hardware button
+    button = Button()
+
     logger.info("awaiting location to choose track")
     while not gps.is_working() or gps.get_lat_long() == (0, 0):
         time.sleep(1)
@@ -125,6 +130,8 @@ def init():
     gps.register_position_listener(lap_tracker)
     gui.register_lap_provider(lap_tracker)
     radio_interface.register_lap_provider(lap_tracker)
+    radio.register_gps_provider(gps)
+
 
 Thread(target=init, daemon=True).start()
 

@@ -10,6 +10,14 @@ package lemon_pi.shared.generated;
 //
 // These will be auto-populated on send
 
+message GpsPosition {
+  float lat = 1;
+  float long = 2;
+  int32 speed_mph = 3;
+  int32 heading = 4;
+  int64 gps_timestamp = 5;
+}
+
 // a ping message, sent sporadically from both car and pit
 message Ping {
 
@@ -18,6 +26,9 @@ message Ping {
   int32 timestamp = 2;
 
   string sender = 3;
+
+  // optionally include a gpd position in these messages
+  GpsPosition gps = 4;
 
 }
 
@@ -64,6 +75,9 @@ message Opponent {
   string car_number = 1;
 
   string gap_text = 2;
+
+  // we set this to true if we are chasing the car in front
+  bool chase_mode = 3;
 }
 
 // the position of a car in the race. Usually only sent to our car
@@ -108,6 +122,9 @@ message CarTelemetry {
   int32 last_lap_fuel_usage = 7;
 
   int32 fuel_remaining_percent = 8;
+
+  // a list of recently seen + acknowledged messages by the driver
+  repeated string messages_seen = 9;
 }
 
 message EnteringPits {

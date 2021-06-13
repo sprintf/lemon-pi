@@ -1,6 +1,6 @@
 
 
-# a datastructure representing a row in the leaderboard.
+# a data structure representing a row in the leaderboard.
 # the leaderboard is a double linked list, where each element
 # contains a pointer to the `car_in_front` and another to the
 # `car_behind`.
@@ -14,6 +14,7 @@ class PositionEnum(Enum):
     OVERALL = 1
     IN_CLASS = 2
 
+
 class CarPosition:
 
     NOT_STARTED = 99999
@@ -26,15 +27,15 @@ class CarPosition:
         self.class_position = CarPosition.NOT_STARTED
         self.laps_completed = 0
         # float, seconds and parts of seconds
-        self.last_lap_time: float = None
+        self.last_lap_time: float = 0.0
         self.last_lap_timestamp = None
         # float, seconds and parts of seconds
         self.fastest_lap_time = None
         self.fastest_lap = None
-        self.car_in_front = None
-        self.car_behind = None
+        self.car_in_front: CarPosition = None
+        self.car_behind: CarPosition = None
 
-    def get_car_in_front(self, position_mode:PositionEnum):
+    def get_car_in_front(self, position_mode: PositionEnum):
         if position_mode == PositionEnum.OVERALL:
             return self.car_in_front
         else:
@@ -50,35 +51,51 @@ class CarPosition:
         return self.class_position
 
     def __repr__(self):
-        return "#{} {}th laps:{} by {} last: {} best: {} on lap {}".format(self.car_number, self.position,
-                                    self.laps_completed,
-                                    self.gap(self.car_in_front),
-                                    self.last_lap_time, self.fastest_lap_time, self.fastest_lap)
+        return "#{} {}th laps:{} by {} last: {} best: {} on lap {}".\
+            format(self.car_number,
+                   self.position,
+                   self.laps_completed,
+                   self.gap(self.car_in_front),
+                   self.last_lap_time,
+                   self.fastest_lap_time,
+                   self.fastest_lap)
 
     # produce a human readable format of the gap. This could be in the form:
-    #   5 laps
+    #   5 L    gap is 5 laps
+    #   7 L(p) car is in pits
     #   4:05
     #   12s
     # It takes no more than 7 characters to display
     def gap(self, car_ahead):
+
+        # take care of the situation where this car is the leader
         if car_ahead is None:
             return "-"
+
+        seconds_diff = -1
+        if car_ahead.last_lap_timestamp and self.last_lap_timestamp:
+            seconds_diff = int((self.last_lap_timestamp - car_ahead.last_lap_timestamp) / 1000)
+
         if car_ahead.laps_completed and self.laps_completed:
             lap_diff = car_ahead.laps_completed - self.laps_completed
             if lap_diff > 0:
-                return "{} lap{}".format(lap_diff, "s" if lap_diff > 1 else "")
-        if car_ahead.last_lap_timestamp and self.last_lap_timestamp:
-            seconds_diff = int((self.last_lap_timestamp - car_ahead.last_lap_timestamp) / 1000)
+                # if it's been more than 5 minutes between one of these two cars
+                # crossed the line, then one or both are pitted
+                if seconds_diff < 300:
+                    return "{} L".format(lap_diff)
+                else:
+                    return "{} L(p)".format(lap_diff)
+        if seconds_diff > 0:
             if seconds_diff >= 60:
                 minutes_diff = int(seconds_diff / 60)
                 seconds_diff = seconds_diff % 60
-                return "{}:{:2d}".format(minutes_diff, seconds_diff)
+                return "{}:{:02d}".format(minutes_diff, seconds_diff)
             else:
                 return "{}s".format(seconds_diff)
         return "-"
 
 
-# The RaceOrder is the main datastructure that indexes and manages the
+# The RaceOrder is the main data structure that indexes and manages the
 # CarPosition.
 # It updates as cars pass the start/finish line
 class RaceOrder(EventHandler):
@@ -111,9 +128,11 @@ class RaceOrder(EventHandler):
         if not existing:
             self.number_lookup[car.car_number] = car
             self.first = self.__append__(self.first, car)
+            existing = car
+        return existing
 
-    def add_class(self, id, name):
-        self.class_lookup[id] = name
+    def add_class(self, class_id, name):
+        self.class_lookup[class_id] = name
 
     def has_multiple_classes(self) -> bool:
         return len(self.class_lookup) > 1
@@ -124,7 +143,7 @@ class RaceOrder(EventHandler):
     def update_position(self, car_number, position, lap_count):
         car = self.number_lookup.get(car_number)
         if not car:
-            raise Exception
+            car = self.add_car(CarPosition(car_number, "unknown"))
         # the lap_count can be passed in as none
         if lap_count:
             car.laps_completed = lap_count
@@ -133,14 +152,14 @@ class RaceOrder(EventHandler):
         self.__adjust_position__(car)
         # renumber the field
         self.cleanup()
-        #self.__check_data_structure__()
+        # self.__check_data_structure__()
 
     def update_last_lap(self, car_number, last_lap_time: float):
         if not isinstance(last_lap_time, float):
             raise Exception("lap time is not a float")
         car = self.number_lookup.get(car_number)
         if not car:
-            raise Exception
+            car = self.add_car(CarPosition(car_number, "unknown"))
         car.last_lap_time = last_lap_time
 
     def update_fastest_lap(self, car_number, fastest_lap_number, fastest_lap_time: float):
@@ -148,14 +167,14 @@ class RaceOrder(EventHandler):
             raise Exception("lap time is not a float")
         car = self.number_lookup.get(car_number)
         if not car:
-            raise Exception
+            car = self.add_car(CarPosition(car_number, "unknown"))
         car.fastest_lap = fastest_lap_number
         car.fastest_lap_time = fastest_lap_time
 
     def update_lap_timestamp(self, car_number, timestamp):
         car = self.number_lookup.get(car_number)
         if not car:
-            raise Exception
+            car = self.add_car(CarPosition(car_number, "unknown"))
         car.last_lap_timestamp = timestamp
 
     def __append__(self, target: CarPosition, car: CarPosition):
@@ -201,7 +220,6 @@ class RaceOrder(EventHandler):
             self.first = car
         else:
             # store some markers
-            #insert_point_car_in_front = insert_after.car_in_front
             insert_point_car_behind = insert_after.car_behind
 
             # wire us up into the new spot
@@ -225,7 +243,6 @@ class RaceOrder(EventHandler):
         self.cleanup()
 
     def __find_insertion_point__(self, car: CarPosition):
-        target_position = car.position
         scan = car.car_in_front
         iterations = 0
         while scan and (scan.laps_completed < car.laps_completed or scan.position == CarPosition.NOT_STARTED):
@@ -276,7 +293,7 @@ class RaceOrder(EventHandler):
         if self.first and self.first.position != CarPosition.NOT_STARTED:
             assert self.first.position == 1, self.__repr__()
             last_position = 0
-            scan:CarPosition = self.first
+            scan: CarPosition = self.first
             ns_encountered = False
             while scan:
                 if scan.position == CarPosition.NOT_STARTED:
@@ -284,7 +301,10 @@ class RaceOrder(EventHandler):
                 if ns_encountered:
                     assert scan.position == CarPosition.NOT_STARTED
                 else:
-                    assert scan.position == last_position + 1, "pos {} found car in pos {}\n{}".format(last_position + 1, scan.position, self.__repr__())
+                    assert scan.position == last_position + 1, \
+                        "pos {} found car in pos {}\n{}".format(last_position + 1,
+                                                                scan.position,
+                                                                self.__repr__())
                     last_position = scan.position
                     if scan.car_in_front:
                         assert scan.car_in_front.laps_completed >= scan.laps_completed, \
@@ -322,7 +342,3 @@ class RaceOrder(EventHandler):
             result = result + "\n" + repr(scan)
             scan = scan.car_behind
         return result
-
-
-
-

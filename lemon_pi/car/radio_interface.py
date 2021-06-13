@@ -51,12 +51,16 @@ class RadioInterface(Thread, EventHandler):
         self.radio = radio
         self.temp_provider = temp_provider
         self.lap_provider = lap_provider
+        self.gps_provider = None
         self.fuel_provider = fuel_provider
         RadioSyncEvent.register_handler(self)
         LeaveTrackEvent.register_handler(self)
 
     def register_lap_provider(self, lap_provider):
         self.lap_provider = lap_provider
+
+    def register_gps_provider(self, gps):
+        self.gps_provider = gps
 
     def handle_event(self, event, **kwargs):
         if event == RadioSyncEvent:
@@ -154,6 +158,8 @@ class RadioInterface(Thread, EventHandler):
         if msg.position_in_class > 0 and msg.position_in_class != msg.position:
             return "P{} ({})".format(msg.position, msg.position_in_class)
         return "P{}".format(msg.position)
+
+
 
 
 

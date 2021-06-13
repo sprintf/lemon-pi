@@ -1,4 +1,4 @@
-from guizero import App, Text, Box, PushButton, Picture, TextBox
+from guizero import App, Text, Box, PushButton, Picture, TextBox, Drawing
 
 from lemon_pi.car.display_providers import *
 from lemon_pi.car.event_defs import (
@@ -35,6 +35,27 @@ class ToggleImage(Picture):
 
     def off(self):
         self.image = self.off_image
+
+
+class AlertLight(Drawing):
+
+    def __init__(self, parent, color="yellow"):
+        Drawing.__init__(self, parent, width=64, height=64)
+        self.bg = "black"
+        self.size = 32
+        self.adjust = 2
+        self.color = color
+        self.o = self.oval(32 - self.size, 32 - self.size, 32 + self.size, 32 + self.size, color=self.color)
+        self.repeat(50, self.__grow_and_shrink)
+
+    def __grow_and_shrink(self):
+        if self.size <= 0:
+            self.adjust = 2
+        if self.size >= 32:
+            self.adjust = -2
+        self.size += self.adjust
+        self.delete(self.o)
+        self.o = self.oval(32 - self.size, 32 - self.size, 32 + self.size, 32 + self.size, color=self.color)
 
 
 class Gui(EventHandler):
@@ -80,7 +101,6 @@ class Gui(EventHandler):
 
         Box(self.splash, width=Gui.WIDTH, height=int(50 * Gui.SCALE_FACTOR))
         splash_lower = Box(self.splash, width=Gui.WIDTH, height=107, align="right")
-        Picture(splash_lower, image="resources/images/argonaut.gif", align="right")
         Text(splash_lower, "in conjunction with", size=Gui.TEXT_SMALL, font=self.font, color="white", align="right")
 
         self.app = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, visible=False)
@@ -114,6 +134,10 @@ class Gui(EventHandler):
         if settings.EXIT_BUTTON_ENABLED:
             PushButton(self.col2, image="resources/images/exitbutton.gif", command=self.quit)
             Box(self.col2, height=24, width=int(Gui.COL_WIDTH * 0.8))
+
+        a = AlertLight(self.col2, color="cyan")
+        a.color = "yellow"
+        a.visible = False
 
         self.stint_ending_display = self.create_stint_end_instructions(self.col4)
         self.stint_starting_display = self.create_stint_start_instructions(self.col5)

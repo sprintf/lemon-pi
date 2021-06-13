@@ -54,3 +54,9 @@ TargetTimeEvent = Event("target-time")
 
 # dumo out the leaderboard to stdout
 DumpLeaderboardEvent = Event("dump-leaderboard")
+
+# Car Settings
+# car=
+# chase_mode= [true/false]
+# target_car= [string number if chase mode true]
+CarSettingsEvent = Event("car-settings")

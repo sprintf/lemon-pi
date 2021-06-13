@@ -36,7 +36,7 @@ git clone https://github.com/sprintf/python-obd.git
 python3 -m venv venv
 . venv/bin/activate
 pip3 install -e ./python-obd/
-pip3 install -r requirements.txt
+pip3 install -r requirements-pi.txt
 ```
 
 7. fix up numpy dependency to work on rpi

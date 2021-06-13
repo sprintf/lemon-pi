@@ -16,8 +16,8 @@ RADIO_DEVICE = CAR_NUMBER = "181"
 OBD_DISABLED = True
 
 # optionally disable Radio
-RADIO_DISABLED = True
+RADIO_DISABLED = False
 
 # optionally disable GPS
-GPS_DISABLED = True
+GPS_DISABLED = False
 

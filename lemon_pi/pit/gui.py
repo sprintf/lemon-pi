@@ -1,4 +1,4 @@
-from guizero import App, Text, Box, TextBox, PushButton, ListBox, Combo, ButtonGroup
+from guizero import App, Text, Box, TextBox, PushButton, ListBox, Combo, ButtonGroup, Picture
 
 import logging
 from python_settings import settings
@@ -10,6 +10,7 @@ from lemon_pi.pit.event_defs import (
     LapCompletedEvent,
     TelemetryEvent, DumpLeaderboardEvent, RadioReceiveEvent, TargetTimeEvent
 )
+from lemon_pi.pit.gui_car_settings import CarSettings
 from lemon_pi.shared.events import Event
 from lemon_pi.shared.gui_components import AlertBox, FadingBox
 from lemon_pi.shared.time_provider import TimeProvider
@@ -19,11 +20,14 @@ logger = logging.getLogger(__name__)
 NUMBER = 'num'
 LAP = 'lap'
 POS = 'pos'
+GAP = 'gap'
 TEMP = 'temp'
 LAP_TIME = 'lap_t'
 TARGET_TIME = 'target_t'
 FUEL = 'fuel'
 COMMS = 'comms'
+SETTINGS = 'stgs'
+CAR_SETTINGS_GUI = 'stgs_panel'
 
 class BigText(Text):
 
@@ -61,21 +65,29 @@ class Gui:
         BigText(self.car_area, "Car", color="lightgreen", grid=[0, 0])
         BigText(self.car_area, "Lap", color="lightgreen", grid=[1, 0])
         BigText(self.car_area, "Position", color="lightgreen", grid=[2, 0])
-        BigText(self.car_area, "Last lap", color="lightgreen", grid=[4, 0])
-        BigText(self.car_area, " Target", color="lightgreen", grid=[5, 0])
-        BigText(self.car_area, " Temp", color="lightgreen", grid=[6, 0])
-        BigText(self.car_area, " Fuel", color="lightgreen", grid=[7, 0])
-        BigText(self.car_area, "   Comms", color="lightgreen", grid=[8, 0])
+        BigText(self.car_area, "Gap", color="lightgreen", grid=[4, 0])
+        BigText(self.car_area, "Last lap", color="lightgreen", grid=[5, 0])
+        BigText(self.car_area, " Target", color="lightgreen", grid=[6, 0])
+        BigText(self.car_area, " Temp", color="lightgreen", grid=[7, 0])
+        BigText(self.car_area, " Fuel", color="lightgreen", grid=[8, 0])
+        BigText(self.car_area, "   Comms", color="lightgreen", grid=[9, 0])
         for row, car in enumerate(self.target_cars):
             self.car_data[car] = {}
             self.car_data[car][NUMBER] = BigText(self.car_area, text=car, grid=[0, row + 1]) # car number
             self.car_data[car][LAP] = BigText(self.car_area, text="0", grid=[1, row + 1]) # lap
             self.car_data[car][POS] = BigText(self.car_area, text="", grid=[2, row + 1]) # pos
-            self.car_data[car][LAP_TIME] = BigText(self.car_area, text="HH:MM", grid=[4, row + 1]) # last lap
-            self.car_data[car][TARGET_TIME] = BigText(self.car_area, text="", grid=[5, row + 1]) # last lap
-            self.car_data[car][TEMP] = self.create_temp_gauge(self.car_area, grid=[6, row + 1]) # temp
-            self.car_data[car][FUEL] = BigText(self.car_area, text="?", grid=[7, row + 1]) # fuel
-            self.car_data[car][COMMS] = FadingBox(self.car_area, width=32, height=32, grid=[8, row + 1])
+            self.car_data[car][GAP] = BigText(self.car_area, text="", grid=[4, row + 1]) # gap
+            self.car_data[car][LAP_TIME] = BigText(self.car_area, text="HH:MM", grid=[5, row + 1]) # last lap
+            self.car_data[car][TARGET_TIME] = BigText(self.car_area, text="", grid=[6, row + 1]) # last lap
+            self.car_data[car][TEMP] = self.create_temp_gauge(self.car_area, grid=[7, row + 1]) # temp
+            self.car_data[car][FUEL] = BigText(self.car_area, text="?", grid=[8, row + 1]) # fuel
+            icons = Box(self.car_area, grid=[9, row + 1])
+            self.car_data[car][COMMS] = FadingBox(icons, width=32, height=32, align="left")
+            Box(icons, width=2, height=2,align="left")
+            self.car_data[car][SETTINGS] = PushButton(icons, image="resources/images/cog.gif",
+                                                      width=24, height=24, align="left",
+                                                      command=self.handle_car_settings, args=[car])
+            self.car_data[car][CAR_SETTINGS_GUI] = CarSettings(self.root, car)
 
         # spacer
         Box(self.main, height=32, width="fill")
@@ -99,6 +111,9 @@ class Gui:
         RadioReceiveEvent.register_handler(self)
         TargetTimeEvent.register_handler(self)
 
+    def handle_car_settings(self, car_number):
+        self.car_data[car_number][CAR_SETTINGS_GUI].show()
+
     def display(self):
         self.root.when_key_pressed = self.handle_keyboard
         self.root.display()
@@ -118,6 +133,7 @@ class Gui:
         self.__update_position(car=car, position=position, class_position=class_position)
         self.__update_car_data__(car=car, lap_count=laps, last_lap_time=last_lap_time)
         self.car_data[car][LAP].value = laps + 1
+        self.car_data[car][GAP].value = gap
 
     def handle_event(self, event: Event, flag=None, car="", **kwargs):
         if event == RaceStatusEvent:
@@ -298,9 +314,11 @@ class Gui:
             self.car_data[car][FUEL].value = "{}%".format(fuel_percent)
 
     def __update_position(self, car="", position=0, class_position=0):
-        if class_position > 0 and class_position != position:
+        if 0 < class_position < position:
             self.car_data[car][POS].value = "P{} ({})".format(position, class_position)
-        self.car_data[car][POS].value = "P{}".format(position)
+        else:
+            # missing else block was causing issue #189
+            self.car_data[car][POS].value = "P{}".format(position)
 
     def __update_target_time(self, car="", seconds=0.0):
         self.car_data[car][TARGET_TIME].value = "{:02d}:{:02d}".format(int(seconds / 60), int(seconds) % 60)

@@ -26,7 +26,7 @@ jobs:
           GMAP_APIKEY : ${{ secrets.GMAP_APIKEY }}
         continue-on-error: true
         run: |
-          pip install -r requirements.txt
+          pip install -r requirements-linux.txt
           export PYTHONPATH='.'
           python lemon_pi/utils/plot_tracks.py
 

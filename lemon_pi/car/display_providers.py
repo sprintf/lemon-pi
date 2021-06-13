@@ -1,7 +1,5 @@
 
-import datetime
-
-# a mixin for things that are flakey ...
+# a mixin for things that are flaky ...
 # particularly GPS
 class UnreliableProviderMixin:
 
@@ -30,7 +28,7 @@ class PositionProvider(UnreliableProviderMixin):
         pass
 
 
-class LapProvider():
+class LapProvider:
 
     # get the lap count
     def get_lap_count(self) -> int:
@@ -58,4 +56,3 @@ class FuelProvider:
 
     def get_fuel_percent_remaining(self) -> int:
         pass
-
