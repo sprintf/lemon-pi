@@ -1,11 +1,12 @@
-from guizero import App, Text, Box, PushButton, Picture, TextBox
+from guizero import App, Text, Box, PushButton, Picture, TextBox, Drawing
 
 from lemon_pi.car.display_providers import *
 from lemon_pi.car.event_defs import (
 
     LeaveTrackEvent, StateChangePittedEvent, StateChangeSettingOffEvent, CompleteLapEvent, OBDConnectedEvent,
     OBDDisconnectedEvent, GPSConnectedEvent, GPSDisconnectedEvent, RaceFlagStatusEvent, DriverMessageEvent,
-    DriverMessageAddendumEvent, ExitApplicationEvent, EnterTrackEvent, RadioReceiveEvent)
+    DriverMessageAddendumEvent, ExitApplicationEvent, EnterTrackEvent, RadioReceiveEvent, ButtonPressEvent,
+    AudioAlarmEvent)
 
 import logging
 import platform
@@ -35,6 +36,27 @@ class ToggleImage(Picture):
 
     def off(self):
         self.image = self.off_image
+
+
+class AlertLight(Drawing):
+
+    def __init__(self, parent, color="yellow"):
+        Drawing.__init__(self, parent, width=64, height=64)
+        self.bg = "black"
+        self.size = 32
+        self.adjust = 2
+        self.color = color
+        self.o = self.oval(32 - self.size, 32 - self.size, 32 + self.size, 32 + self.size, color=self.color)
+        self.repeat(50, self.__grow_and_shrink)
+
+    def __grow_and_shrink(self):
+        if self.size <= 0:
+            self.adjust = 2
+        if self.size >= 32:
+            self.adjust = -2
+        self.size += self.adjust
+        self.delete(self.o)
+        self.o = self.oval(32 - self.size, 32 - self.size, 32 + self.size, 32 + self.size, color=self.color)
 
 
 class Gui(EventHandler):
@@ -80,7 +102,6 @@ class Gui(EventHandler):
 
         Box(self.splash, width=Gui.WIDTH, height=int(50 * Gui.SCALE_FACTOR))
         splash_lower = Box(self.splash, width=Gui.WIDTH, height=107, align="right")
-        Picture(splash_lower, image="resources/images/argonaut.gif", align="right")
         Text(splash_lower, "in conjunction with", size=Gui.TEXT_SMALL, font=self.font, color="white", align="right")
 
         self.app = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, visible=False)
@@ -114,6 +135,10 @@ class Gui(EventHandler):
         if settings.EXIT_BUTTON_ENABLED:
             PushButton(self.col2, image="resources/images/exitbutton.gif", command=self.quit)
             Box(self.col2, height=24, width=int(Gui.COL_WIDTH * 0.8))
+
+        a = AlertLight(self.col2, color="cyan")
+        a.color = "yellow"
+        a.visible = False
 
         self.stint_ending_display = self.create_stint_end_instructions(self.col4)
         self.stint_starting_display = self.create_stint_start_instructions(self.col5)
@@ -264,6 +289,8 @@ class Gui(EventHandler):
             self.__updateLap(randomLapTimeProvider)
         if event_data.key == 'p':
             self.handle_event(RadioReceiveEvent)
+        if event_data.key == 'b':
+            ButtonPressEvent.emit(button=0)
 
     def display(self):
         self.root.when_key_pressed = self.handle_keyboard
@@ -311,6 +338,7 @@ class Gui(EventHandler):
     def create_temp_widget(self, parent):
         result = AlertBox(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(112 * Gui.SCALE_FACTOR))
         result.set_range(settings.TEMP_BAND_LOW, settings.TEMP_BAND_WARN, settings.TEMP_BAND_HIGH)
+        result.set_alarm_cb( lambda: AudioAlarmEvent.emit(message="Engine Overheating"))
         result.set_border(4, "darkgreen")
         Text(result, "TEMP", size=Gui.TEXT_SMALL, color="white")
         Text(result, "???", size=Gui.TEXT_XL, font=self.font, color="white")

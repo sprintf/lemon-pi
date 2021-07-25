@@ -1,16 +1,29 @@
-from lemon_pi.pit.event_defs import RaceStatusEvent, LapCompletedEvent
+from lemon_pi.pit.event_defs import RaceStatusEvent, LapCompletedEvent, CarSettingsEvent
 from lemon_pi.pit.leaderboard import RaceOrder, CarPosition
 from datetime import datetime
 import logging
 
+from lemon_pi.shared.events import EventHandler
+
 logger = logging.getLogger(__name__)
 
-class DataSourceHandler:
+
+class DataSourceHandler(EventHandler):
 
     def __init__(self, leaderboard: RaceOrder, target_cars: [str]):
         self.leaderboard = leaderboard
         self.race_flag = ""
         self.target_cars: [str] = target_cars
+        self.chase_cars: dict = {}
+        CarSettingsEvent.register_handler(self)
+
+    def handle_event(self, event, car="", chase_mode=False, target_car=""):
+        if event == CarSettingsEvent:
+            if chase_mode:
+                self.chase_cars[car] = target_car
+            else:
+                if car in self.chase_cars:
+                    del self.chase_cars[car]
 
     def handle_message(self, raw_line):
         try:
@@ -61,10 +74,16 @@ class DataSourceHandler:
                         self.leaderboard.update_position(car_number, position, laps)
                         if car_number in self.target_cars:
                             target = self.leaderboard.number_lookup.get(car_number)
-                            ahead = target.car_in_front
-                            gap = target.gap(ahead)
+                            # if we are chasing a particular car then look it up instead
+                            # of the car directly ahead
+                            car_ahead = None
+                            if car_number in self.chase_cars:
+                                car_ahead = self.leaderboard.number_lookup.get(self.chase_cars[car_number])
+                            if not car_ahead:
+                                car_ahead = target.car_in_front
+                            gap = target.gap(car_ahead)
                             self.emit_lap_completed(car_number, laps, position,
-                                                    target.class_position, ahead,
+                                                    target.class_position, car_ahead,
                                                     gap, last_lap_time, flag)
                         else:
                             this_car = self.leaderboard.number_lookup.get(car_number)

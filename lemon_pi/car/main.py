@@ -1,6 +1,10 @@
 
 import time, os
 from threading import Thread
+from pygame import mixer
+
+from lemon_pi.car.audio import Audio
+from lemon_pi.car.button import Button
 from lemon_pi.car.gui import Gui
 from lemon_pi.car.gps_reader import GpsReader
 from lemon_pi.car.maf_analyzer import MafAnalyzer
@@ -62,6 +66,11 @@ if not "SETTINGS_MODULE" in os.environ:
 gui = Gui(settings.DISPLAY_WIDTH, settings.DISPLAY_HEIGHT)
 
 def init():
+
+    # sound initialization
+    mixer.pre_init(44100, -16, 2, 512)
+    mixer.init()
+
     # detect USB devices (should just be Lora)
     UsbDetector.init()
 
@@ -75,6 +84,8 @@ def init():
     # turn wifi off now, to save battery
     WifiManager().disable_wifi()
 
+    # enable sound generation
+    Audio(mixer).start()
     StateMachine()
     MovementListener()
 
@@ -116,6 +127,9 @@ def init():
     # show the main application
     gui.present_main_app()
 
+    # bring in a button listener, to read the hardware button
+    button = Button()
+
     logger.info("awaiting location to choose track")
     while not gps.is_working() or gps.get_lat_long() == (0, 0):
         time.sleep(1)
@@ -125,6 +139,8 @@ def init():
     gps.register_position_listener(lap_tracker)
     gui.register_lap_provider(lap_tracker)
     radio_interface.register_lap_provider(lap_tracker)
+    radio.register_gps_provider(gps)
+
 
 Thread(target=init, daemon=True).start()
 

@@ -15,7 +15,7 @@ from lemon_pi.car.event_defs import (
     LapInfoEvent,
     RadioReceiveEvent,
     RefuelEvent,
-    ExitApplicationEvent
+    ExitApplicationEvent, RacePositionEvent
 )
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.generated.messages_pb2 import (
@@ -51,12 +51,16 @@ class RadioInterface(Thread, EventHandler):
         self.radio = radio
         self.temp_provider = temp_provider
         self.lap_provider = lap_provider
+        self.gps_provider = None
         self.fuel_provider = fuel_provider
         RadioSyncEvent.register_handler(self)
         LeaveTrackEvent.register_handler(self)
 
     def register_lap_provider(self, lap_provider):
         self.lap_provider = lap_provider
+
+    def register_gps_provider(self, gps):
+        self.gps_provider = gps
 
     def handle_event(self, event, **kwargs):
         if event == RadioSyncEvent:
@@ -106,6 +110,10 @@ class RadioInterface(Thread, EventHandler):
             logger.info("got race position message...{}".format(msg))
             # is this about us directly?
             if msg.car_number == settings.CAR_NUMBER:
+                RacePositionEvent.emit(pos=msg.position,
+                                       pos_in_class=msg.position_in_class,
+                                       car_ahead=msg.car_ahead.car_number,
+                                       gap=msg.car_ahead.gap_text)
                 position_text = self.format_position(msg)
                 if msg.car_ahead.car_number:
                     text = "{}  ▲ #{} by {}".format(position_text, msg.car_ahead.car_number, msg.car_ahead.gap_text)
@@ -154,6 +162,8 @@ class RadioInterface(Thread, EventHandler):
         if msg.position_in_class > 0 and msg.position_in_class != msg.position:
             return "P{} ({})".format(msg.position, msg.position_in_class)
         return "P{}".format(msg.position)
+
+
 
 
 

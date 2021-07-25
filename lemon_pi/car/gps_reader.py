@@ -16,14 +16,18 @@ import logging
 import time
 import subprocess
 
+from lemon_pi.shared.data_provider_interface import GpsProvider
 from lemon_pi.shared.events import EventHandler
+from lemon_pi.shared.generated.messages_pb2 import GpsPosition
 
 logger = logging.getLogger(__name__)
 
-class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
+
+class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvider):
 
     def __init__(self, log_to_file=False):
         Thread.__init__(self, daemon=True)
+        self.fix_timestamp = 0
         self.speed_mph = 999
         self.heading = 0
         self.working = False
@@ -82,7 +86,8 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
                                     self.part_synced = True
                                     logger.info("time corrected to {}".format(datetime.now()))
                                 else:
-                                    logger.warning("GPS Data time lag = {}  (skipping)".format(lag.total_seconds()))
+                                    logger.warning("GPS Data time lag = {}  (skipping {}/30)".
+                                                   format(lag.total_seconds(), self.sequential_timesync_errors))
                                 continue
                             self.sequential_timesync_errors = 0
                             self.time_synced = True
@@ -107,6 +112,9 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
                             if not math.isnan(session.fix.latitude):
                                 self.lat = session.fix.latitude
                                 self.long = session.fix.longitude
+                                self.fix_timestamp = time.time()
+                                # generally we should try to move away from position listeners, and instead
+                                # have them pull from this class when they need it
                                 if self.position_listener:
                                     self.position_listener.update_position(self.lat, self.long, self.heading, time.time(), self.speed_mph)
                                 if not self.working:
@@ -123,13 +131,35 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler):
                 time.sleep(30)
 
     def get_speed(self) -> int:
-        return self.speed_mph
+        if self.time_synced and time.time() - self.fix_timestamp < 5:
+            return self.speed_mph
+        else:
+            return 999
 
     def get_heading(self) -> int:
-        return int(self.heading)
+        if self.time_synced and time.time() - self.fix_timestamp < 5:
+            return int(self.heading)
+        else:
+            return 0
 
     def get_lat_long(self) -> (float, float):
-        return (self.lat, self.long)
+        if self.time_synced and time.time() - self.fix_timestamp < 5:
+            return (self.lat, self.long)
+        else:
+            return (0.0, 0.0)
+
+    def get_gps_position(self) -> GpsPosition:
+        if self.time_synced and time.time() - self.fix_timestamp < 5:
+            result = GpsPosition()
+            result.lat = self.lat
+            result.long = self.long
+            result.speed_mph = self.speed_mph
+            result.heading = self.heading
+            result.gps_timestamp = round(self.fix_timestamp)
+            return result
+        else:
+            return None
+
 
     def is_working(self) -> bool:
         return self.working

@@ -21,6 +21,7 @@ class AlertBox(Box):
         self.low_value = 180
         self.warn_value = 205
         self.error_value = 215
+        self.alarm_fn = None
 
     def set_range(self, low, warn, error):
         self.low_value = low
@@ -46,6 +47,8 @@ class AlertBox(Box):
     def _alert(self):
         self.bg = "white"
         self._set_text_color("red")
+        if self.alarm_fn:
+            self.alarm_fn()
 
     def _warn(self):
         self.bg = self.orig_bg
@@ -63,6 +66,9 @@ class AlertBox(Box):
         for child in self.children:
             if isinstance(child, Text):
                 child.text_color = color
+
+    def set_alarm_cb(self, fn):
+        self.alarm_fn = fn
 
 
 # a Fading Box starts off as an empty box. When it is told

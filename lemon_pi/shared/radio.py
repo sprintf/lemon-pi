@@ -12,6 +12,7 @@ from serial.threaded import LineReader, ReaderThread
 from serial.serialutil import PARITY_NONE, STOPBITS_ONE, EIGHTBITS
 from python_settings import settings
 
+from lemon_pi.shared.data_provider_interface import GpsProvider
 from lemon_pi.shared.message_encoder import MessageEncoder
 from lemon_pi.shared.message_decoder import (
     MessageDecoder,
@@ -26,10 +27,10 @@ from google.protobuf.message import Message
 #
 # Radio Logic
 #
-# It takes around 4s to transmit any message with Lora
+# It takes around 1-2s to transmit any message with Lora
 # During that time the radio has to be disabled from receive mode, so this
-# creates a large window for transmissions not being received for this reason:
-#  1. tranmissions should be limited
+# creates a large window for transmissions not being received, so for this reason:
+#  1. transmissions should be limited
 #  2. the ping protocol only runs when nothing else is happening
 #  3. mechanisms that transmit based on a coordinated event (such as the car crossing the line)
 #     should be offset accordingly
@@ -39,6 +40,7 @@ from google.protobuf.message import Message
 #  The +- 10s is randomized so that it's unlikely two radios will ever stay in sync
 #  The ping includes the identity of the sender, so it is possible to display all the
 #  radios that are talking in a group
+#  The ping may also include GPS data from the transmitter's location, if configured
 from lemon_pi.shared.usb_detector import UsbDetector, UsbDevice
 
 logger = logging.getLogger(__name__)
@@ -87,6 +89,10 @@ class Radio(Thread):
         self.send_queue = Queue()
         self.send_thread = Thread(target=self.__send_outbound_messages__, daemon=True)
         self.receive_queue = Queue()
+        self.gps_provider: GpsProvider = None
+
+    def register_gps_provider(self, gps):
+        self.gps_provider = gps
 
     def __pick_radio_freq__(self, key:str) -> int:
         index = adler32(key.encode("UTF8")) % len(Radio.FREQ)
@@ -95,8 +101,8 @@ class Radio(Thread):
     def run(self):
         try:
             self.receive_loop()
-        except:
-            logger.error("radio not connected")
+        except Exception as e:
+            logger.exception("radio not connected", e)
             time.sleep(10)
 
     def choose_port(self) -> str:
@@ -253,6 +259,11 @@ class Radio(Thread):
                         else:
                             ping = ToCarMessage()
                         ping.ping.timestamp = 1
+                        if self.gps_provider:
+                            gps_position = self.gps_provider.get_gps_position()
+                            if gps_position:
+                                logger.info("sending ping w/ lat,long {},{}".format(gps_position.lat, gps_position.long))
+                                ping.ping.gps.CopyFrom(gps_position)
                         self.send_async(ping)
                 logger.warning("disconnect detected")
 
