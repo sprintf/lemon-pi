@@ -109,13 +109,16 @@ class Audio(Thread, EventHandler):
         # car number that are tens and hundreds should be pronounced as-is
         if car_number.endswith("0"):
             return car_number
+        # james bond style logic
+        if car_number.startswith("00"):
+            return "double O. " + Audio._car_number_to_audio(car_number[2])
         # for other numbers we want to turn them into a sequence of their digits
         # e.g. 199 would not be "one hundred and ninety nine" it would be "one nine nine"
         try:
             result = ""
             for digit in car_number:
                 result += Audio.number_to_text[digit] + " "
-            return result
+            return result.strip()
         except KeyError:
             return car_number
 

@@ -43,11 +43,13 @@ class TestAudio(unittest.TestCase):
         audio.engine.runAndWait.assert_called_once()
 
     def test_number_announcement(self):
-        self.assertEqual("one five six ", Audio._car_number_to_audio("156"))
-        self.assertEqual("nine nine ", Audio._car_number_to_audio("99"))
+        self.assertEqual("one five six", Audio._car_number_to_audio("156"))
+        self.assertEqual("nine nine", Audio._car_number_to_audio("99"))
+        self.assertEqual("double O. seven", Audio._car_number_to_audio("007"))
         self.assertEqual("0", Audio._car_number_to_audio("0"))
         self.assertEqual("10", Audio._car_number_to_audio("10"))
-        self.assertEqual("seven O. seven ", Audio._car_number_to_audio("707"))
+        self.assertEqual("100", Audio._car_number_to_audio("100"))
+        self.assertEqual("seven O. seven", Audio._car_number_to_audio("707"))
         self.assertEqual("11b", Audio._car_number_to_audio("11b"))
 
 
