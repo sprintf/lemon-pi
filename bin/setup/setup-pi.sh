@@ -7,6 +7,7 @@ sudo apt-get update
 #sudo apt-get install python3.8
 
 sudo apt-get install git gpsd gpsd-clients
+sudo apt-get install espeak
 
 git clone https://github.com/sprintf/lemon-pi.git
 
@@ -17,7 +18,7 @@ git clone https://github.com/sprintf/python-obd.git
 python3 -m venv venv
 . venv/bin/activate
 pip3 install -e ./python-obd
-pip3 install -r requirements.txt
+pip3 install -r requirements-pi.txt
 
 sudo apt-get install -y libatlas-base-dev
 sudo apt-get install -y protobuf-compiler
@@ -38,6 +39,7 @@ NotShowIn=GNOME;KDE;XFCE;
 EOM1
 
 cat <<EOM2 | sudo tee -a /boot/config.txt
+hdmi_force_hotplug=1
 hdmi_group=2
 hdmi_mode=87
 
@@ -48,8 +50,3 @@ hdmi_drive=2
 hdmi_cvt=1024 576 60 3 0 0 0
 EOM2
 
-wget http://ftp.us.debian.org/debian/pool/non-free/s/svox/libttspico0_1.0+git20130326-9_armhf.deb
-wget http://ftp.us.debian.org/debian/pool/non-free/s/svox/libttspico-utils_1.0+git20130326-9_armhf.deb
-sudo apt-get install -f ./libttspico0_1.0+git20130326-9_armhf.deb ./libttspico-utils_1.0+git20130326-9_armhf.deb
-
-wget http://ftp.us.debian.org/debian/pool/non-free/s/svox/
