@@ -5,7 +5,8 @@ from lemon_pi.car.event_defs import (
 
     LeaveTrackEvent, StateChangePittedEvent, StateChangeSettingOffEvent, CompleteLapEvent, OBDConnectedEvent,
     OBDDisconnectedEvent, GPSConnectedEvent, GPSDisconnectedEvent, RaceFlagStatusEvent, DriverMessageEvent,
-    DriverMessageAddendumEvent, ExitApplicationEvent, EnterTrackEvent, RadioReceiveEvent)
+    DriverMessageAddendumEvent, ExitApplicationEvent, EnterTrackEvent, RadioReceiveEvent, ButtonPressEvent,
+    AudioAlarmEvent)
 
 import logging
 import platform
@@ -288,6 +289,8 @@ class Gui(EventHandler):
             self.__updateLap(randomLapTimeProvider)
         if event_data.key == 'p':
             self.handle_event(RadioReceiveEvent)
+        if event_data.key == 'b':
+            ButtonPressEvent.emit(button=0)
 
     def display(self):
         self.root.when_key_pressed = self.handle_keyboard
@@ -335,6 +338,7 @@ class Gui(EventHandler):
     def create_temp_widget(self, parent):
         result = AlertBox(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(112 * Gui.SCALE_FACTOR))
         result.set_range(settings.TEMP_BAND_LOW, settings.TEMP_BAND_WARN, settings.TEMP_BAND_HIGH)
+        result.set_alarm_cb( lambda: AudioAlarmEvent.emit(message="Engine Overheating"))
         result.set_border(4, "darkgreen")
         Text(result, "TEMP", size=Gui.TEXT_SMALL, color="white")
         Text(result, "???", size=Gui.TEXT_XL, font=self.font, color="white")

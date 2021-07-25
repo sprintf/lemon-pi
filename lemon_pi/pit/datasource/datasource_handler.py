@@ -3,16 +3,19 @@ from lemon_pi.pit.leaderboard import RaceOrder, CarPosition
 from datetime import datetime
 import logging
 
+from lemon_pi.shared.events import EventHandler
+
 logger = logging.getLogger(__name__)
 
-class DataSourceHandler:
+
+class DataSourceHandler(EventHandler):
 
     def __init__(self, leaderboard: RaceOrder, target_cars: [str]):
         self.leaderboard = leaderboard
         self.race_flag = ""
         self.target_cars: [str] = target_cars
         self.chase_cars: dict = {}
-        CarSettingsEvent.register_handler(self.handle_event)
+        CarSettingsEvent.register_handler(self)
 
     def handle_event(self, event, car="", chase_mode=False, target_car=""):
         if event == CarSettingsEvent:

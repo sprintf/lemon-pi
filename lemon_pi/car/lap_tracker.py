@@ -58,7 +58,8 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
             # de-bounce hitting start finish line twice ... a better
             # approach might be to ensure car travels so far away from line
             if time - self.lap_start_time > 10:
-                CompleteLapEvent.emit()
+                lap_time = cross_time - self.lap_start_time
+                CompleteLapEvent.emit(lap_count=self.lap_count + 1, lap_time=lap_time)
                 if not self.on_track:
                     logger.info("entering track")
                     # this isn't true for a multi-driver day, but we'll keep each
@@ -70,7 +71,7 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                 else:
                     logger.info("completed lap!")
                     self.lap_count += 1
-                    self.last_lap_time = cross_time - self.lap_start_time
+                    self.last_lap_time = lap_time
                     if self.listener:
                         self.listener.update_lap(self.lap_count, self.last_lap_time)
                 self.lap_start_time = cross_time

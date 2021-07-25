@@ -14,6 +14,8 @@ LeaveTrackEvent = Event("LeaveTrack", debounce_time=30)
 EnterTrackEvent = Event("EnterTrack", debounce_time=30)
 
 # a lap has been completed
+# lap_count=   int
+# lap_time=  float
 CompleteLapEvent = Event("CompleteLap")
 
 # a request to exit the application
@@ -70,6 +72,20 @@ RadioReceiveEvent = Event("radio-rx")
 
 #  This wraps an initial event, unleashed by the button push
 # event=
-ButtonPressEvent = Event("btn")
+# button=0   the id of the button that was pushed
+ButtonPressEvent = Event("btn", debounce_time=0.25)
+
+# an audio alarm
+# message=
+AudioAlarmEvent = Event("alrm", debounce_time=60)
+
+# an event indicating the cars position in the race
+# pos=
+# pos_in_class=
+# car_ahead=
+# gap=
+RacePositionEvent = Event("rpos")
+
+
 
 

@@ -2,6 +2,7 @@
 import time, os
 from threading import Thread
 
+from lemon_pi.car.audio import Audio
 from lemon_pi.car.button import Button
 from lemon_pi.car.gui import Gui
 from lemon_pi.car.gps_reader import GpsReader
@@ -77,6 +78,8 @@ def init():
     # turn wifi off now, to save battery
     WifiManager().disable_wifi()
 
+    # enable sound generation
+    Audio().start()
     StateMachine()
     MovementListener()
 
