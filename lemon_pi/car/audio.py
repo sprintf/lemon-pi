@@ -2,7 +2,6 @@ import pyttsx3
 import logging
 from queue import Queue
 from threading import Thread
-from pygame import mixer
 
 from lemon_pi.car.event_defs import ButtonPressEvent, CompleteLapEvent, AudioAlarmEvent, RacePositionEvent
 from lemon_pi.shared.events import EventHandler
@@ -25,12 +24,10 @@ class Audio(Thread, EventHandler):
         '9' : "nine"
     }
 
-    def __init__(self):
+    def __init__(self, mixer):
         Thread.__init__(self, daemon=True)
         self.engine = pyttsx3.init()
         self.queue = Queue()
-        mixer.pre_init(44100, -16, 2, 512)
-        mixer.init()
         self.click = mixer.Sound('resources/sounds/click.wav')
         ButtonPressEvent.register_handler(self)
         CompleteLapEvent.register_handler(self)

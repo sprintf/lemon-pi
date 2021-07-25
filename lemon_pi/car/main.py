@@ -1,6 +1,7 @@
 
 import time, os
 from threading import Thread
+from pygame import mixer
 
 from lemon_pi.car.audio import Audio
 from lemon_pi.car.button import Button
@@ -65,6 +66,11 @@ if not "SETTINGS_MODULE" in os.environ:
 gui = Gui(settings.DISPLAY_WIDTH, settings.DISPLAY_HEIGHT)
 
 def init():
+
+    # sound initialization
+    mixer.pre_init(44100, -16, 2, 512)
+    mixer.init()
+
     # detect USB devices (should just be Lora)
     UsbDetector.init()
 
@@ -79,7 +85,7 @@ def init():
     WifiManager().disable_wifi()
 
     # enable sound generation
-    Audio().start()
+    Audio(mixer).start()
     StateMachine()
     MovementListener()
 
