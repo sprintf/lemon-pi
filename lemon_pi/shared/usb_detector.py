@@ -56,14 +56,27 @@ class UsbDetector:
                 logger.info("already mapped : {}".format(device))
                 devices.remove(device)
 
-        # step1 ... see if any are radio
+        # step 1 ... throw out the gps
+        logger.info("detecting GPS devices")
+        inaccessible = []
+        for device in devices:
+            try:
+                with serial.Serial(device, baudrate=57600, timeout=2) as ser:
+                    pass
+            except serial.SerialException:
+                inaccessible.append(device)
+        for bad_device in inaccessible:
+            logger.info(f"found possible GPS device (busy) {bad_device}")
+            devices.remove(bad_device)
+
+        # step 2 ... see if any are radio
         logger.info("detecting Lora devices")
         for device in devices:
             with serial.Serial(device, baudrate=57600, timeout=2) as ser:
                 try:
                     while len(ser.readline()):
                         logger.debug("throwing away... ")
-                        pass
+
                     ser.write("sys get ver\r\n".encode("UTF-8"))
                     time.sleep(0.5)
                     # set timeout ...? ?
@@ -79,9 +92,8 @@ class UsbDetector:
                 except UnicodeDecodeError:
                     # we get into this when we try to talk to OBD like this
                     pass
-                finally:
-                    ser.close()
 
+        # step 3 ..
         logger.info("detecting OBD devices")
         for device in devices:
             if self.device_map.get(device):
@@ -97,8 +109,8 @@ class UsbDetector:
                         self.usb_map[UsbDevice.OBD] = device
                         self.device_map[device] = UsbDevice.OBD
                         logger.info("associated {} with OBD".format(device))
-                finally:
-                    ser.close()
+                except serial.SerialException:
+                    pass
 
         self.last_scan_time = time.time()
 
