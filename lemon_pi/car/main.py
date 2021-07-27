@@ -38,9 +38,14 @@ logging.basicConfig(format='%(asctime)s %(message)s',
 
 if not os.path.isdir("logs"):
     os.mkdir("logs")
-file_handler = logging.FileHandler("logs/lap-logger-{}.csv".format(today))
+
+lap_file_handler = logging.FileHandler("logs/lap-logger-{}.csv".format(today))
 lap_logger = logging.getLogger("lap-logger")
-lap_logger.addHandler(file_handler)
+lap_logger.addHandler(lap_file_handler)
+
+gps_file_handler = logging.FileHandler("logs/gps-{}.csv".format(today))
+gps_logger = logging.getLogger("gps-logger")
+gps_logger.addHandler(gps_file_handler)
 
 handler = RotatingFileHandler("logs/lemon-pi.log",
                               maxBytes=10000000,
