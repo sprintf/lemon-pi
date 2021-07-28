@@ -14,6 +14,7 @@ from lemon_pi.car import geometry
 import time
 from datetime import datetime
 import logging
+from python_settings import settings
 
 from lemon_pi.shared.events import EventHandler
 
@@ -91,9 +92,10 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                         if crossed_target:
                             target_metadata.event.emit(ts=cross_time)
         # log gps
-        dt = datetime.fromtimestamp(time)
-        gps_logger.info(
-            f"{dt.hour}:{dt.minute}:{dt.second},{time},{self.lap_count},{lat},{long},{speed},{heading}")
+        if settings.LOG_GPS:
+            dt = datetime.fromtimestamp(time)
+            gps_logger.info(
+                f"{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d},{time},{self.lap_count},{lat},{long},{speed},{heading}")
 
     def handle_event(self, event, lap_count=0, ts=0):
         if event == LapInfoEvent:

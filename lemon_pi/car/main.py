@@ -46,6 +46,7 @@ lap_logger.addHandler(lap_file_handler)
 gps_file_handler = logging.FileHandler("logs/gps-{}.csv".format(today))
 gps_logger = logging.getLogger("gps-logger")
 gps_logger.addHandler(gps_file_handler)
+gps_logger.propagate = False
 
 handler = RotatingFileHandler("logs/lemon-pi.log",
                               maxBytes=10000000,
