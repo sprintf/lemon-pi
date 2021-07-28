@@ -5,6 +5,7 @@ import os
 import logging
 import serial
 import time
+from gps import gps
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -57,17 +58,18 @@ class UsbDetector:
                 devices.remove(device)
 
         # step 1 ... throw out the gps
-        logger.info("detecting GPS devices")
-        inaccessible = []
-        for device in devices:
+        if devices:
             try:
-                with serial.Serial(device, baudrate=57600, timeout=2) as ser:
-                    pass
-            except serial.SerialException:
-                inaccessible.append(device)
-        for bad_device in inaccessible:
-            logger.info(f"found possible GPS device (busy) {bad_device}")
-            devices.remove(bad_device)
+                with gps() as session:
+                    session.read()
+                    session.send('?DEVICES;')
+                    code = session.read()
+                    if code == 0:
+                        for gps_device in session.data["devices"]:
+                            logger.info(f"found gps device at {gps_device['path']}")
+                            devices.remove(gps_device["path"])
+            except Exception:
+                logger.info("didn't find connected GPS device")
 
         # step 2 ... see if any are radio
         logger.info("detecting Lora devices")
