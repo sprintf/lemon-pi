@@ -59,17 +59,21 @@ class UsbDetector:
 
         # step 1 ... throw out the gps
         if devices:
+            session = None
             try:
-                with gps() as session:
-                    session.read()
-                    session.send('?DEVICES;')
-                    code = session.read()
-                    if code == 0:
-                        for gps_device in session.data["devices"]:
-                            logger.info(f"found gps device at {gps_device['path']}")
-                            devices.remove(gps_device["path"])
+                session = gps()
+                session.read()
+                session.send('?DEVICES;')
+                code = session.read()
+                if code == 0:
+                    for gps_device in session.data["devices"]:
+                        logger.info(f"found gps device at {gps_device['path']}")
+                        devices.remove(gps_device["path"])
             except Exception:
                 logger.info("didn't find connected GPS device")
+            finally:
+                if session:
+                    session.close()
 
         # step 2 ... see if any are radio
         logger.info("detecting Lora devices")
