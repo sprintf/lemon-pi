@@ -15,10 +15,12 @@ from lemon_pi.car.event_defs import (
 import logging
 import time
 import subprocess
+from python_settings import settings
 
 from lemon_pi.shared.data_provider_interface import GpsProvider
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.generated.messages_pb2 import GpsPosition
+
 
 logger = logging.getLogger(__name__)
 
@@ -184,7 +186,7 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
             logger.info("detected GPS device, setting baud rate to 57600")
             # setting cycle to more than 1.0 means we see the same coordinate
             # position delivered multiple times in a row
-            session.send('?DEVICE={"class":"DEVICE","bps":57600}')
+            session.send(f'?DEVICE=\{"class":"DEVICE","bps":57600,"cycle":{settings.GPS_CYCLE}\}')
             code = session.read()
             logger.debug("got code {}".format(code))
             response = session.data
@@ -201,7 +203,7 @@ if __name__ == "__main__":
     class FileLogger(PositionUpdater):
 
         def __init__(self):
-            self.file = open("../../traces/trace-{}.csv".format(int(time.time())), mode="w")
+            self.file = open("traces/trace-{}.csv".format(int(time.time())), mode="w")
 
         def update_position(self, lat:float, long:float, heading:float, time:float, speed:int) -> None:
             self.file.write("{},{},{},{},{}\n".format(time, lat, long, heading, speed))
