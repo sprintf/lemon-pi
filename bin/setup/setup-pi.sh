@@ -7,7 +7,10 @@ sudo apt-get update
 #sudo apt-get install python3.8
 
 sudo apt-get install git gpsd gpsd-clients
+# needed for text to speech
 sudo apt-get install espeak
+# needed for pygame sounds
+sudo apt-get install libsdl2-mixer-2.0.0
 
 git clone https://github.com/sprintf/lemon-pi.git
 
