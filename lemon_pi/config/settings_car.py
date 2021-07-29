@@ -51,3 +51,9 @@ SET_OFF_INSTRUCTIONS = """1. Adjust Seat
 6. Water
 Gloves? HANS?
 """
+
+# should gps be logged?
+LOG_GPS = False
+
+# update rate for GPS  (change to between 0.1 amd 1.0)
+GPS_CYCLE = 1.0
