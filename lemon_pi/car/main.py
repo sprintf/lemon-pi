@@ -95,16 +95,18 @@ def init():
     StateMachine()
     MovementListener()
 
-    MA = MafAnalyzer(lap_logger)
-    obd = ObdReader(MA)
+    maf_analyzer = MafAnalyzer(lap_logger)
+    obd = ObdReader(maf_analyzer)
     gps = GpsReader()
     radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY, ToCarMessage())
-    radio_interface = RadioInterface(radio, obd, None, MA)
+    radio_interface = RadioInterface(radio, obd, None, maf_analyzer)
 
     # start a background thread to pull in gps data
     if settings.GPS_DISABLED:
         logger.warning("GPS has been disabled")
     else:
+        if settings.GPS_CYCLE != '1.0':
+            gps.set_cycle(settings.GPS_CYCLE)
         gps.start()
 
     # start a background thread to pull in OBD data
@@ -125,7 +127,7 @@ def init():
     gui.register_speed_provider(gps)
     gui.register_time_provider(LocalTimeProvider())
     gui.register_temp_provider(obd)
-    gui.register_fuel_provider(MA)
+    gui.register_fuel_provider(maf_analyzer)
 
     logger.info("reading tracks")
     tracks: [TrackLocation] = read_tracks()
@@ -141,7 +143,7 @@ def init():
         time.sleep(1)
     closest_track = min(tracks, key=lambda x: haversine(gps.get_lat_long(), x.get_start_finish_target().midpoint))
     logger.info("closest track selected : {}".format(closest_track))
-    lap_tracker = LapTracker(closest_track, MA)
+    lap_tracker = LapTracker(closest_track, maf_analyzer)
     gps.register_position_listener(lap_tracker)
     gui.register_lap_provider(lap_tracker)
     radio_interface.register_lap_provider(lap_tracker)
@@ -151,4 +153,3 @@ def init():
 Thread(target=init, daemon=True).start()
 
 gui.display()
-

@@ -91,9 +91,9 @@ class Gui(EventHandler):
         self.start_time = 0
         self.font = self.__identify_font(platform.system())
         self.root = App("Lemon-Pi",
-                       bg="black",
-                       width=Gui.WIDTH,
-                       height=Gui.HEIGHT)
+                        bg="black",
+                        width=Gui.WIDTH,
+                        height=Gui.HEIGHT)
 
         self.splash = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, visible=True)
         Box(self.splash, width=Gui.WIDTH, height=int(100 * Gui.SCALE_FACTOR))
@@ -122,7 +122,7 @@ class Gui(EventHandler):
         Box(self.col1, height=24, width=int(Gui.COL_WIDTH * 0.8))
         self.lap_display = self.create_lap_widget(self.col1)
         Box(self.col2, height=24, width=int(Gui.COL_WIDTH * 0.8))
-        self.temp_widget:AlertBox = self.create_temp_widget(self.col2)
+        self.temp_widget: AlertBox = self.create_temp_widget(self.col2)
         Box(self.col2, height=24, width=int(Gui.COL_WIDTH * 0.8))
         self.speed_heading_widget = self.create_speed_widget(self.col2)
         self.fuel_display = self.create_fuel_widget(self.col3)
@@ -140,8 +140,8 @@ class Gui(EventHandler):
         a.color = "yellow"
         a.visible = False
 
-        self.stint_ending_display = self.create_stint_end_instructions(self.col4)
-        self.stint_starting_display = self.create_stint_start_instructions(self.col5)
+        self.stint_ending_display = self.create_instructions(self.col4)
+        self.stint_starting_display = self.create_instructions(self.col5)
 
         LeaveTrackEvent.register_handler(self)
         EnterTrackEvent.register_handler(self)
@@ -286,7 +286,7 @@ class Gui(EventHandler):
         if event_data.key == 'O':
             self.obd_image.off()
         if event_data.key == 'l':
-            self.__updateLap(randomLapTimeProvider)
+            self.__update_lap(randomLapTimeProvider)
         if event_data.key == 'p':
             self.handle_event(RadioReceiveEvent)
         if event_data.key == 'b':
@@ -303,25 +303,24 @@ class Gui(EventHandler):
 
     def register_temp_provider(self, provider: TemperatureProvider):
         # might need to store in order to cancel
-        self.temp_widget.repeat(1000, self.__updateTemp, args=[provider])
+        self.temp_widget.repeat(1000, self.__update_temp, args=[provider])
 
     def register_time_provider(self, provider: TimeProvider):
         # might need to store in order to cancel
-        self.time_widget.repeat(1000, self.__updateTime, args=[provider])
+        self.time_widget.repeat(1000, self.__update_time, args=[provider])
         self.time_widget.repeat(500, self.__update_time_beat)
 
     def register_lap_provider(self, provider: LapProvider):
-        self.time_widget.repeat(500, self.__updateLap, args=[provider])
+        self.time_widget.repeat(500, self.__update_lap, args=[provider])
 
     def register_speed_provider(self, provider: SpeedProvider):
-        self.speed_heading_widget.repeat(200, self.__updateSpeed, args=[provider])
+        self.speed_heading_widget.repeat(200, self.__update_speed, args=[provider])
 
     def register_fuel_provider(self, provider: FuelProvider):
-        self.fuel_display.repeat(1000, self.__updateFuel, args=[provider])
+        self.fuel_display.repeat(1000, self.__update_fuel, args=[provider])
 
     def create_gps_obd_images(self, parent):
         result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(48 * Gui.SCALE_FACTOR))
-        #result.set_border(4, "darkgreen")
         gps = ToggleImage(result,
                           "resources/images/gps_ok.gif",
                           "resources/images/gps_off.gif",
@@ -338,7 +337,7 @@ class Gui(EventHandler):
     def create_temp_widget(self, parent):
         result = AlertBox(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(112 * Gui.SCALE_FACTOR))
         result.set_range(settings.TEMP_BAND_LOW, settings.TEMP_BAND_WARN, settings.TEMP_BAND_HIGH)
-        result.set_alarm_cb( lambda: AudioAlarmEvent.emit(message="Engine Overheating"))
+        result.set_alarm_cb(lambda: AudioAlarmEvent.emit(message="Engine Overheating"))
         result.set_border(4, "darkgreen")
         Text(result, "TEMP", size=Gui.TEXT_SMALL, color="white")
         Text(result, "???", size=Gui.TEXT_XL, font=self.font, color="white")
@@ -393,7 +392,7 @@ class Gui(EventHandler):
 
         return result
 
-    def create_stint_end_instructions(self, parent):
+    def create_instructions(self, parent):
         result = Box(parent)
         result.set_border(4, "darkgreen")
         Text(result, "INSTRUCTIONS", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
@@ -405,23 +404,11 @@ class Gui(EventHandler):
         instructions.value = settings.ENTER_PIT_INSTRUCTIONS
         return result
 
-    def create_stint_start_instructions(self, parent):
-        result = Box(parent)
-        result.set_border(4, "darkgreen")
-        Text(result, "INSTRUCTIONS", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
-        instructions = TextBox(result, multiline=True,
-                               width=parent.width - 8, height=parent.height - 24)
-        instructions.text_size = Gui.TEXT_SMALL
-        instructions.text_color = "white"
-        instructions.font = self.font
-        instructions.value = settings.SET_OFF_INSTRUCTIONS
-        return result
-
-    def __updateTemp(self, provider: TemperatureProvider):
+    def __update_temp(self, provider: TemperatureProvider):
         val = provider.get_temp_f()
         self.temp_widget.update_value(val)
 
-    def __updateTime(self, provider: TimeProvider):
+    def __update_time(self, provider: TimeProvider):
         self.time_widget.children[1].value = "{:02d}".format(provider.get_hours())
         self.time_widget.children[3].value = "{:02d}".format(provider.get_minutes())
 
@@ -432,11 +419,11 @@ class Gui(EventHandler):
         else:
             beat.text_color = "white"
 
-    def __updateSpeed(self, provider: SpeedProvider):
+    def __update_speed(self, provider: SpeedProvider):
         self.speed_heading_widget.children[0].value = "{:02d}".format(provider.get_speed())
         # self.speed_heading_widget.children[2].value = str(provider.get_heading())
 
-    def __updateLap(self, provider: LapProvider):
+    def __update_lap(self, provider: LapProvider):
         self.lap_display.children[1].value = provider.get_lap_count()
         if provider.get_lap_count() != 999:
             minutes = int(provider.get_lap_timer() / 60)
@@ -449,7 +436,7 @@ class Gui(EventHandler):
             tenths = int((ll - int(ll)) * 10)
             self.lap_display.children[5].value = "{:02d}:{:02d}.{:01d}".format(minutes, seconds, tenths)
 
-    def __updateFuel(self, provider: FuelProvider):
+    def __update_fuel(self, provider: FuelProvider):
         # children offsets:
         total_used_box : Box = self.fuel_display.children[1]
         # last_hour_box : Box  = self.fuel_display.children[2]
@@ -470,7 +457,7 @@ class Gui(EventHandler):
             Exception("no font defined for {}".format(platform))
 
 
-    ### test classes
+# test classes
 class RandomLapTimeProvider(LapProvider):
 
     def __init__(self):
@@ -478,6 +465,9 @@ class RandomLapTimeProvider(LapProvider):
 
     def get_last_lap_time(self) -> float:
         return random.randint(100000, 300000) / 1000
+
+    def get_predicted_lap_time(self) -> float:
+        return 200 + random.randint(-2000, 2000) / 1000
 
     def get_lap_timer(self) -> int:
         return int(time.time() - self.start_time)

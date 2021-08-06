@@ -21,3 +21,6 @@ RADIO_DISABLED = False
 # optionally disable GPS
 GPS_DISABLED = False
 
+LOG_GPS = False
+GPS_CYCLE = "0.5"
+

@@ -42,6 +42,15 @@ class LapProvider:
     def get_last_lap_time(self) -> float:
         pass
 
+    # return predicted lap time, or None if there's no
+    # current prediction
+    def get_predicted_lap_time(self) -> float:
+        pass
+
+    # return best lap time, or None if none has yet been set
+    def get_best_lap_time(self) -> float:
+        pass
+
 
 class FuelProvider:
 

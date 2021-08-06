@@ -5,14 +5,20 @@
 # direction of travel when passing the point.
 from lemon_pi.car.geometry import calc_intersect_heading
 
+
 class Target:
 
-    def __init__(self, name, lat_long1, lat_long2, direction):
+    def __init__(self, name, lat_long1, lat_long2, direction="", target_heading=0):
         self.name = name
         self.lat_long1 = min(lat_long1, lat_long2)
         self.lat_long2 = max(lat_long1, lat_long2)
-        self.target_heading = calc_intersect_heading(self.lat_long1, self.lat_long2, direction)
+        if direction:
+            self.target_heading = calc_intersect_heading(self.lat_long1, self.lat_long2, direction)
+        else:
+            self.target_heading = target_heading
         self.midpoint = self._calc_midpoint_()
+        from lemon_pi.car.line_cross_detector import LineCrossDetector
+        self.line_cross_detector = LineCrossDetector()
 
     def _calc_midpoint_(self):
         lat1, long1 = self.lat_long1

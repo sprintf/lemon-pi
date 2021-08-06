@@ -1,5 +1,18 @@
 from numpy import *
 from haversine import haversine
+import math
+
+
+def angular_difference(h1, h2):
+    d = abs(h1 - h2)
+    if d > 180:
+        if h1 < 180:
+            h1 = h1 + 360
+        else:
+            h2 = h2 + 360
+        d = abs(h1 - h2)
+    return d
+
 
 def __perp_xy(a):
     b = empty_like(a)
@@ -7,17 +20,19 @@ def __perp_xy(a):
     b[1] = a[0]
     return b
 
-# caldulate the heading in degrees from north to go from one lat long to another
+
+# calculate the heading in degrees from north to go from one lat long to another
 def heading_between_lat_long(from_ll, to_ll):
     x_diff = haversine(to_ll, (to_ll[0], from_ll[1]))
     y_diff = haversine(to_ll, (from_ll[0], to_ll[1]))
     # haversine distance is always positive, so we crudely set the sign
-    if (to_ll[1] < from_ll[1]):
+    if to_ll[1] < from_ll[1]:
         x_diff = -x_diff
     if to_ll[0] < from_ll[0]:
         y_diff = -y_diff
     angle_radians = math.atan2(x_diff, y_diff)
     return (degrees(angle_radians) + 360) % 360
+
 
 def seg_intersect_lat_long(a1, a2, b1, b2):
     result = seg_intersect_xy(
@@ -26,7 +41,8 @@ def seg_intersect_lat_long(a1, a2, b1, b2):
         array([b1[1], b1[0]]),
         array([b2[1], b2[0]])
     )
-    return (result[1], result[0])
+    return result[1], result[0]
+
 
 def seg_intersect_xy(a1, a2, b1, b2):
     da = a2 - a1
@@ -51,11 +67,10 @@ def is_between(a1, a2, p1):
 # get a point on the given heading
 #  point is a (lat, long) tuple
 # return a (lat, long) tuple
-def get_point_on_heading(point, heading:float):
+def get_point_on_heading(point, heading:float, d=0.05):
     a1 = array([point[1], point[0]])
     R = 6378.1  # radius of earth
     brg = math.radians(heading)
-    d = 0.05 # 50 feet?
 
     lat1 = math.radians(a1[1])  # its the y axis
     lon1 = math.radians(a1[0])  # its the x axis
@@ -69,14 +84,14 @@ def get_point_on_heading(point, heading:float):
 
 
 DirectionMap = {
-    "N" : 0,
-    "NE" : 45,
-    "E" : 90,
-    "SE" : 135,
-    "S" : 180,
-    "SW" : 225,
-    "W" : 270,
-    "NW" : 315
+    "N": 0,
+    "NE": 45,
+    "E": 90,
+    "SE": 135,
+    "S": 180,
+    "SW": 225,
+    "W": 270,
+    "NW": 315
 }
 
 
