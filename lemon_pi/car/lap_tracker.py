@@ -1,7 +1,7 @@
-from lemon_pi.car.track import TrackLocation, START_FINISH, TargetMetaData
+from lemon_pi.car.predictor import LapTimePredictor
+from lemon_pi.car.track import TrackLocation, START_FINISH
 from lemon_pi.car.updaters import PositionUpdater, LapUpdater
 from lemon_pi.car.display_providers import LapProvider
-from lemon_pi.car.target import Target
 from lemon_pi.car.event_defs import (
     LeaveTrackEvent,
     CompleteLapEvent,
@@ -9,8 +9,6 @@ from lemon_pi.car.event_defs import (
     LapInfoEvent, EnterTrackEvent
 )
 
-from haversine import haversine, Unit
-from lemon_pi.car import geometry
 import time
 from datetime import datetime
 import logging
@@ -20,17 +18,6 @@ from lemon_pi.shared.events import EventHandler
 
 logger = logging.getLogger(__name__)
 gps_logger = logging.getLogger("gps-logger")
-
-
-def angular_difference(h1, h2):
-    diff = abs(h1 - h2)
-    if diff > 180:
-        if h1 < 180:
-            h1 = h1 + 360
-        else:
-            h2 = h2 + 360
-        diff = abs(h1 - h2)
-    return diff
 
 
 class LapTracker(PositionUpdater, LapProvider, EventHandler):
@@ -44,19 +31,21 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
         self.last_pos_time = 0.0
         self.lap_count = 999
         self.last_lap_time = 0
+        self.best_lap_time = None
         self.last_timestamp = 0
         self.last_dist_to_line = 0
+        self.predictive_lap_timer = LapTimePredictor(track.get_start_finish_target())
         LapInfoEvent.register_handler(self)
         LeaveTrackEvent.register_handler(self)
         EnterTrackEvent.register_handler(self)
 
-    def update_position(self, lat:float, long:float, heading:float, time:float, speed:int) -> None:
+    def update_position(self, lat: float, long: float, heading: float, time: float, speed: int) -> None:
         if (lat, long) == self.last_pos:
             return
 
         logger.debug("updating position to {} {}".format(lat, long))
         self.last_pos = (lat, long)
-        crossed_line, cross_time = self._crossed_line(lat, long, heading, time, self.track.get_start_finish_target())
+        crossed_line, cross_time = self.predictive_lap_timer.update_position(lat, long, heading, time)
         if crossed_line:
             # de-bounce hitting start finish line twice ... a better
             # approach might be to ensure car travels so far away from line
@@ -75,6 +64,8 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                     logger.info("completed lap!")
                     self.lap_count += 1
                     self.last_lap_time = lap_time
+                    if self.best_lap_time is None or lap_time < self.best_lap_time:
+                        self.best_lap_time = lap_time
                     if self.listener:
                         self.listener.update_lap(self.lap_count, self.last_lap_time)
                 self.lap_start_time = cross_time
@@ -88,7 +79,8 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                     targets = self.track.targets[target_metadata]
                 if target_metadata != START_FINISH:
                     for target in targets:
-                        crossed_target, cross_time = self._crossed_line(lat, long, heading, time, target)
+                        crossed_target, cross_time = \
+                            target.line_cross_detector.crossed_line(lat, long, heading, time, target)
                         if crossed_target:
                             target_metadata.event.emit(ts=cross_time)
         # log gps
@@ -115,45 +107,6 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
             self.on_track = True
             self.lap_start_time = ts
 
-    def _crossed_line(self, lat, long, heading, time:float, target:Target):
-        if angular_difference(target.target_heading, heading) > 20:
-            return False, 0
-
-        dist = int(haversine(target.midpoint, (lat, long), unit=Unit.FEET))
-        logger.debug("distance to target = {} feet".format(dist))
-        # needs to be 200 feet or less. At 100mph a car covers 150 feet per second, and
-        # some gps devices are only providing updates once per second
-        if dist < 200:
-            # grab a point that we're heading towards
-            point_ahead = geometry.get_point_on_heading((lat, long), heading)
-
-            # work out the intersect from car to line
-            intersect = geometry.seg_intersect_lat_long(target.lat_long1, target.lat_long2,
-                                                        (lat, long), point_ahead)
-
-            # is this intersect point on the target line?
-            if geometry.is_between(target.lat_long1, target.lat_long2, intersect):
-                logger.debug("on track to hit target")
-
-                # lets get the heading from our current position to the intersect
-                target_heading = geometry.heading_between_lat_long((lat, long), intersect)
-                if (abs(heading - target_heading) > 160):
-                    logger.info("GONE PASSED {} line!!!!".format(target.name))
-                    logger.debug("my heading = {}, target heading = {}".format(heading, target.target_heading))
-
-                    # work out the precise time we crossed the line
-                    time_gap = time - self.last_timestamp
-                    distance_ratio = (self.last_dist_to_line + dist) / dist
-                    logger.debug("adjusting line cross time back by {:.3f}".format(time_gap / distance_ratio))
-                    est_cross_time = time - (time_gap / distance_ratio)
-
-                    return True, est_cross_time
-
-                # we're in front of the line, store the distance and the current time
-                self.last_dist_to_line = dist
-                self.last_timestamp = time
-        return False, 0
-
     def get_lap_count(self) -> int:
         return self.lap_count
 
@@ -163,16 +116,20 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
     def get_last_lap_time(self) -> float:
         return self.last_lap_time
 
-import csv
-from lemon_pi.car.track import read_tracks
+    def get_predicted_lap_time(self) -> float:
+        return self.predictive_lap_timer.predict_lap()
 
-logger = logging.getLogger(__name__)
+    def get_best_lap_time(self) -> float:
+        return self.best_lap_time
 
-logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S',
-                    level=logging.DEBUG)
 
 if __name__ == "__main__":
+    import csv
+    from lemon_pi.car.track import read_tracks
+
+    logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S',
+                        level=logging.DEBUG)
     tracks = read_tracks()
 
     tracker = LapTracker(tracks[1], None)
@@ -183,4 +140,4 @@ if __name__ == "__main__":
             x += 1
             if x % 1 == 0:
                 label = "hdg:{} spd:{}".format(int(point[3]), "?")
-                tracker.update_position(point[1], point[2], point[3], point[0], 30)
+                tracker.update_position(float(point[1]), float(point[2]), float(point[3]), float(point[0]), 30)

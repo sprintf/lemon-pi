@@ -14,13 +14,14 @@ from lemon_pi.car.event_defs import (
 )
 import logging
 import time
+import os
 import subprocess
 from python_settings import settings
 
 from lemon_pi.shared.data_provider_interface import GpsProvider
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.generated.messages_pb2 import GpsPosition
-
+from lemon_pi.shared.usb_detector import UsbDetector, UsbDevice
 
 logger = logging.getLogger(__name__)
 
@@ -59,10 +60,16 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
                         data = session.next()
 
                         if session.fix.time and str(session.fix.time) != "nan":
-                            logger.debug("{} {} {} {}".format(session.fix.time, data['class'], session.fix.latitude, session.fix.longitude ))
+                            logger.debug("{} {} {} {}".
+                                         format(session.fix.time,
+                                                data['class'],
+                                                session.fix.latitude,
+                                                session.fix.longitude))
                             gps_datetime = parser.isoparse(session.fix.time).astimezone()
-                            lag: timedelta = abs(datetime.now(tz=timezone.utc) - \
-                                                 gps_datetime)
+                            if gps_datetime.year < 2021:
+                                logger.debug("time wonky, ignoring")
+                                continue
+                            lag: timedelta = abs(datetime.now(tz=timezone.utc) - gps_datetime)
 
                             if self.part_synced:
                                 # we have set the clock to the GPS a moment ago...whatever
@@ -106,9 +113,11 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
                             if not math.isnan(session.fix.speed):
                                 self.speed_mph = int(session.fix.speed * 2.237)
                                 if self.speed_mph < 3:
-                                    NotMovingEvent.emit(speed=self.speed_mph, lat_long=(session.fix.latitude, session.fix.longitude))
+                                    NotMovingEvent.emit(speed=self.speed_mph,
+                                                        lat_long=(session.fix.latitude, session.fix.longitude))
                                 else:
-                                    MovingEvent.emit(speed=self.speed_mph, lat_long=(session.fix.latitude, session.fix.longitude))
+                                    MovingEvent.emit(speed=self.speed_mph,
+                                                     lat_long=(session.fix.latitude, session.fix.longitude))
                             if not math.isnan(session.fix.track):
                                 self.heading = session.fix.track
                             if not math.isnan(session.fix.latitude):
@@ -118,15 +127,15 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
                                 # generally we should try to move away from position listeners, and instead
                                 # have them pull from this class when they need it
                                 if self.position_listener:
-                                    self.position_listener.update_position(self.lat, self.long, self.heading, time.time(), self.speed_mph)
+                                    self.position_listener.update_position(self.lat, self.long,
+                                                                           self.heading, time.time(), self.speed_mph)
                                 if not self.working:
                                     self.working = True
                                     GPSConnectedEvent.emit()
-                            #time.sleep(0.1)
                     except KeyError:
                         # this happens when elevation is not included, we don't care
                         pass
-            except Exception as e:
+            except Exception:
                 logger.exception("issue with GPS, reconnecting.")
                 self.working = False
                 GPSDisconnectedEvent.emit()
@@ -146,9 +155,9 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
 
     def get_lat_long(self) -> (float, float):
         if self.time_synced and time.time() - self.fix_timestamp < 5:
-            return (self.lat, self.long)
+            return self.lat, self.long
         else:
-            return (0.0, 0.0)
+            return 0.0, 0.0
 
     def get_gps_position(self) -> GpsPosition:
         if self.time_synced and time.time() - self.fix_timestamp < 5:
@@ -181,20 +190,27 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
         devices = response['devices']
         if len(devices) == 0:
             raise Exception("no gps device")
-        gps = devices[0]
-        if 'driver' in gps:
-            logger.info("detected GPS device, setting baud rate to 57600")
-            # setting cycle to more than 1.0 means we see the same coordinate
-            # position delivered multiple times in a row
-            session.send(f'?DEVICE=\{"class":"DEVICE","bps":57600,"cycle":{settings.GPS_CYCLE}\}')
-            code = session.read()
-            logger.debug("got code {}".format(code))
-            response = session.data
-            logger.debug("got response {}".format(response))
         session.send('?WATCH={"enable":true,"json":true}')
+
+    def set_cycle(self, delay:str):
+        if UsbDetector.detected(UsbDevice.GPS):
+            gps_device = UsbDetector.get(UsbDevice.GPS)
+            result = subprocess.run(["gpsctl", "-f", "-t", "MTK-3301", "-c", delay, gps_device],
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            logger.info(f"result of setting GPS cycle time = {result.returncode}")
+
+    def set_baud(self, baud:str):
+        if UsbDetector.detected(UsbDevice.GPS):
+            gps_device = UsbDetector.get(UsbDevice.GPS)
+            result = subprocess.run(["gpsctl", "-f", "-t", "MTK-3301", "-s", baud, gps_device],
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            logger.info(f"result of setting GPS baud rate = {result.returncode}")
 
 
 if __name__ == "__main__":
+
+    if "SETTINGS_MODULE" not in os.environ:
+        os.environ["SETTINGS_MODULE"] = "lemon_pi.config.local_settings_car"
 
     logging.basicConfig(format='%(asctime)s.%(msecs)03d %(name)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
@@ -209,7 +225,9 @@ if __name__ == "__main__":
             self.file.write("{},{},{},{},{}\n".format(time, lat, long, heading, speed))
             self.file.flush()
 
+    UsbDetector.init()
     tracker = GpsReader()
+    tracker.setCycle("0.5")
     tracker.register_position_listener(FileLogger())
     tracker.run()
 

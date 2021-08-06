@@ -4,7 +4,8 @@ import unittest
 from unittest.mock import Mock, patch
 import time
 
-from lemon_pi.car.lap_tracker import angular_difference, LapTracker
+from lemon_pi.car.lap_tracker import LapTracker
+from lemon_pi.car.geometry import angular_difference
 from lemon_pi.car.target import Target
 from lemon_pi.car.track import TrackLocation, RADIO_SYNC
 

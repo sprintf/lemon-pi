@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 class UsbDevice(Enum):
     OBD = 1
     LORA = 2
+    GPS = 3
 
 
 # it's hard to tell which device is plugged into the computer ... either on
@@ -62,13 +63,15 @@ class UsbDetector:
             session = None
             try:
                 session = gps()
-                session.read()
+                session.read() # needed to get past version info
                 session.send('?DEVICES;')
                 code = session.read()
                 if code == 0:
                     for gps_device in session.data["devices"]:
-                        logger.info(f"found gps device at {gps_device['path']}")
-                        devices.remove(gps_device["path"])
+                        device_path = gps_device['path']
+                        self.usb_map[UsbDevice.GPS] = device_path
+                        self.device_map[device_path] = UsbDevice.LORA
+                        logger.info("associated {} with GPS".format(device_path))
             except Exception:
                 logger.info("didn't find connected GPS device")
             finally:
@@ -78,6 +81,9 @@ class UsbDetector:
         # step 2 ... see if any are radio
         logger.info("detecting Lora devices")
         for device in devices:
+            if self.device_map.get(device):
+                # it's been identified
+                continue
             with serial.Serial(device, baudrate=57600, timeout=2) as ser:
                 try:
                     while len(ser.readline()):
@@ -103,7 +109,7 @@ class UsbDetector:
         logger.info("detecting OBD devices")
         for device in devices:
             if self.device_map.get(device):
-                # it's been identified as Lora
+                # it's been identified
                 continue
             with serial.Serial(device, baudrate=38400, timeout=2) as ser:
                 try:
@@ -156,3 +162,4 @@ if __name__ == "__main__":
                         level=logging.DEBUG)
 
     UsbDetector.init()
+    print(UsbDetector.get_instance().usb_map)
