@@ -54,7 +54,7 @@ class PredictiveTimerTest(unittest.TestCase):
 
         total_error_percentage = 0
 
-        with open("resources/test/sonoma-full.csv") as f:
+        with open("resources/test/sonoma-10-laps.csv") as f:
             csv_reader = reader(f)
             self.skip_preamble(csv_reader)
             line_count = 0
