@@ -12,4 +12,5 @@ python-OBD
 lemon_pi/shared/generated
 lemon_pi/config/local_settings_pit.py
 lemon_pi/config/local_settings_car.py
+lemon_pi/resources/test/sonoma-full.csv
 tmp

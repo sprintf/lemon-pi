@@ -92,7 +92,7 @@ def init():
 
     # enable sound generation
     Audio(mixer).start()
-    StateMachine()
+    StateMachine.init()
     MovementListener()
 
     maf_analyzer = MafAnalyzer(lap_logger)

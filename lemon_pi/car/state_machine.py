@@ -19,6 +19,8 @@ class State(Enum):
 # based on the events in events.py
 class StateMachine(EventHandler):
 
+    __instance = None
+
     def __init__(self):
         # we assume we're parked in pit when we are initialized, if we're not
         # we're in big trouble anyway. If we cross the start-finish line then we
@@ -29,6 +31,14 @@ class StateMachine(EventHandler):
         LeaveTrackEvent.register_handler(self)
         CompleteLapEvent.register_handler(self)
         OBDConnectedEvent.register_handler(self)
+
+    @classmethod
+    def init(cls):
+        StateMachine.__instance = StateMachine()
+
+    @classmethod
+    def is_on_track(cls):
+        return StateMachine.__instance.state == State.ON_TRACK
 
     def handle_event(self, event, speed=0, lat_long=None, ts=0):
         # upon power on we assume we're in the pit, so this

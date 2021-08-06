@@ -14,7 +14,7 @@ import random
 import time
 from python_settings import settings
 
-
+from lemon_pi.car.state_machine import StateMachine
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.gui_components import AlertBox, FadingBox
 from lemon_pi.shared.time_provider import TimeProvider
@@ -78,7 +78,7 @@ class Gui(EventHandler):
         Gui.WIDTH = width
         Gui.HEIGHT = height
         Gui.COL_WIDTH = int(width / 3)
-        Gui.LOWER_ROW_HEIGHT = int(Gui.HEIGHT / 5)
+        Gui.MESSAGE_ROW_HEIGHT = int(Gui.HEIGHT / 5)
         Gui.SCALE_FACTOR = Gui.WIDTH / 800
         
         if width > 1000:
@@ -106,17 +106,18 @@ class Gui(EventHandler):
 
         self.app = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, visible=False)
 
-        # this is our lower text area
-        self.lower_row = Box(self.app, align="bottom", width=Gui.WIDTH, height=int(64 * Gui.SCALE_FACTOR))
-        self.msg_area = Text(self.lower_row, "", align="left", size=48, font=self.font, color="white", bg="purple")
+        # this is our upper text area
+        self.upper_row = Box(self.app, align="top", width=Gui.WIDTH, height=int(64 * Gui.SCALE_FACTOR))
+        self.msg_area = Text(self.upper_row, "", align="left", size=48, font=self.font, color="white", bg="purple")
 
-        self.col1 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - Gui.LOWER_ROW_HEIGHT)
-        self.col2 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - Gui.LOWER_ROW_HEIGHT)
-        self.col3 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - Gui.LOWER_ROW_HEIGHT)
+        self.col1 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - Gui.MESSAGE_ROW_HEIGHT)
+        self.col2 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - Gui.MESSAGE_ROW_HEIGHT)
+        self.col3 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - Gui.MESSAGE_ROW_HEIGHT)
 
         # these are invisible displays used to show special case data when the car is pitting
         self.col4 = Box(self.app, align="left", width=self.col3.width, height=self.col3.height, visible=False)
         self.col5 = Box(self.app, align="left", width=self.col3.width, height=self.col3.height, visible=False)
+        self.col6 = Box(self.app, align="left", width=self.col3.width, height=self.col3.height, visible=False)
 
         self.time_widget = self.create_time_widget(self.col1)
         Box(self.col1, height=24, width=int(Gui.COL_WIDTH * 0.8))
@@ -142,6 +143,7 @@ class Gui(EventHandler):
 
         self.stint_ending_display = self.create_instructions(self.col4)
         self.stint_starting_display = self.create_instructions(self.col5)
+        self.predictive_lap_timer = self.create_lap_timer(self.col6)
 
         LeaveTrackEvent.register_handler(self)
         EnterTrackEvent.register_handler(self)
@@ -179,19 +181,13 @@ class Gui(EventHandler):
 
     def handle_event(self, event, **kwargs):
         if event == LeaveTrackEvent:
-            self.col3.hide()
-            self.col4.show()
-            self.col5.hide()
+            self._col_display(4)
             return
         if event == StateChangePittedEvent:
-            self.col3.hide()
-            self.col4.hide()
-            self.col5.show()
+            self._col_display(5)
             return
         if event == StateChangeSettingOffEvent or event == EnterTrackEvent:
-            self.col3.show()
-            self.col4.hide()
-            self.col5.hide()
+            self._col_display(3)
             return
 
         if event == RadioReceiveEvent:
@@ -266,17 +262,13 @@ class Gui(EventHandler):
 
         if event_data.key == "s":
             # imitate start/finish behavior
-            self.col3.hide()
-            self.col4.show()
-            self.col5.hide()
+            self._col_display(4)
         if event_data.key == "f":
-            self.col3.hide()
-            self.col4.hide()
-            self.col5.show()
+            self._col_display(5)
         if event_data.key == "h":
-            self.col3.show()
-            self.col4.hide()
-            self.col5.hide()
+            self._col_display(3)
+        if event_data.key == 'k':
+            self._col_display(6)
         if event_data.key == 'g':
             self.gps_image.on()
         if event_data.key == 'G':
@@ -291,6 +283,13 @@ class Gui(EventHandler):
             self.handle_event(RadioReceiveEvent)
         if event_data.key == 'b':
             ButtonPressEvent.emit(button=0)
+
+    def _col_display(self, to_show):
+        for x in range(3, 7):
+            if x == to_show:
+                getattr(self, f"col{x}").show()
+            else:
+                getattr(self, f"col{x}").hide()
 
     def display(self):
         self.root.when_key_pressed = self.handle_keyboard
@@ -312,6 +311,7 @@ class Gui(EventHandler):
 
     def register_lap_provider(self, provider: LapProvider):
         self.time_widget.repeat(500, self.__update_lap, args=[provider])
+        self.time_widget.repeat(500, self.__update_predicted_lap, args=[provider])
 
     def register_speed_provider(self, provider: SpeedProvider):
         self.speed_heading_widget.repeat(200, self.__update_speed, args=[provider])
@@ -404,6 +404,13 @@ class Gui(EventHandler):
         instructions.value = settings.ENTER_PIT_INSTRUCTIONS
         return result
 
+    def create_lap_timer(self, parent):
+        result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(112 * Gui.SCALE_FACTOR))
+        result.set_border(4, "darkgreen")
+        Text(result, "PREDICTED", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
+        Text(result, "mm:ss", size=Gui.TEXT_XL, font=self.font, color="white")
+        return result
+
     def __update_temp(self, provider: TemperatureProvider):
         val = provider.get_temp_f()
         self.temp_widget.update_value(val)
@@ -435,6 +442,16 @@ class Gui(EventHandler):
             seconds = int(ll) % 60
             tenths = int((ll - int(ll)) * 10)
             self.lap_display.children[5].value = "{:02d}:{:02d}.{:01d}".format(minutes, seconds, tenths)
+
+    def __update_predicted_lap(self, provider: LapProvider):
+        predicted = provider.get_predicted_lap_time()
+        if predicted:
+            # if we're on track and getting predictions then show them
+            if StateMachine.is_on_track() and not self.col6.visible:
+                self._col_display(6)
+            minutes = int(predicted / 60)
+            seconds = int(predicted % 60)
+            self.col6.children[1].value = "{:02d}:{:02d}".format(minutes, seconds)
 
     def __update_fuel(self, provider: FuelProvider):
         # children offsets:
