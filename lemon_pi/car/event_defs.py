@@ -70,8 +70,7 @@ LapInfoEvent = Event("lap-info")
 #
 RadioReceiveEvent = Event("radio-rx")
 
-#  This wraps an initial event, unleashed by the button push
-# event=
+# A button has been pushed
 # button=0   the id of the button that was pushed
 ButtonPressEvent = Event("btn", debounce_time=0.25)
 
