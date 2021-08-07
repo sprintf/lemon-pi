@@ -22,5 +22,6 @@ class Button(Thread):
             GPIO.wait_for_edge(INPUT_PIN, GPIO.RISING)
             ButtonPressEvent.emit(button=0)
             time.sleep(0.2)
+            print("handled button press")
 
 
