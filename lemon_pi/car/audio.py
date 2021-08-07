@@ -82,7 +82,7 @@ class Audio(Thread, EventHandler):
             if seconds == 0:
                 self.announce(f"{minutes} minute{plural} dead")
             elif seconds < 10:
-                self.announce(f"{minutes}. 0{seconds}")
+                self.announce(f"{minutes}. O. {seconds}")
             else:
                 self.announce(f"{minutes}. {seconds}")
         else:
