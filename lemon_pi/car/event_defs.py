@@ -73,7 +73,7 @@ RadioReceiveEvent = Event("radio-rx")
 #  This wraps an initial event, unleashed by the button push
 # event=
 # button=0   the id of the button that was pushed
-ButtonPressEvent = Event("btn", debounce_time=0.25)
+ButtonPressEvent = Event("btn", debounce_time=0.25, suppress_logs=True)
 
 # an audio alarm
 # message=
