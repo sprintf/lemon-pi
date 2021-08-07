@@ -137,9 +137,10 @@ class Gui(EventHandler):
             PushButton(self.col2, image="resources/images/exitbutton.gif", command=self.quit)
             Box(self.col2, height=24, width=int(Gui.COL_WIDTH * 0.8))
 
-        a = AlertLight(self.col2, color="cyan")
-        a.color = "yellow"
-        a.visible = False
+        # this uses high cpu just being invisible : its still growing and shrinking
+        #a = AlertLight(self.col2, color="cyan")
+        #a.color = "yellow"
+        #a.visible = False
 
         self.stint_ending_display = self.create_instructions(self.col4)
         self.stint_starting_display = self.create_instructions(self.col5)
