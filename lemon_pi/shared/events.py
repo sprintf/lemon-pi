@@ -52,9 +52,6 @@ class Event:
             # call all the registered handlers
             for handler in self.handlers:
                 handler.handle_event(self, **kwargs)
-            print(f"called {len(self.handlers)} handlers on {self} {self.name}")
-        else:
-            print("nothing doing")
 
     @classmethod
     def instance_iterator(cls):
