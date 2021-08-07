@@ -14,7 +14,7 @@ class Button():
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(INPUT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         # might want to try bouncetime=200 if its very bouncy
-        GPIO.add_event_detect(INPUT_PIN, GPIO.RISING, callback=self.button_handler, bouncetime=250)
+        GPIO.add_event_detect(INPUT_PIN, GPIO.RISING, callback=self.button_handler, bouncetime=350)
 
     def button_handler(self, channel):
         logger.info("button pressed")

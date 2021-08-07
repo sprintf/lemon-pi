@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 # this enables console logging, but we're going to use
 # rotating file based logging
-logging.basicConfig(format='%(asctime)s %(message)s',
+logging.basicConfig(format='%(asctime)s.%(msecs)03d %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.WARN)
 
@@ -50,7 +50,7 @@ gps_logger.propagate = False
 handler = RotatingFileHandler("logs/lemon-pi.log",
                               maxBytes=10000000,
                               backupCount=10)
-handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(name)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
+handler.setFormatter(logging.Formatter(fmt='%(asctime)s.%(msecs)03d %(name)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
 handler.setLevel(logging.INFO)
 logging.getLogger().addHandler(handler)
 logging.getLogger().setLevel(logging.INFO)
