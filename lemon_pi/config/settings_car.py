@@ -57,3 +57,6 @@ LOG_GPS = False
 
 # update rate for GPS  (change to between 0.1 amd 1.0) (yes, its a string)
 GPS_CYCLE = "1.0"
+
+# distance between virtual gates on the track
+VGATE_SEPARATION_FEET = 200

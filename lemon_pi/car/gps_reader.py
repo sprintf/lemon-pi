@@ -195,14 +195,14 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
     def set_cycle(self, delay:str):
         if UsbDetector.detected(UsbDevice.GPS):
             gps_device = UsbDetector.get(UsbDevice.GPS)
-            result = subprocess.run(["gpsctl", "-f", "-t", "MTK-3301", "-c", delay, gps_device],
+            result = subprocess.run(["gpsctl", "-c", delay, gps_device],
                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             logger.info(f"result of setting GPS cycle time = {result.returncode}")
 
     def set_baud(self, baud:str):
         if UsbDetector.detected(UsbDevice.GPS):
             gps_device = UsbDetector.get(UsbDevice.GPS)
-            result = subprocess.run(["gpsctl", "-f", "-t", "MTK-3301", "-s", baud, gps_device],
+            result = subprocess.run(["gpsctl", "-s", baud, gps_device],
                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             logger.info(f"result of setting GPS baud rate = {result.returncode}")
 
@@ -227,7 +227,7 @@ if __name__ == "__main__":
 
     UsbDetector.init()
     tracker = GpsReader()
-    tracker.setCycle("0.5")
+    tracker.set_cycle("0.5")
     tracker.register_position_listener(FileLogger())
     tracker.run()
 

@@ -8,6 +8,9 @@ from haversine import haversine, Unit
 
 logger = logging.getLogger(__name__)
 
+from python_settings import settings
+
+
 # todo : move this to settings
 BREADCRUMB_DISTANCE_FEET = 200
 
@@ -105,7 +108,7 @@ class LapTimePredictor:
 
         if len(self.gates) == 0:
             dist_from_sf = int(haversine(self.start_finish.midpoint, (lat, long), unit=Unit.FEET))
-            if dist_from_sf >= BREADCRUMB_DISTANCE_FEET:
+            if dist_from_sf >= settings.VGATE_SEPARATION_FEET:
                 self.gates.append(Gate(lat, long, heading, "gate-0"))
                 logger.info(f"added first gate, dist to sf = {dist_from_sf}")
         else:

@@ -9,7 +9,7 @@ from lemon_pi.car.event_defs import ButtonPressEvent, CompleteLapEvent
 class TestAudio(unittest.TestCase):
 
     def test_lap_times(self):
-        audio = Audio(Mock())
+        audio = Audio()
         audio.announce = Mock()
         audio.announce_lap_time(60.0)
         audio.announce.assert_called_with('1 minute dead')
@@ -24,13 +24,13 @@ class TestAudio(unittest.TestCase):
         audio.announce.assert_called_with('3. 18')
 
     def test_button_press(self):
-        audio = Audio(Mock())
+        audio = Audio()
         audio.play_click = Mock()
         ButtonPressEvent.emit(button=0)
         audio.play_click.assert_called_once()
 
     def test_lap_completed(self):
-        audio = Audio(Mock())
+        audio = Audio()
         CompleteLapEvent.emit(lap_time=54.252)
         self.assertEqual(1, audio.queue.qsize())
         audio.engine.say = Mock()
