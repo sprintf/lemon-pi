@@ -119,7 +119,7 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
                                     MovingEvent.emit(speed=self.speed_mph,
                                                      lat_long=(session.fix.latitude, session.fix.longitude))
                             if not math.isnan(session.fix.track):
-                                self.heading = session.fix.track
+                                self.heading = int(session.fix.track)
                             if not math.isnan(session.fix.latitude):
                                 self.lat = session.fix.latitude
                                 self.long = session.fix.longitude
@@ -165,7 +165,7 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
             result.lat = self.lat
             result.long = self.long
             result.speed_mph = self.speed_mph
-            result.heading = self.heading
+            result.heading = int(self.heading)
             result.gps_timestamp = round(self.fix_timestamp)
             return result
         else:
