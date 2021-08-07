@@ -68,7 +68,7 @@ RaceFlagStatusEvent = Event("flag-status")
 LapInfoEvent = Event("lap-info")
 
 #
-RadioReceiveEvent = Event("radio-rx")
+RadioReceiveEvent = Event("car-radio-rx")
 
 # A button has been pushed
 # button=0   the id of the button that was pushed
