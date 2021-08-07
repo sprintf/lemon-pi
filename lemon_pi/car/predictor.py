@@ -1,6 +1,7 @@
 import logging
 from enum import Enum
 
+from lemon_pi.car.event_defs import DriverMessageEvent
 from lemon_pi.car.gate import Gate
 from lemon_pi.car.line_cross_detector import LineCrossDetector
 from lemon_pi.car.target import Target
@@ -64,6 +65,7 @@ class LapTimePredictor:
                 self.lap_start_time = crossed_time
                 if self.state == PredictorState.INIT:
                     self.state = PredictorState.BREADCRUMB
+                    DriverMessageEvent.emit(text="learning track...")
                 elif self.state == PredictorState.BREADCRUMB:
                     self._update_gate_time_to_finish(last_lap_time)
                     self.state = PredictorState.WORKING

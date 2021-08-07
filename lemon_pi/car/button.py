@@ -17,7 +17,7 @@ class Button():
         GPIO.add_event_detect(INPUT_PIN, GPIO.RISING, callback=self.button_handler, bouncetime=350)
 
     def button_handler(self, channel):
-        logger.info("button pressed")
+        logger.debug("button pressed")
         ButtonPressEvent.emit(button=0)
 
 
