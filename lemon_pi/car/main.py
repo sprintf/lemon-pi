@@ -100,8 +100,6 @@ def init():
     if settings.GPS_DISABLED:
         logger.warning("GPS has been disabled")
     else:
-        if settings.GPS_CYCLE != '1.0':
-            gps.set_cycle(settings.GPS_CYCLE)
         gps.start()
 
     # start a background thread to pull in OBD data
