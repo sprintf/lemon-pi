@@ -19,6 +19,9 @@ class Event:
 
     def __init__(self, name="", suppress_logs=False, debounce_time=0):
         self.name = name
+        for e in Event.instances:
+            if e.name == name:
+                raise Exception(f"redefinition of event {name}")
         Event.instances.append(self)
         # some events emit all the time so we suppress logging them consecutively
         self.suppress_logs = suppress_logs

@@ -45,7 +45,7 @@ TelemetryEvent = Event("telemetry")
 SendMessageEvent = Event("send-message")
 
 #   car=
-RadioReceiveEvent = Event("radio-rx")
+RadioReceiveEvent = Event("pit-radio-rx")
 
 # emit() sends out
 # car=

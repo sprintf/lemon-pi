@@ -1,11 +1,11 @@
 
 import RPi.GPIO as GPIO
-from event_defs import ButtonPressEvent
+from lemon_pi.car.event_defs import ButtonPressEvent
 
 INPUT_PIN = 10
 
 
-class Button:
+class Button():
 
     def __init__(self):
         GPIO.setwarnings(False)
@@ -16,4 +16,5 @@ class Button:
 
     def button_handler(self, channel):
         ButtonPressEvent.emit(button=0)
+
 
