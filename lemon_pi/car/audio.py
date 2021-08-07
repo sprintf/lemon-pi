@@ -1,3 +1,5 @@
+import subprocess
+
 import pyttsx3
 import logging
 from queue import Queue
@@ -24,11 +26,11 @@ class Audio(Thread, EventHandler):
         '9' : "nine"
     }
 
-    def __init__(self, mixer):
+    def __init__(self):
         Thread.__init__(self, daemon=True)
         self.engine = pyttsx3.init()
         self.queue = Queue()
-        self.click = mixer.Sound('resources/sounds/click.wav')
+        self.click_sound = 'resources/sounds/click.wav'
         ButtonPressEvent.register_handler(self)
         CompleteLapEvent.register_handler(self)
         AudioAlarmEvent.register_handler(self)
@@ -67,7 +69,10 @@ class Audio(Thread, EventHandler):
         self.queue.put(message)
 
     def play_click(self):
-        self.click.play()
+        result = subprocess.run(["aplay", self.click_sound],
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if result.returncode != 0:
+            logger.error("failed to play click sound")
 
     def announce_lap_time(self, lap_time=1.0, lap_count=0):
         minutes = int(lap_time / 60)
