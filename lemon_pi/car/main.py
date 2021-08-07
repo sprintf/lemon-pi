@@ -136,7 +136,7 @@ def init():
     gui.present_main_app()
 
     # bring in a button listener, to read the hardware button
-    button = Button()
+    Button().start()
 
     logger.info("awaiting location to choose track")
     while not gps.is_working() or gps.get_lat_long() == (0, 0):
