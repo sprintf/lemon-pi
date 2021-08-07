@@ -15,7 +15,6 @@ import time
 from python_settings import settings
 
 from lemon_pi.car.state_machine import StateMachine
-from lemon_pi.pit.event_defs import LapCompletedEvent
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.gui_components import AlertBox, FadingBox
 from lemon_pi.shared.time_provider import TimeProvider
@@ -286,7 +285,7 @@ class Gui(EventHandler):
         if event_data.key == 'b':
             ButtonPressEvent.emit(button=0)
         if event_data.key == 'a':
-            LapCompletedEvent.emit(lap_time=123.4, lap_count=1)
+            CompleteLapEvent.emit(lap_time=123.4, lap_count=1)
 
     def _col_display(self, to_show):
         for x in range(3, 7):
