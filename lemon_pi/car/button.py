@@ -1,6 +1,6 @@
 
 import RPi.GPIO as GPIO
-from event_defs import ButtonPressEvent
+from lemon_pi.car.event_defs import ButtonPressEvent
 from threading import Thread
 import time
 
