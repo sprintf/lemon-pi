@@ -24,7 +24,7 @@ class StateMachineTestCase(LemonPiTestCase):
         sm = StateMachine()
         MovingEvent.emit()
         LeaveTrackEvent.emit()
-        CompleteLapEvent.emit()
+        CompleteLapEvent.emit(lap_time=63, lap_count=99)
         self.assertEqual(sm.state, State.ON_TRACK)
 
     def test_pitting(self):

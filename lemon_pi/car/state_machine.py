@@ -40,7 +40,7 @@ class StateMachine(EventHandler):
     def is_on_track(cls):
         return StateMachine.__instance.state == State.ON_TRACK
 
-    def handle_event(self, event, speed=0, lat_long=None, ts=0):
+    def handle_event(self, event, **kwargs):
         # upon power on we assume we're in the pit, so this
         # isn't a completely reliable state
         if self.state == State.PARKED_IN_PIT:

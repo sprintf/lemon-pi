@@ -1,6 +1,7 @@
 
 import unittest
 from unittest.mock import Mock, patch
+import time
 
 from lemon_pi.car.audio import Audio
 from lemon_pi.car.event_defs import ButtonPressEvent, CompleteLapEvent
@@ -31,7 +32,7 @@ class TestAudio(unittest.TestCase):
 
     def test_lap_completed(self):
         audio = Audio()
-        CompleteLapEvent.emit(lap_time=54.252)
+        CompleteLapEvent.emit(lap_time=54.252, lap_count=5)
         self.assertEqual(1, audio.queue.qsize())
         audio.engine.say = Mock()
         audio.engine.runAndWait = Mock()
