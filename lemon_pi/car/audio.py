@@ -29,6 +29,7 @@ class Audio(Thread, EventHandler):
     def __init__(self):
         Thread.__init__(self, daemon=True)
         self.engine = pyttsx3.init()
+        self.engine.setProperty('volume', 1.0)
         self.queue = Queue()
         self.click_sound = 'resources/sounds/click.wav'
         ButtonPressEvent.register_handler(self)

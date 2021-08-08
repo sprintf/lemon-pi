@@ -65,7 +65,7 @@ class LapTimePredictor:
                 self.lap_start_time = crossed_time
                 if self.state == PredictorState.INIT:
                     self.state = PredictorState.BREADCRUMB
-                    DriverMessageEvent.emit(text="learning track...", duration=60)
+                    DriverMessageEvent.emit(text="learning track...", duration_secs=60)
                 elif self.state == PredictorState.BREADCRUMB:
                     self._update_gate_time_to_finish(last_lap_time)
                     self.state = PredictorState.WORKING

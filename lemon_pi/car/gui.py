@@ -278,6 +278,7 @@ class Gui(EventHandler):
             self.obd_image.off()
         if event_data.key == 'l':
             self.__update_lap(randomLapTimeProvider)
+            self.__update_predicted_lap(randomLapTimeProvider)
         if event_data.key == 'p':
             self.handle_event(RadioReceiveEvent)
         if event_data.key == 'b':
@@ -467,32 +468,34 @@ class Gui(EventHandler):
         predicted = provider.get_predicted_lap_time()
         best_lap = provider.get_best_lap_time()
 
+        outer_box = self.col6.children[0]
+
         if predicted:
             # if we're on track and getting predictions then show them
             if StateMachine.is_on_track() and not self.col6.visible:
                 self._col_display(6)
             minutes = int(predicted / 60)
             seconds = int(predicted % 60)
-            self.col6.children[1].value = "{:02d}:{:02d}".format(minutes, seconds)
+            outer_box.children[1].value = "{:02d}:{:02d}".format(minutes, seconds)
             if best_lap:
                 delta = best_lap - predicted
-                self.col6.children[4].value = f"{delta:0.1f} s"
+                outer_box.children[4].value = f"{delta:0.1f} s"
                 if delta < -1:
-                    self.col6.children[4].text_color = "purple"
+                    outer_box.children[4].text_color = "purple"
                 elif delta < 1:
-                    self.col6.children[4].text_color = "green"
+                    outer_box.children[4].text_color = "green"
                 elif delta < 2:
-                    self.col6.children[4].text_color = "white"
+                    outer_box.children[4].text_color = "white"
                 else:
-                    self.col6.children[4].text_color = "yellow"
+                    outer_box.children[4].text_color = "yellow"
             else:
-                self.col6.children[4].value = "? s"
-                self.col6.children[4].text_color = "grey"
+                outer_box.children[4].value = "? s"
+                outer_box.children[4].text_color = "grey"
 
         if best_lap:
             minutes = int(best_lap / 60)
             seconds = int(best_lap % 60)
-            self.col6.children[7].value = "{:02d}:{:02d}".format(minutes, seconds)
+            outer_box.children[7].value = "{:02d}:{:02d}".format(minutes, seconds)
 
     def __update_fuel(self, provider: FuelProvider):
         # children offsets:
