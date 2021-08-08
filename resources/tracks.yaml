@@ -37,6 +37,8 @@ tracks:
      start_finish_direction: "N"
      pit_entry_coords: "(39.535192,-122.338194),(39.535092,-122.338176)"
      pit_entry_direction: "E"
+     pit_out_coords: "(39.538090, -122.338785), (39.538096, -122.338641)"
+     pit_out_direction: "N"
 
   -  name: "Laguna Seca"
      start_finish_coords: "(36.586308,-121.756908),(36.586158,-121.756649)"
