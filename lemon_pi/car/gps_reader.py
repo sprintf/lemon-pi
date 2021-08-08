@@ -135,8 +135,16 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
                                 # generally we should try to move away from position listeners, and instead
                                 # have them pull from this class when they need it
                                 if self.position_listener:
-                                    self.position_listener.update_position(self.lat, self.long,
-                                                                           self.heading, time.time(), self.speed_mph)
+                                    start_time = time.time()
+                                    try:
+                                        self.position_listener.update_position(self.lat, self.long,
+                                                                            self.heading, time.time(), self.speed_mph)
+                                    except Exception:
+                                        logger.exception("issue with GPS listener.")
+                                    finally:
+                                        elapsed_ms = int(time.time() - start_time * 1000)
+                                        if elapsed_ms > 50:
+                                            logger.warning(f"position handling took {elapsed_ms} ms")
                                 if not self.working:
                                     self.working = True
                                     GPSConnectedEvent.emit()

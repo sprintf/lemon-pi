@@ -19,7 +19,7 @@ class TestAudio(unittest.TestCase):
         audio.announce.assert_called_with('2 minutes dead')
 
         audio.announce_lap_time(122.1)
-        audio.announce.assert_called_with('2. 02')
+        audio.announce.assert_called_with('2. O. 2')
 
         audio.announce_lap_time(198.1)
         audio.announce.assert_called_with('3. 18')
