@@ -536,5 +536,8 @@ class RandomLapTimeProvider(LapProvider):
     def get_lap_count(self) -> int:
         return 145
 
+    def get_best_lap_time(self) -> float:
+        return 200 + random.randint(-2000, 2000) / 1000
+
 randomLapTimeProvider = RandomLapTimeProvider()
 
