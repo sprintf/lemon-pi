@@ -106,6 +106,8 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
         if event == EnterTrackEvent:
             self.on_track = True
             self.lap_start_time = ts
+            if self.lap_count == 999:
+                self.lap_count = 0
 
     def get_lap_count(self) -> int:
         return self.lap_count

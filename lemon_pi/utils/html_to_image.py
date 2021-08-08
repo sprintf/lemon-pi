@@ -15,6 +15,7 @@ async def main(files:[]):
     browser = await launch()
     page = await browser.newPage()
     for file in files:
+        print(f"processing {file}")
         outfile = file.replace(".html", ".jpg")
         await page.goto('https://storage.googleapis.com/perplexus/public/{}'.format(file))
         # we need to wait for the background to load

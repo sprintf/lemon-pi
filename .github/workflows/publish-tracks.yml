@@ -50,13 +50,16 @@ jobs:
         name: Generating thumbnails
         if: steps.generate.outcome == 'success'
         run: |
-          echo "generating thumbnails"
+          echo "installing pyppeteer"
           pip install pyppeteer
+          echo "generating thumbnails"
           python lemon_pi/utils/html_to_image.py `ls tracks/*.html`
           for x in tracks/*.html ; do
+            echo "cropping $x"
             image=`echo $x | sed 's/\.html/\.jpg/'`
             python lemon_pi/utils/image_crop.py $image
           done
+          echo "moving thumbnails"
           mkdir tracks/thumbnails
           for x in tracks/*-clipped.jpg ; do
             target=`echo $x | sed 's/-clipped//'`
