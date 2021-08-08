@@ -478,19 +478,24 @@ class Gui(EventHandler):
             seconds = int(predicted % 60)
             outer_box.children[1].value = "{:02d}:{:02d}".format(minutes, seconds)
             if best_lap:
-                delta = best_lap - predicted
+                delta = predicted - best_lap
                 outer_box.children[4].value = f"{delta:0.1f} s"
                 if delta < -1:
-                    outer_box.children[4].text_color = "purple"
+                    outer_box.children[4].text_color = "white"
+                    outer_box.children[4].bg = "purple"
                 elif delta < 1:
                     outer_box.children[4].text_color = "green"
+                    outer_box.children[4].bg = "black"
                 elif delta < 2:
                     outer_box.children[4].text_color = "white"
+                    outer_box.children[4].bg = "black"
                 else:
                     outer_box.children[4].text_color = "yellow"
+                    outer_box.children[4].bg = "black"
             else:
                 outer_box.children[4].value = "? s"
                 outer_box.children[4].text_color = "grey"
+                outer_box.children[4].bg = "black"
 
         if best_lap:
             minutes = int(best_lap / 60)
