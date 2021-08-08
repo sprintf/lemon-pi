@@ -2,10 +2,10 @@
 from lemon_pi.shared.events import Event
 
 # the car is moving
-MovingEvent = Event("Moving", suppress_logs=True)
+MovingEvent = Event("Moving", suppress_logs=True, debounce_time=1)
 
 # the car is not moving
-NotMovingEvent = Event("NotMoving", suppress_logs=True)
+NotMovingEvent = Event("NotMoving", suppress_logs=True, debounce_time=1)
 
 # the car is exiting the race track and entering the pits
 LeaveTrackEvent = Event("LeaveTrack", debounce_time=30)
@@ -72,7 +72,7 @@ RadioReceiveEvent = Event("car-radio-rx")
 
 # A button has been pushed
 # button=0   the id of the button that was pushed
-ButtonPressEvent = Event("btn", debounce_time=0.25, suppress_logs=True)
+ButtonPressEvent = Event("btn", debounce_time=0.25)
 
 # an audio alarm
 # message=

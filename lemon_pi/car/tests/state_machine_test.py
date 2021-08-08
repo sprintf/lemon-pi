@@ -24,7 +24,7 @@ class StateMachineTestCase(LemonPiTestCase):
         sm = StateMachine()
         MovingEvent.emit()
         LeaveTrackEvent.emit()
-        CompleteLapEvent.emit()
+        CompleteLapEvent.emit(lap_time=63, lap_count=99)
         self.assertEqual(sm.state, State.ON_TRACK)
 
     def test_pitting(self):
@@ -36,6 +36,7 @@ class StateMachineTestCase(LemonPiTestCase):
         CarStoppedEvent.emit()
         self.assertEqual(sm.state, State.PARKED_IN_PIT)
         # then suppose we move and are then stationary again
+        MovingEvent.last_event_time = 0
         MovingEvent.emit()
         self.assertEqual(sm.state, State.LEAVING_PIT)
         # force 10s to pass

@@ -232,9 +232,7 @@ class Gui(EventHandler):
 
         # go back to the fuel display if we complete a lap and it is not showing.
         if event == CompleteLapEvent and not self.col3.visible:
-            self.col3.show()
-            self.col4.hide()
-            self.col5.hide()
+            self._col_display(3)
             return
 
         if event == OBDConnectedEvent:
@@ -280,10 +278,13 @@ class Gui(EventHandler):
             self.obd_image.off()
         if event_data.key == 'l':
             self.__update_lap(randomLapTimeProvider)
+            self.__update_predicted_lap(randomLapTimeProvider)
         if event_data.key == 'p':
             self.handle_event(RadioReceiveEvent)
         if event_data.key == 'b':
             ButtonPressEvent.emit(button=0)
+        if event_data.key == 'a':
+            CompleteLapEvent.emit(lap_time=123.4, lap_count=1)
 
     def _col_display(self, to_show):
         for x in range(3, 7):
@@ -406,10 +407,29 @@ class Gui(EventHandler):
         return result
 
     def create_lap_timer(self, parent):
-        result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(112 * Gui.SCALE_FACTOR))
+        result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(336 * Gui.SCALE_FACTOR))
         result.set_border(4, "darkgreen")
         Text(result, "PREDICTED", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
+        # child [1]
         Text(result, "mm:ss", size=Gui.TEXT_XL, font=self.font, color="white")
+
+        # spacer
+        Box(result, width=12 * Gui.SCALE_FACTOR, height=24, align="left")
+
+        # Delta timer
+        Text(result, "DELTA", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
+        # child [4]
+        Text(result, "0 s", size=Gui.TEXT_XL, font=self.font, color="white")
+
+        # spacer
+        Box(result, width=12 * Gui.SCALE_FACTOR, height=24, align="left")
+
+        # TODO : support sending a target time from the pit, change this title
+        # to "TARGET"
+        Text(result, "BEST", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
+        # child [7]
+        Text(result, "mm:ss", size=Gui.TEXT_LARGE, font=self.font, color="white")
+
         return result
 
     def __update_temp(self, provider: TemperatureProvider):
@@ -446,13 +466,41 @@ class Gui(EventHandler):
 
     def __update_predicted_lap(self, provider: LapProvider):
         predicted = provider.get_predicted_lap_time()
+        best_lap = provider.get_best_lap_time()
+
+        outer_box = self.col6.children[0]
+
         if predicted:
             # if we're on track and getting predictions then show them
             if StateMachine.is_on_track() and not self.col6.visible:
                 self._col_display(6)
             minutes = int(predicted / 60)
             seconds = int(predicted % 60)
-            self.col6.children[1].value = "{:02d}:{:02d}".format(minutes, seconds)
+            outer_box.children[1].value = "{:02d}:{:02d}".format(minutes, seconds)
+            if best_lap:
+                delta = predicted - best_lap
+                outer_box.children[4].value = f"{delta:0.1f} s"
+                if delta < -1:
+                    outer_box.children[4].text_color = "white"
+                    outer_box.children[4].bg = "purple"
+                elif delta < 1:
+                    outer_box.children[4].text_color = "green"
+                    outer_box.children[4].bg = "black"
+                elif delta < 2:
+                    outer_box.children[4].text_color = "white"
+                    outer_box.children[4].bg = "black"
+                else:
+                    outer_box.children[4].text_color = "yellow"
+                    outer_box.children[4].bg = "black"
+            else:
+                outer_box.children[4].value = "? s"
+                outer_box.children[4].text_color = "grey"
+                outer_box.children[4].bg = "black"
+
+        if best_lap:
+            minutes = int(best_lap / 60)
+            seconds = int(best_lap % 60)
+            outer_box.children[7].value = "{:02d}:{:02d}".format(minutes, seconds)
 
     def __update_fuel(self, provider: FuelProvider):
         # children offsets:
@@ -492,6 +540,9 @@ class RandomLapTimeProvider(LapProvider):
 
     def get_lap_count(self) -> int:
         return 145
+
+    def get_best_lap_time(self) -> float:
+        return 200 + random.randint(-2000, 2000) / 1000
 
 randomLapTimeProvider = RandomLapTimeProvider()
 

@@ -1,16 +1,29 @@
 
+# Each track must have a start-finish set of coordinates
+# The pit-out coords are used to configure gps to run at a faster rate
+# The start finish line should not extend across the pit out lane,
+# as this confuses the predictive lap timer.
+# The pit-in coords are used to alert the pit that the car is
+# coming into the pits, and to display driver instructions to aid
+# driver swaps. The pit-in coords are also used to reset the GPS
+# back to 1 Hertz
+
 tracks:
   -  name: "Sonoma Raceway"
-     start_finish_coords: "(38.161340,-122.454911),(38.161589,-122.454658)"
+     start_finish_coords: "(38.161469,-122.454784),(38.161588,-122.454659)"
      start_finish_direction: "NW"
      pit_entry_coords: "(38.158549,-122.452756),(38.158343,-122.452689)"
      pit_entry_direction: "W"
+     pit_out_coords: "(38.161335,-122.454918),(38.161462, -122.454790)"
+     pit_out_direction: "NW"
 
   -  name: "Thunderhill"
      start_finish_coords: "(39.538475,-122.331300),(39.538480,-122.331113)"
      start_finish_direction: "S"
      pit_entry_coords: "(39.542489,-122.331372),(39.542488,-122.331315)"
      pit_entry_direction: "S"
+     pit_out_coords: "(39.539314,-122.331434),(39.539315,-122.331290)"
+     pit_out_direction: "S"
      radio_sync_list:
        - "west cut":
          radio_sync_coords: "(39.539930,-122.336541),(39.539739,-122.336530)"
@@ -80,24 +93,48 @@ tracks:
      start_finish_direction: "W"
      pit_entry_coords: "(29.278953,-95.420712),(29.278887,-95.420603)"
      pit_entry_direction: "SW"
+     pit_out_coords: "(29.279540, -95.425442),(29.279547, -95.425354)"
+     pit_out_direction: "N"
 
   -  name: "New Hampshire Motor Speedway"
      start_finish_coords: "(43.363132,-71.462133),(43.363060,-71.461852)"
      start_finish_direction: "S"
      pit_entry_coords: "(43.364704,-71.461090),(43.364642,-71.460877)"
      pit_entry_direction: "S"
+     pit_out_coords: "(43.361208, -71.462747),(43.361151, -71.462511)"
+     pit_out_direction: "S"
 
   -  name: "Gingerman Raceway"
      start_finish_coords: "(42.408026,-86.140581),(42.408028,-86.140392)"
      start_finish_direction: "N"
      pit_entry_coords: "(42.405682,-86.140487),(42.405601,-86.140484)"
      pit_entry_direction: "W"
+     pit_out_coords: "(42.409446, -86.140760), (42.409447, -86.140654)"
+     pit_out_direction: "N"
 
   -  name: "High Plains Raceway"
      start_finish_coords: "(39.735103,-103.894444),(39.734969,-103.894485)"
      start_finish_direction: "E"
      pit_entry_coords: "(39.735443,-103.895937),(39.735368,-103.895936)"
      pit_entry_direction: "E"
+     pit_out_coords: "(39.734942, -103.892095),(39.734862, -103.892041)"
+     pit_out_direction: "NE"
+
+  -  name: "Autobahn Country Club, Joliet"
+     start_finish_coords: "(41.455158, -88.126925),(41.455263, -88.126838)"
+     start_finish_direction: "SE"
+     pit_entry_coords: "(41.456434, -88.12861),(41.456528, -88.128561)"
+     pit_entry_direction: "E"
+     pit_out_coords: "(41.455295, -88.126820),(41.455408, -88.126731)"
+     pit_out_direction: "SE"
+
+  -  name: "NCM Motorsports Park"
+     start_finish_coords: "(37.001100, -86.368613),(37.000978, -86.368536)"
+     start_finish_direction: "SW"
+     pit_entry_coords: "(37.002003, -86.366165),(37.001941, -86.366134)"
+     pit_entry_direction: "SW"
+     pit_out_coords: "(37.000059, -86.370473),(36.999969, -86.370431)"
+     pit_out_direction: "SW"
 
 # this is a local test track, used for testing and other things.
   -  name: "Arlington Test Track"
@@ -107,6 +144,8 @@ tracks:
      pit_entry_direction: "NW"
      radio_sync_coords: "(37.927329,-122.296101),(37.927392,-122.295992)"
      radio_sync_direction: "SE"
+     pit_out_coords: "(37.928483,-122.297005),(37.928385,-122.297129)"
+     pit_out_direction: "SE"
      hidden: "true"
 
 

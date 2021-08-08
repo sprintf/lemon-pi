@@ -1,7 +1,6 @@
 
 import time, os
 from threading import Thread
-from pygame import mixer
 
 from lemon_pi.car.audio import Audio
 from lemon_pi.car.button import Button
@@ -32,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 # this enables console logging, but we're going to use
 # rotating file based logging
-logging.basicConfig(format='%(asctime)s %(message)s',
+logging.basicConfig(format='%(asctime)s.%(msecs)03d %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.WARN)
 
@@ -51,7 +50,7 @@ gps_logger.propagate = False
 handler = RotatingFileHandler("logs/lemon-pi.log",
                               maxBytes=10000000,
                               backupCount=10)
-handler.setFormatter(logging.Formatter(fmt='%(asctime)s %(name)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
+handler.setFormatter(logging.Formatter(fmt='%(asctime)s.%(msecs)03d %(name)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
 handler.setLevel(logging.INFO)
 logging.getLogger().addHandler(handler)
 logging.getLogger().setLevel(logging.INFO)
@@ -73,10 +72,6 @@ gui = Gui(settings.DISPLAY_WIDTH, settings.DISPLAY_HEIGHT)
 
 def init():
 
-    # sound initialization
-    mixer.pre_init(44100, -16, 2, 512)
-    mixer.init()
-
     # detect USB devices (should just be Lora)
     UsbDetector.init()
 
@@ -91,7 +86,7 @@ def init():
     WifiManager().disable_wifi()
 
     # enable sound generation
-    Audio(mixer).start()
+    Audio().start()
     StateMachine.init()
     MovementListener()
 
@@ -105,8 +100,6 @@ def init():
     if settings.GPS_DISABLED:
         logger.warning("GPS has been disabled")
     else:
-        if settings.GPS_CYCLE != '1.0':
-            gps.set_cycle(settings.GPS_CYCLE)
         gps.start()
 
     # start a background thread to pull in OBD data

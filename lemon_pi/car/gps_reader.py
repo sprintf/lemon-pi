@@ -10,7 +10,7 @@ from lemon_pi.car.event_defs import (
     NotMovingEvent,
     MovingEvent,
     GPSConnectedEvent,
-    GPSDisconnectedEvent
+    GPSDisconnectedEvent, EnterTrackEvent, LeaveTrackEvent
 )
 import logging
 import time
@@ -42,11 +42,19 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
         self.part_synced = False
         self.time_synced = False
         self.sequential_timesync_errors = 0
+        EnterTrackEvent.register_handler(self)
+        LeaveTrackEvent.register_handler(self)
         ExitApplicationEvent.register_handler(self)
 
     def handle_event(self, event, **kwargs):
         if event == ExitApplicationEvent:
             self.finished = True
+        if event == EnterTrackEvent:
+            if settings.GPS_CYCLE != 1.0:
+                self.set_cycle(settings.GPS_CYCLE)
+        if event == LeaveTrackEvent:
+            if settings.GPS_CYCLE != 1.0:
+                self.set_cycle(1.0)
 
     def run(self) -> None:
         while not self.finished:
@@ -127,8 +135,16 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
                                 # generally we should try to move away from position listeners, and instead
                                 # have them pull from this class when they need it
                                 if self.position_listener:
-                                    self.position_listener.update_position(self.lat, self.long,
-                                                                           self.heading, time.time(), self.speed_mph)
+                                    start_time = time.time()
+                                    try:
+                                        self.position_listener.update_position(self.lat, self.long,
+                                                                            self.heading, time.time(), self.speed_mph)
+                                    except Exception:
+                                        logger.exception("issue with GPS listener.")
+                                    finally:
+                                        elapsed_ms = int(time.time() - start_time * 1000)
+                                        if elapsed_ms > 50:
+                                            logger.warning(f"position handling took {elapsed_ms} ms")
                                 if not self.working:
                                     self.working = True
                                     GPSConnectedEvent.emit()
@@ -192,17 +208,17 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
             raise Exception("no gps device")
         session.send('?WATCH={"enable":true,"json":true}')
 
-    def set_cycle(self, delay:str):
+    def set_cycle(self, delay:float):
         if UsbDetector.detected(UsbDevice.GPS):
             gps_device = UsbDetector.get(UsbDevice.GPS)
-            result = subprocess.run(["gpsctl", "-f", "-t", "MTK-3301", "-c", delay, gps_device],
+            result = subprocess.run(["gpsctl", "-c", str(delay), gps_device],
                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             logger.info(f"result of setting GPS cycle time = {result.returncode}")
 
-    def set_baud(self, baud:str):
+    def set_baud(self, baud:int):
         if UsbDetector.detected(UsbDevice.GPS):
             gps_device = UsbDetector.get(UsbDevice.GPS)
-            result = subprocess.run(["gpsctl", "-f", "-t", "MTK-3301", "-s", baud, gps_device],
+            result = subprocess.run(["gpsctl", "-s", str(baud), gps_device],
                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             logger.info(f"result of setting GPS baud rate = {result.returncode}")
 
@@ -227,7 +243,7 @@ if __name__ == "__main__":
 
     UsbDetector.init()
     tracker = GpsReader()
-    tracker.setCycle("0.5")
+    tracker.set_cycle(0.5)
     tracker.register_position_listener(FileLogger())
     tracker.run()
 

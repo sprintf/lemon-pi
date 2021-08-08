@@ -1,12 +1,16 @@
 import logging
 from enum import Enum
 
+from lemon_pi.car.event_defs import DriverMessageEvent
 from lemon_pi.car.gate import Gate
 from lemon_pi.car.line_cross_detector import LineCrossDetector
 from lemon_pi.car.target import Target
 from haversine import haversine, Unit
 
 logger = logging.getLogger(__name__)
+
+from python_settings import settings
+
 
 # todo : move this to settings
 BREADCRUMB_DISTANCE_FEET = 200
@@ -61,6 +65,7 @@ class LapTimePredictor:
                 self.lap_start_time = crossed_time
                 if self.state == PredictorState.INIT:
                     self.state = PredictorState.BREADCRUMB
+                    DriverMessageEvent.emit(text="learning track...", duration_secs=60)
                 elif self.state == PredictorState.BREADCRUMB:
                     self._update_gate_time_to_finish(last_lap_time)
                     self.state = PredictorState.WORKING
@@ -105,7 +110,7 @@ class LapTimePredictor:
 
         if len(self.gates) == 0:
             dist_from_sf = int(haversine(self.start_finish.midpoint, (lat, long), unit=Unit.FEET))
-            if dist_from_sf >= BREADCRUMB_DISTANCE_FEET:
+            if dist_from_sf >= settings.VGATE_SEPARATION_FEET:
                 self.gates.append(Gate(lat, long, heading, "gate-0"))
                 logger.info(f"added first gate, dist to sf = {dist_from_sf}")
         else:

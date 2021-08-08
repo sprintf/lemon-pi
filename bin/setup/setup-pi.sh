@@ -10,7 +10,8 @@ sudo apt-get install git gpsd gpsd-clients
 # needed for text to speech
 sudo apt-get install espeak
 # needed for pygame sounds
-sudo apt-get install libsdl2-mixer-2.0.0
+# may not be needed : we do need aplay for sure
+# sudo apt-get install libsdl2-mixer-2.0.0
 
 git clone https://github.com/sprintf/lemon-pi.git
 

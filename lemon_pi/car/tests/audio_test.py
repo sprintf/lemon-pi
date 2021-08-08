@@ -1,6 +1,7 @@
 
 import unittest
 from unittest.mock import Mock, patch
+import time
 
 from lemon_pi.car.audio import Audio
 from lemon_pi.car.event_defs import ButtonPressEvent, CompleteLapEvent
@@ -9,7 +10,7 @@ from lemon_pi.car.event_defs import ButtonPressEvent, CompleteLapEvent
 class TestAudio(unittest.TestCase):
 
     def test_lap_times(self):
-        audio = Audio(Mock())
+        audio = Audio()
         audio.announce = Mock()
         audio.announce_lap_time(60.0)
         audio.announce.assert_called_with('1 minute dead')
@@ -18,20 +19,20 @@ class TestAudio(unittest.TestCase):
         audio.announce.assert_called_with('2 minutes dead')
 
         audio.announce_lap_time(122.1)
-        audio.announce.assert_called_with('2. 02')
+        audio.announce.assert_called_with('2. O. 2')
 
         audio.announce_lap_time(198.1)
         audio.announce.assert_called_with('3. 18')
 
     def test_button_press(self):
-        audio = Audio(Mock())
+        audio = Audio()
         audio.play_click = Mock()
         ButtonPressEvent.emit(button=0)
         audio.play_click.assert_called_once()
 
     def test_lap_completed(self):
-        audio = Audio(Mock())
-        CompleteLapEvent.emit(lap_time=54.252)
+        audio = Audio()
+        CompleteLapEvent.emit(lap_time=54.252, lap_count=5)
         self.assertEqual(1, audio.queue.qsize())
         audio.engine.say = Mock()
         audio.engine.runAndWait = Mock()
