@@ -85,6 +85,10 @@ AudioAlarmEvent = Event("alrm", debounce_time=60)
 # gap=
 RacePositionEvent = Event("rpos")
 
+# a target lap time has been received from the pits
+# target=
+SetTargetTimeEvent = Event("target")
+
 
 
 
