@@ -30,7 +30,8 @@ class Audio(Thread, EventHandler):
         Thread.__init__(self, daemon=True)
         self.engine = pyttsx3.init()
         self.engine.setProperty('volume', 1.0)
-        self.engine.startLoop()
+        # on Darwin we seem to need this... on RPi it blocks
+        # self.engine.startLoop()
         self.queue = Queue()
         self.click_sound = 'resources/sounds/click.wav'
         ButtonPressEvent.register_handler(self)
@@ -63,6 +64,8 @@ class Audio(Thread, EventHandler):
         msg = self.queue.get()
         logger.info(f"announcing '{msg}'")
         self.engine.say(msg)
+        # on Darwin this crashes the whole app, on RPi it seems fine.
+        self.engine.runAndWait()
         self.queue.task_done()
 
     def announce(self, message:str):
