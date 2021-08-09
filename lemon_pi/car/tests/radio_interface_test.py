@@ -5,7 +5,7 @@ import time
 from lemon_pi.car.display_providers import TemperatureProvider, LapProvider, FuelProvider
 from lemon_pi.car.event_defs import RadioSyncEvent
 from lemon_pi.car.radio_interface import RadioInterface
-from lemon_pi.shared.generated.messages_pb2 import SetFuelLevel, RaceStatus, RaceFlagStatus
+from lemon_pi.shared.generated.messages_pb2 import SetFuelLevel, RaceStatus, RaceFlagStatus, SetTargetTime
 from lemon_pi.shared.tests.lemon_pi_test_case import LemonPiTestCase
 
 
@@ -44,6 +44,24 @@ class RadioInterfaceTestCase(LemonPiTestCase):
         sf.car_number = "999"
         ri.process_incoming(sf)
         refuel_event.assert_called_with(percent_full=69)
+
+    @patch("lemon_pi.car.event_defs.SetTargetTimeEvent.emit")
+    def test_zero_target_time_message(self, target_time_event):
+        ri = RadioInterface(Mock(), None, None, None)
+        target_message = SetTargetTime()
+        target_message.car_number = "999"
+        target_message.target_lap_time = 0.0
+        ri.process_incoming(target_message)
+        target_time_event.assert_called_with(target=0.0)
+
+    @patch("lemon_pi.car.event_defs.SetTargetTimeEvent.emit")
+    def test_non_zero_target_time_message(self, target_time_event):
+        ri = RadioInterface(Mock(), None, None, None)
+        target_message = SetTargetTime()
+        target_message.car_number = "999"
+        target_message.target_lap_time = 128.5
+        ri.process_incoming(target_message)
+        target_time_event.assert_called_with(target=128.5)
 
     def test_handling_radio_sync(self):
         temp_provider = TemperatureProvider()
