@@ -159,6 +159,18 @@ message RemoteReboot {
   string car_number = 4;
 }
 
+message SetTargetTime {
+  int32 seq_num = 1;
+
+  int32 timestamp = 2;
+
+  string sender = 3;
+
+  string car_number = 4;
+
+  float target_lap_time = 5;  // set to zero to unset
+}
+
 message ToCarMessage {
   oneof to_car {
     Ping ping = 1;
@@ -167,6 +179,7 @@ message ToCarMessage {
     RacePosition race_position = 4;
     SetFuelLevel set_fuel = 5;
     RemoteReboot reboot = 6;
+    SetTargetTime set_target = 7;
   }
 }
 

@@ -6,7 +6,7 @@ from lemon_pi.car.event_defs import (
     LeaveTrackEvent, StateChangePittedEvent, StateChangeSettingOffEvent, CompleteLapEvent, OBDConnectedEvent,
     OBDDisconnectedEvent, GPSConnectedEvent, GPSDisconnectedEvent, RaceFlagStatusEvent, DriverMessageEvent,
     DriverMessageAddendumEvent, ExitApplicationEvent, EnterTrackEvent, RadioReceiveEvent, ButtonPressEvent,
-    AudioAlarmEvent)
+    AudioAlarmEvent, SetTargetTimeEvent)
 
 import logging
 import platform
@@ -89,6 +89,7 @@ class Gui(EventHandler):
             Gui.TEXT_XL = 72
 
         self.start_time = 0
+        self.target_time = 0
         self.font = self.__identify_font(platform.system())
         self.root = App("Lemon-Pi",
                         bg="black",
@@ -159,6 +160,7 @@ class Gui(EventHandler):
         DriverMessageEvent.register_handler(self)
         DriverMessageAddendumEvent.register_handler(self)
         RadioReceiveEvent.register_handler(self)
+        SetTargetTimeEvent.register_handler(self)
 
     def present_main_app(self):
         # sleep up to 5 seconds
@@ -230,6 +232,10 @@ class Gui(EventHandler):
             self.msg_area.value = self.msg_area.value + kwargs.get("text")
             return
 
+        if event == SetTargetTimeEvent:
+            self.__update_target_time(kwargs.get("target"))
+            return
+
         # go back to the fuel display if we complete a lap and it is not showing.
         if event == CompleteLapEvent and not self.col3.visible:
             self._col_display(3)
@@ -285,6 +291,11 @@ class Gui(EventHandler):
             ButtonPressEvent.emit(button=0)
         if event_data.key == 'a':
             CompleteLapEvent.emit(lap_time=randomLapTimeProvider.get_last_lap_time(), lap_count=1)
+        if event_data.key == 't':
+            if self.target_time == 0:
+                self.__update_target_time(67.43)
+            else:
+                self.__update_target_time(0)
 
     def _col_display(self, to_show):
         for x in range(3, 7):
@@ -407,7 +418,7 @@ class Gui(EventHandler):
         return result
 
     def create_lap_timer(self, parent):
-        result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(336 * Gui.SCALE_FACTOR))
+        result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(364 * Gui.SCALE_FACTOR))
         result.set_border(4, "darkgreen")
         Text(result, "PREDICTED", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
         # child [1]
@@ -424,8 +435,6 @@ class Gui(EventHandler):
         # spacer
         Box(result, width=12 * Gui.SCALE_FACTOR, height=24, align="left")
 
-        # TODO : support sending a target time from the pit, change this title
-        # to "TARGET"
         Text(result, "BEST", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
         # child [7]
         Text(result, "mm:ss", size=Gui.TEXT_LARGE, font=self.font, color="white")
@@ -464,9 +473,19 @@ class Gui(EventHandler):
             tenths = int((ll - int(ll)) * 10)
             self.lap_display.children[5].value = "{:02d}:{:02d}.{:01d}".format(minutes, seconds, tenths)
 
+    def __update_target_time(self, target_time: float):
+        self.target_time = target_time
+        outer_box = self.col6.children[0]
+        if self.target_time != 0:
+            outer_box.children[6].value = "TARGET"
+            self.__display_time(self.target_time, outer_box.children[7])
+        else:
+            outer_box.children[6].value = "BEST"
+            self.__display_time(0, outer_box.children[7])
+
     def __update_predicted_lap(self, provider: LapProvider):
         predicted = provider.get_predicted_lap_time()
-        best_lap = provider.get_best_lap_time()
+        target_lap = self.target_time or provider.get_best_lap_time()
 
         outer_box = self.col6.children[0]
 
@@ -477,8 +496,9 @@ class Gui(EventHandler):
             minutes = int(predicted / 60)
             seconds = int(predicted % 60)
             outer_box.children[1].value = "{:02d}:{:02d}".format(minutes, seconds)
-            if best_lap:
-                delta = predicted - best_lap
+
+            if target_lap:
+                delta = predicted - target_lap
                 outer_box.children[4].value = f"{delta:0.1f} s"
                 if delta < -1:
                     outer_box.children[4].text_color = "white"
@@ -497,10 +517,14 @@ class Gui(EventHandler):
                 outer_box.children[4].text_color = "grey"
                 outer_box.children[4].bg = "black"
 
-        if best_lap:
-            minutes = int(best_lap / 60)
-            seconds = int(best_lap % 60)
-            outer_box.children[7].value = "{:02d}:{:02d}".format(minutes, seconds)
+        if target_lap:
+            self.__display_time(target_lap, outer_box.children[7])
+
+    @staticmethod
+    def __display_time(seconds:float, text_box:Text):
+        minutes = int(seconds / 60)
+        seconds = int(seconds % 60)
+        text_box.value = "{:02d}:{:02d}".format(minutes, seconds)
 
     def __update_fuel(self, provider: FuelProvider):
         # children offsets:

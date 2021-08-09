@@ -15,7 +15,7 @@ from lemon_pi.car.event_defs import (
     LapInfoEvent,
     RadioReceiveEvent,
     RefuelEvent,
-    ExitApplicationEvent, RacePositionEvent
+    ExitApplicationEvent, RacePositionEvent, SetTargetTimeEvent
 )
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.generated.messages_pb2 import (
@@ -25,7 +25,7 @@ from lemon_pi.shared.generated.messages_pb2 import (
     RacePosition,
     RaceFlagStatus,
     SetFuelLevel,
-    ToPitMessage, RemoteReboot)
+    ToPitMessage, RemoteReboot, SetTargetTime)
 
 from python_settings import settings
 
@@ -155,6 +155,12 @@ class RadioInterface(Thread, EventHandler):
             logger.info("told system to shut down ... now rebooting lemon-pi")
             subprocess.run(['sudo', 'reboot', 'now'])
             logger.info("goodbye, cruel world...")
+        elif type(msg) == SetTargetTime:
+            if msg.car_number != settings.CAR_NUMBER:
+                logger.info("it's not for me, ignoring")
+                return
+            logger.info(f"got a target time of {msg.target_lap_time}")
+            SetTargetTimeEvent.emit(target=msg.target_lap_time)
         else:
             logger.info("got unexpected message : {}".format(type(msg)))
 
