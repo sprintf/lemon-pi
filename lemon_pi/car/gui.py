@@ -103,6 +103,7 @@ class Gui(EventHandler):
 
         Box(self.splash, width=Gui.WIDTH, height=int(50 * Gui.SCALE_FACTOR))
         splash_lower = Box(self.splash, width=Gui.WIDTH, height=107, align="right")
+        Picture(splash_lower, image="resources/images/argonaut.gif", align="right")
         Text(splash_lower, "in conjunction with", size=Gui.TEXT_SMALL, font=self.font, color="white", align="right")
 
         self.app = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, visible=False)
