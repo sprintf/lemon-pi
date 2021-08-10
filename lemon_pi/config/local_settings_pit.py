@@ -4,7 +4,7 @@ RADIO_KEY = "mykey"
 
 # provide a race id to track realtime results
 # empty means disabled
-RACE_ID = "106666"
+RACE_ID = ""
 
 # the race cars we want to track
 # [] means no tracking

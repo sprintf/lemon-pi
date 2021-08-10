@@ -2,7 +2,8 @@ import unittest
 from unittest.mock import MagicMock, patch
 import time
 
-from lemon_pi.pit.event_defs import RaceStatusEvent, LapCompletedEvent, PingEvent, PittingEvent, TelemetryEvent
+from lemon_pi.pit.event_defs import RaceStatusEvent, LapCompletedEvent, PingEvent, PittingEvent, TelemetryEvent, \
+    SendTargetTimeEvent
 from lemon_pi.pit.radio_interface import RadioInterface
 from lemon_pi.shared.generated.messages_pb2 import Ping, EnteringPits, CarTelemetry, RaceFlagStatus
 from python_settings import settings
@@ -55,6 +56,24 @@ class RadioInterfaceTestCase(LemonPiTestCase):
         self.assertEqual(3, fields.race_position.position)
         self.assertEqual("181", fields.race_position.car_ahead.car_number)
         self.assertEqual(RaceFlagStatus.GREEN, fields.race_position.flag_status)
+
+    @patch("lemon_pi.shared.radio.Radio")
+    def test_target_time_int(self, radio):
+        ri = RadioInterface(radio)
+        radio.send_async = MagicMock()
+        ri.handle_event(SendTargetTimeEvent, car='1', target_time=0)
+        fields = radio.send_async.call_args.args[0]
+        self.assertEqual("1", fields.set_target.car_number)
+        self.assertEqual(0.0, fields.set_target.target_lap_time)
+
+    @patch("lemon_pi.shared.radio.Radio")
+    def test_target_time_float(self, radio):
+        ri = RadioInterface(radio)
+        radio.send_async = MagicMock()
+        ri.handle_event(SendTargetTimeEvent, car='1', target_time=128.5)
+        fields = radio.send_async.call_args.args[0]
+        self.assertEqual("1", fields.set_target.car_number)
+        self.assertEqual(128.5, fields.set_target.target_lap_time)
 
     def test_ping_processing(self):
         ri = RadioInterface(MagicMock())
