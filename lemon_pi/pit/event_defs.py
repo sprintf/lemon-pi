@@ -60,3 +60,8 @@ DumpLeaderboardEvent = Event("dump-leaderboard")
 # chase_mode= [true/false]
 # target_car= [string number if chase mode true]
 CarSettingsEvent = Event("car-settings")
+
+# Send a target time to a car
+# car=
+# target_time=
+SendTargetTimeEvent = Event("send-target-time")
