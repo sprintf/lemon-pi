@@ -15,10 +15,6 @@ logger = logging.getLogger(__name__)
 from python_settings import settings
 
 
-# todo : move this to settings
-BREADCRUMB_DISTANCE_FEET = 200
-
-
 class PredictorState(Enum):
     # we are awaiting crossing the start finish line
     INIT = 1,
@@ -54,7 +50,7 @@ class LapTimePredictor(EventHandler):
         # load a set of gate verifiers for our previous sessions at this track
         if LapSessionStore.get_instance():
             self.gate_verifiers = [GateVerifier(f) for f in LapSessionStore.get_instance().load_sessions()]
-            # todo : if we have one from very recently then use it
+            # todo : if we have one from very recently then use it .. as long as data look good
         else:
             self.gate_verifiers = []
 
@@ -133,7 +129,7 @@ class LapTimePredictor(EventHandler):
             last_gate = self.gates[len(self.gates) - 1]
             dist_from_sf = int(haversine(self.start_finish.midpoint, (lat, long), unit=Unit.FEET))
             dist_from_last_gate = int(haversine(last_gate.coords(), (lat, long), unit=Unit.FEET))
-            if dist_from_last_gate >= BREADCRUMB_DISTANCE_FEET:
+            if dist_from_last_gate >= settings.VGATE_SEPARATION_FEET:
                 self.gates.append(Gate(lat, long, heading, f"gate-{len(self.gates)}", previous=last_gate))
                 logger.info(f"added gate {len(self.gates)} dist to sf = {dist_from_sf}")
 

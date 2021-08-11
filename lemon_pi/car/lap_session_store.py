@@ -35,5 +35,6 @@ class LapSessionStore:
         # todo : write a time into the file, so we know when it was run ... if it was
         # on same day (or day before) we take it straight away
         # todo : filename should be the track length
+        # todo : put versioning into the name
         pickle.dump(gates, "TBD")
         pass
