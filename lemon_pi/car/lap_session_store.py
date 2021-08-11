@@ -6,35 +6,35 @@ from lemon_pi.car.track import TrackLocation
 
 
 class LapSessionStore:
-    # Used to store session data. The
 
     __instance = None
 
     def __init__(self, track: TrackLocation):
         self.track = track
+        self.basedir = f"/var/lib/lemon-pi/track-data/{track.code}"
+        os.makedirs(self.basedir)
 
     @classmethod
     def init(cls, track: TrackLocation):
         LapSessionStore.__instance = LapSessionStore(track)
-        os.makedirs("/var/lib/lemon-pi/track-data")
 
     @classmethod
     def get_instance(cls) :
         return LapSessionStore.__instance
 
-    def load_sessions(self) -> Gates:
-        # todo : load all sessions for this track
-        gates = []
-        for session in os.listdir():
-            gates.append(pickle.load(session))
-        return gates
+    def load_sessions(self) -> [Gates]:
+        # load all sessions for this track
+        result = []
+        for file in os.listdir(self.basedir):
+            if file.endswith("-v1.dat"):
+                with open(file) as f:
+                    result.append(pickle.load(f))
+        return result
 
     def save_session(self, gates: Gates):
-        # todo : create path from base + track + current session if there is one
-        # if there's enough data, then write it back
-        # todo : write a time into the file, so we know when it was run ... if it was
-        # on same day (or day before) we take it straight away
-        # todo : filename should be the track length
-        # todo : put versioning into the name
-        pickle.dump(gates, "TBD")
-        pass
+        filename = f"{gates.get_distance_feet()}-v1.dat"
+        # todo : this needs implementing
+        gates.stamp_time()
+        # todo : don't write of theres no data
+        with open(filename, "w") as f:
+            pickle.dump(gates, f)
