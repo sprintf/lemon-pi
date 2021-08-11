@@ -1,4 +1,7 @@
+from haversine import haversine, Unit
+
 from lemon_pi.car import geometry
+from lemon_pi.car.line_cross_detector import LineCrossDetector
 from lemon_pi.car.target import Target
 from statistics import mean
 import bisect
@@ -9,6 +12,35 @@ logger = logging.getLogger(__name__)
 # why 18? after running the predictive lap timer test on lots of different
 # values between 12 and 100, 18 turned out to be a pretty good result
 ELEMENTS = 18
+
+
+class Gates:
+
+    def __init__(self, start_finish: Target):
+        self.start_finish = start_finish
+        self.gates: [Gate] = []
+        self.fingerprint = ""
+
+    def __iter__(self):
+        return self.gates.__iter__()
+
+    def __len__(self):
+        return self.gates.__len__()
+
+    def __getitem__(self, item):
+        return self.gates.__getitem__(item)
+
+    def append(self, thing):
+        return self.gates.append(thing)
+
+    def get_distance_feet(self) -> int:
+        last_lat_long = self.start_finish.midpoint
+        total_distance_feet = 0
+        for gate in self.gates:
+            total_distance_feet += haversine(last_lat_long, (gate.lat, gate.long), Unit.FEET)
+            last_lat_long = gate.lat, gate.long
+        total_distance_feet += haversine(last_lat_long, self.start_finish.midpoint, Unit.FEET)
+        return total_distance_feet
 
 
 class Gate:
@@ -129,3 +161,28 @@ class Gate:
                 results.append(scanner.last_mini_rank)
             scanner = scanner.previous
         return results
+
+
+class GateVerifier:
+
+    def __init__(self, gates: Gates):
+        self.gates = gates
+        self.cross_detector = LineCrossDetector()
+        self.index = 0
+        self.matched = True
+
+    def verify(self, lat, long, heading, time):
+        if self.index >= len(self.gates):
+            return
+        crossed, crossed_time = self.cross_detector.crossed_line(lat, long, heading, time, self.gates[self.index])
+        if crossed:
+            self.index += 1
+        else:
+            # did we miss a gate?
+            if self.index < len(self.gates) - 1:
+                gate_dist = haversine((lat, long), self.gates[self.index].target.midpoint, Unit.FEET)
+                next_gate_dist = haversine((lat, long), self.gates[self.index + 1].target.midpoint,
+                                           Unit.FEET)
+                if gate_dist > next_gate_dist:
+                    self.matched = False
+                    self.index += 1

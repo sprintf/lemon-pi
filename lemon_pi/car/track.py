@@ -32,8 +32,9 @@ TARGETS = [START_FINISH, PIT_ENTRY, PIT_OUT, RADIO_SYNC]
 
 class TrackLocation:
 
-    def __init__(self, name):
+    def __init__(self, name, code):
         self.name = name
+        self.code = code
         self.targets:{TargetMetaData, Target} = {}
         self.hidden = False
 
@@ -93,7 +94,7 @@ def read_tracks() -> [TrackLocation]:
     with open(track_file) as yamlfile:
         tracks = yaml.load(yamlfile, Loader=yaml.FullLoader)
         for track in tracks["tracks"]:
-            track_data = TrackLocation(track["name"])
+            track_data = TrackLocation(track["name"], track["code"])
 
             for tmd in TARGETS:
                 _read_target(tmd, track, track_data)

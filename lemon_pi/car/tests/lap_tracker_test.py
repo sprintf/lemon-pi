@@ -24,7 +24,7 @@ class TestAngularDifference(unittest.TestCase):
 
     @patch("lemon_pi.car.event_defs.RadioSyncEvent.emit")
     def test_time_crossing_line(self, radio_sync_event):
-        bw = TrackLocation("bw")
+        bw = TrackLocation("bw", "zoo")
         t = Target("start_finish", (35.489031,-119.544530), (35.488713,-119.544510), "E")
         bw.set_start_finish_target(t)
         lu = Mock()
@@ -44,7 +44,7 @@ class TestAngularDifference(unittest.TestCase):
 
     @patch("lemon_pi.car.event_defs.LeaveTrackEvent.emit")
     def test_pit_in_detection(self, leave_track_event):
-        bw = TrackLocation("bw")
+        bw = TrackLocation("bw", "foo")
         sf = Target("start-finiah", (35.489031,-119.544530), (35.488713,-119.544510), "E")
         bw.set_start_finish_target(sf)
         pi = Target("pit-in", (35.489031,-119.546), (35.488713,-119.546), "E")
@@ -58,7 +58,7 @@ class TestAngularDifference(unittest.TestCase):
 
     @patch("lemon_pi.car.event_defs.RadioSyncEvent.emit")
     def test_radio_sync_detection(self, radio_sync_event):
-        bw = TrackLocation("bw")
+        bw = TrackLocation("bw", "bar")
         sf = Target("start-finiah", (35.489031,-119.544530), (35.488713,-119.544510), "E")
         bw.set_start_finish_target(sf)
         pi = Target("radio", (35.489031,-119.546), (35.488713,-119.546), "E")

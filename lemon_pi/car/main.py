@@ -6,6 +6,7 @@ from lemon_pi.car.audio import Audio
 from lemon_pi.car.button import Button
 from lemon_pi.car.gui import Gui
 from lemon_pi.car.gps_reader import GpsReader
+from lemon_pi.car.lap_session_store import LapSessionStore
 from lemon_pi.car.maf_analyzer import MafAnalyzer
 from lemon_pi.car.obd_reader import ObdReader
 from lemon_pi.car.lap_tracker import LapTracker
@@ -136,6 +137,10 @@ def init():
         time.sleep(1)
     closest_track = min(tracks, key=lambda x: haversine(gps.get_lat_long(), x.get_start_finish_target().midpoint))
     logger.info("closest track selected : {}".format(closest_track))
+    # todo : see if there are any stored datasets for this track... load them all
+    # pass these candidate layouts into the lap tracker
+    # can discard any that don't match our current vgate gap
+    LapSessionStore.init(closest_track)
     lap_tracker = LapTracker(closest_track, maf_analyzer)
     gps.register_position_listener(lap_tracker)
     gui.register_lap_provider(lap_tracker)

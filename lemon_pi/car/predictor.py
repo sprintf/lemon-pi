@@ -1,11 +1,14 @@
 import logging
 from enum import Enum
 
-from lemon_pi.car.event_defs import DriverMessageEvent
-from lemon_pi.car.gate import Gate
+from lemon_pi.car.event_defs import DriverMessageEvent, LeaveTrackEvent
+from lemon_pi.car.gate import Gate, Gates, GateVerifier
+from lemon_pi.car.lap_session_store import LapSessionStore
 from lemon_pi.car.line_cross_detector import LineCrossDetector
 from lemon_pi.car.target import Target
 from haversine import haversine, Unit
+
+from lemon_pi.shared.events import EventHandler
 
 logger = logging.getLogger(__name__)
 
@@ -14,11 +17,6 @@ from python_settings import settings
 
 # todo : move this to settings
 BREADCRUMB_DISTANCE_FEET = 200
-
-# todo : write the gates into local storage
-# see if there are gates defined when we decide on the track
-# that saves on the breadcrumbing lap
-# then also save separately the set of times : say every hour
 
 
 class PredictorState(Enum):
@@ -30,11 +28,12 @@ class PredictorState(Enum):
     WORKING = 3
 
 
-class LapTimePredictor:
+class LapTimePredictor(EventHandler):
 
     def __init__(self, start_finish: Target):
         self.start_finish = start_finish
-        self.gates: [Gate] = []
+        self.gates: Gates = Gates(start_finish)
+        # add a list of candidate gates in here....clear all missed flags
         self.start_finish_detector = LineCrossDetector()
         self.gate_detector = LineCrossDetector(degrees=40)
 
@@ -50,6 +49,18 @@ class LapTimePredictor:
         self.current_predicted_time = None
 
         self.gate_index = -1
+
+        LeaveTrackEvent.register_handler(self)
+        # load a set of gate verifiers for our previous sessions at this track
+        if LapSessionStore.get_instance():
+            self.gate_verifiers = [GateVerifier(f) for f in LapSessionStore.get_instance().load_sessions()]
+            # todo : if we have one from very recently then use it
+        else:
+            self.gate_verifiers = []
+
+    def handle_event(self, event, **kwargs):
+        if event == LeaveTrackEvent:
+            LapSessionStore.get_instance().save_session(self.gates)
 
     def update_position(self, lat, long, heading, time):
         # throw out identical data, which some devices provide
@@ -68,6 +79,7 @@ class LapTimePredictor:
                     DriverMessageEvent.emit(text="learning track...", duration_secs=60)
                 elif self.state == PredictorState.BREADCRUMB:
                     self._update_gate_time_to_finish(last_lap_time)
+                    self._determine_gates(self.gates.get_distance_feet())
                     self.state = PredictorState.WORKING
                 elif self.state == PredictorState.WORKING:
                     self._update_gate_time_to_finish(last_lap_time)
@@ -81,6 +93,10 @@ class LapTimePredictor:
             # where gates should be placed
             if self.state == PredictorState.BREADCRUMB:
                 self._lay_breadcrumb(lat, long, heading)
+                # also, on this lap, try to match this lap against other sessions at
+                # this track, so we can load previous data
+                for verifier in self.gate_verifiers:
+                    verifier.verify(lat, long, heading, time)
 
             if self.state == PredictorState.WORKING:
                 self._process_and_predict(lat, long, heading, time)
@@ -160,3 +176,20 @@ class LapTimePredictor:
             return
         for g in self.gates:
             g.record_lap_time(last_lap_time)
+
+    def _determine_gates(self, target_distance):
+        # after the breadcrumbing lap, see if we have a dataset already .. if we do,
+        # then switch to use that
+        matched = [g for g in self.gate_verifiers if g.matched]
+        if not matched:
+            return
+        # sort by closest distance
+        matched.sort(key=lambda a: abs(target_distance - a.get_distance_feet()))
+        # take the best match if it's less than 5% error. The 5% comes from pretending to breadcrumb
+        # 100 laps at sonoma and measuring the actual observed variance. It was never more than 3%
+        best = matched[0]
+        if abs(target_distance - best.get_distance_feet()) * 100 / target_distance <= 5:
+            self.gates = best.gates
+        # todo : if the file was recent then take it (maybe before this point in time)
+        # reclaim the memory
+        self.gate_verifiers = None
