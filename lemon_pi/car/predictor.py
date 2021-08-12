@@ -176,7 +176,7 @@ class LapTimePredictor(EventHandler):
     def _determine_gates(self, target_distance):
         # after the breadcrumbing lap, see if we have a dataset already .. if we do,
         # then switch to use that
-        matched = [g for g in self.gate_verifiers if g.matched]
+        matched = [g for g in self.gate_verifiers if g.is_matched()]
         if not matched:
             return
         # sort by closest distance

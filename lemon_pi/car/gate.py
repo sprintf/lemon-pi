@@ -1,3 +1,5 @@
+import time
+
 from haversine import haversine, Unit
 
 from lemon_pi.car import geometry
@@ -19,7 +21,7 @@ class Gates:
     def __init__(self, start_finish: Target):
         self.start_finish = start_finish
         self.gates: [Gate] = []
-        self.fingerprint = ""
+        self.timestamp = time.time()
 
     def __iter__(self):
         return self.gates.__iter__()
@@ -40,7 +42,13 @@ class Gates:
             total_distance_feet += haversine(last_lat_long, (gate.lat, gate.long), Unit.FEET)
             last_lat_long = gate.lat, gate.long
         total_distance_feet += haversine(last_lat_long, self.start_finish.midpoint, Unit.FEET)
-        return total_distance_feet
+        return int(total_distance_feet)
+
+    def stamp_time(self):
+        self.timestamp = time.time()
+
+    def lap_count(self):
+        return len(self.gates[0].times_from_start)
 
 
 class Gate:
@@ -169,7 +177,10 @@ class GateVerifier:
         self.gates = gates
         self.cross_detector = LineCrossDetector()
         self.index = 0
-        self.matched = True
+        self.matched = 0
+
+    def is_match(self):
+        return self.matched == len(self.gates)
 
     def verify(self, lat, long, heading, time):
         if self.index >= len(self.gates):
@@ -177,6 +188,7 @@ class GateVerifier:
         crossed, crossed_time = self.cross_detector.crossed_line(lat, long, heading, time, self.gates[self.index])
         if crossed:
             self.index += 1
+            self.matched += 1
         else:
             # did we miss a gate?
             if self.index < len(self.gates) - 1:
@@ -184,5 +196,4 @@ class GateVerifier:
                 next_gate_dist = haversine((lat, long), self.gates[self.index + 1].target.midpoint,
                                            Unit.FEET)
                 if gate_dist > next_gate_dist:
-                    self.matched = False
                     self.index += 1
