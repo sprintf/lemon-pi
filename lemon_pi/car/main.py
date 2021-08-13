@@ -137,9 +137,8 @@ def init():
         time.sleep(1)
     closest_track = min(tracks, key=lambda x: haversine(gps.get_lat_long(), x.get_start_finish_target().midpoint))
     logger.info("closest track selected : {}".format(closest_track))
-    # todo : see if there are any stored datasets for this track... load them all
-    # pass these candidate layouts into the lap tracker
-    # can discard any that don't match our current vgate gap
+    # initialize the store that can read previous driving session
+    # data from this track
     LapSessionStore.init(closest_track)
     lap_tracker = LapTracker(closest_track, maf_analyzer)
     gps.register_position_listener(lap_tracker)

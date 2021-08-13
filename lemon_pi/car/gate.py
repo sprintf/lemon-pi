@@ -182,6 +182,12 @@ class GateVerifier:
     def is_match(self):
         return self.matched == len(self.gates)
 
+    def get_distance_feet(self):
+        return self.gates.get_distance_feet()
+
+    def get_timestamp(self):
+        return self.gates.timestamp
+
     def verify(self, lat, long, heading, time):
         if self.index >= len(self.gates):
             return

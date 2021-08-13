@@ -22,7 +22,6 @@ gps_logger = logging.getLogger("gps-logger")
 
 class LapTracker(PositionUpdater, LapProvider, EventHandler):
 
-    # todo : add a list of candidate layouts for the track from previous loaded data
     def __init__(self, track: TrackLocation, listener: LapUpdater):
         self.track = track
         self.listener = listener

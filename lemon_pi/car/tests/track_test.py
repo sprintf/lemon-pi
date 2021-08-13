@@ -8,9 +8,12 @@ class TrackTestCase(unittest.TestCase):
 
     def test_read_tracks(self):
         tracks:[TrackLocation] = read_tracks()
+        track_codes = set()
         for t in tracks:
             print(f"reading {t.name}")
             self.assertTrue(re.match("[a-zA-Z0-9-_]{3,6}", t.code))
+            self.assertFalse(t.code in track_codes)
+            track_codes.add(t.code)
             self.assertTrue(t.track_width_feet() > 25)
             self.assertTrue(t.track_width_feet() < 150)
             pit_to_sf1 = haversine(t.get_start_finish_target().lat_long1,

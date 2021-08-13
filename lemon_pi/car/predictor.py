@@ -1,4 +1,5 @@
 import logging
+from python_settings import settings
 from enum import Enum
 
 from lemon_pi.car.event_defs import DriverMessageEvent, LeaveTrackEvent
@@ -11,8 +12,6 @@ from haversine import haversine, Unit
 from lemon_pi.shared.events import EventHandler
 
 logger = logging.getLogger(__name__)
-
-from python_settings import settings
 
 
 class PredictorState(Enum):
@@ -29,7 +28,6 @@ class LapTimePredictor(EventHandler):
     def __init__(self, start_finish: Target):
         self.start_finish = start_finish
         self.gates: Gates = Gates(start_finish)
-        # add a list of candidate gates in here....clear all missed flags
         self.start_finish_detector = LineCrossDetector()
         self.gate_detector = LineCrossDetector(degrees=40)
 
@@ -176,16 +174,15 @@ class LapTimePredictor(EventHandler):
     def _determine_gates(self, target_distance):
         # after the breadcrumbing lap, see if we have a dataset already .. if we do,
         # then switch to use that
-        matched = [g for g in self.gate_verifiers if g.is_matched()]
+        matched = [g for g in self.gate_verifiers if g.is_match()]
         if not matched:
             return
-        # sort by closest distance
-        matched.sort(key=lambda a: abs(target_distance - a.get_distance_feet()))
+        close = [g for g in matched if (abs(target_distance - g.get_distance_feet()) * 100 / target_distance) < 5]
+        # sort by recent time
+        close.sort(key=lambda a: a.get_timestamp(), reverse=True)
         # take the best match if it's less than 5% error. The 5% comes from pretending to breadcrumb
         # 100 laps at sonoma and measuring the actual observed variance. It was never more than 3%
-        best = matched[0]
-        if abs(target_distance - best.get_distance_feet()) * 100 / target_distance <= 5:
-            self.gates = best.gates
-        # todo : if the file was recent then take it (maybe before this point in time)
+        if close:
+            self.gates = close[0].gates
         # reclaim the memory
         self.gate_verifiers = None
