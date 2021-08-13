@@ -1,6 +1,9 @@
 
 import unittest
-from lemon_pi.car.gate import Gate, ELEMENTS
+from unittest.mock import Mock
+
+from lemon_pi.car.gate import Gate, ELEMENTS, Gates, GateVerifier
+from lemon_pi.car.target import Target
 
 
 class GateTest(unittest.TestCase):
@@ -59,3 +62,51 @@ class GateTest(unittest.TestCase):
         self.assertEqual(36, g1.predict_lap(21))
         self.assertEqual(36, g2.predict_lap(26))
         self.assertEqual(36, g3.predict_lap(31))
+
+
+class GatesTest(unittest.TestCase):
+
+    def test_gates(self):
+        g = Gates(Target("foo", (0, 0), (1, 1), "N"))
+        self.assertEqual(0, len(g))
+        g.append(Gate(1, 0, 270, "gate-0"))
+        self.assertEqual(1, len(g))
+        self.assertEqual("gate-0", g[0].target.name)
+        for i in g:
+            self.assertEqual("gate-0", i.target.name)
+        self.assertEqual(515900, g.get_distance_feet())
+        self.assertEqual(0, g.lap_count())
+        g[0].record_time_from_start(1.2)
+        g[0].record_lap_time(56.3)
+        self.assertEqual(1, g.lap_count())
+
+
+class GateVerifierTest(unittest.TestCase):
+
+    def test_good(self):
+        gates = Gates(Target("foo", (0, 0), (1, 1), "N"))
+        gate_array = []
+        prev = None
+        for i in range(0, 9):
+            gate_array.append(Gate(1, 0, 270, f"gate-{i}", prev))
+            prev = gate_array[i]
+            gates.append(prev)
+        gv = GateVerifier(gates)
+        gv.cross_detector.crossed_line = Mock(return_value=(True, 1.0))
+        for i in range(0, 9):
+            gv.verify(5, 5, 180, 15)
+        self.assertTrue(gv.is_match())
+
+    def test_not_all_gates_crossed(self):
+        gates = Gates(Target("foo", (0, 0), (1, 1), "N"))
+        gate_array = []
+        prev = None
+        for i in range(0, 9):
+            gate_array.append(Gate(1, 0, 270, f"gate-{i}", prev))
+            prev = gate_array[i]
+            gates.append(prev)
+        gv = GateVerifier(gates)
+        gv.cross_detector.crossed_line = Mock(return_value=(True, 1.0))
+        for i in range(0, 8):
+            gv.verify(5, 5, 180, 15)
+        self.assertFalse(gv.is_match())

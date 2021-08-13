@@ -10,6 +10,7 @@
 
 tracks:
   -  name: "Sonoma Raceway"
+     code: "snma"
      start_finish_coords: "(38.161469,-122.454784),(38.161588,-122.454659)"
      start_finish_direction: "NW"
      pit_entry_coords: "(38.158549,-122.452756),(38.158343,-122.452689)"
@@ -18,6 +19,7 @@ tracks:
      pit_out_direction: "NW"
 
   -  name: "Thunderhill"
+     code: "thil"
      start_finish_coords: "(39.538475,-122.331300),(39.538480,-122.331113)"
      start_finish_direction: "S"
      pit_entry_coords: "(39.542489,-122.331372),(39.542488,-122.331315)"
@@ -33,6 +35,7 @@ tracks:
          radio_sync_direction: "W"
 
   -  name: "Thunderhill West"
+     code: "thilw"
      start_finish_coords: "(39.537447,-122.338924),(39.537470,-122.338567)"
      start_finish_direction: "N"
      pit_entry_coords: "(39.535192,-122.338194),(39.535092,-122.338176)"
@@ -41,12 +44,14 @@ tracks:
      pit_out_direction: "N"
 
   -  name: "Laguna Seca"
+     code: "lgna"
      start_finish_coords: "(36.586308,-121.756908),(36.586158,-121.756649)"
      start_finish_direction: "SW"
      pit_entry_coords: "(36.588199,-121.754397),(36.588241,-121.754311)"
      pit_entry_direction: "NW"
 
   -  name: "Buttonwillow"
+     code: "btnw"
      start_finish_coords: "(35.489031,-119.544530),(35.488713,-119.544510)"
      start_finish_direction: "E"
      pit_entry_coords: "(35.488943,-119.547690),(35.489060,-119.547604)"
@@ -55,42 +60,49 @@ tracks:
      pit_out_direction: "E"
 
   -  name: "Oregon Raceway Park"
+     code: "orp"
      start_finish_coords: "(45.363790,-120.744707),(45.363816,-120.744277)"
      start_finish_direction: "S"
      pit_entry_coords: "(45.365624, -120.744398),(45.365573, -120.744325)"
      pit_entry_direction: "SW"
 
   -  name: "The Ridge"
+     code: "rdg"
      start_finish_coords: "(47.254785,-123.192485),(47.254622,-123.192489)"
      start_finish_direction: "E"
      pit_entry_coords: "(47.254623,-123.197713),(47.254509,-123.197639)"
      pit_entry_direction: "NE"
 
   -  name: "Willow Springs"
+     code: "wlws"
      start_finish_coords: "(34.871434,-118.263770),(34.871621,-118.263620)"
      start_finish_direction: "NW"
      pit_entry_coords: "(34.870017,-118.261156),(34.869861,-118.261210)"
      pit_entry_direction: "E"
 
   -  name: "Nola Motorsports Park"
+     code: "nmp"
      start_finish_coords: "(29.885470,-90.199226),(29.885338,-90.199125)"
      start_finish_direction: "SW"
      pit_entry_coords: "(29.888531, -90.196961),(29.888506, -90.196854)"
      pit_entry_direction: "N"
 
   -  name: "Pittsburg International Race Complex"
+     code: "pir"
      start_finish_coords: "(40.850794,-80.347840),(40.850663,-80.347767)"
      start_finish_direction: "SW"
      pit_entry_coords: "(40.851486,-80.344985),(40.851406,-80.344969)"
      pit_entry_direction: "W"
 
   -  name: "Road Atlanta"
+     code: "rdatl"
      start_finish_coords: "(34.150442,-83.814164),(34.150312,-83.814269)"
      start_finish_direction: "SE"
      pit_entry_coords: "(34.150441,-83.816277),(34.150359,-83.816274)"
      pit_entry_direction: "E"
 
   -  name: "MSR Houston"
+     code: "msrh"
      start_finish_coords: "(29.279136,-95.422390),(29.278962,-95.422432)"
      start_finish_direction: "W"
      pit_entry_coords: "(29.278953,-95.420712),(29.278887,-95.420603)"
@@ -99,6 +111,7 @@ tracks:
      pit_out_direction: "N"
 
   -  name: "New Hampshire Motor Speedway"
+     code: "nhms"
      start_finish_coords: "(43.363132,-71.462133),(43.363060,-71.461852)"
      start_finish_direction: "S"
      pit_entry_coords: "(43.364704,-71.461090),(43.364642,-71.460877)"
@@ -107,6 +120,7 @@ tracks:
      pit_out_direction: "S"
 
   -  name: "Gingerman Raceway"
+     code: "gngr"
      start_finish_coords: "(42.408026,-86.140581),(42.408028,-86.140392)"
      start_finish_direction: "N"
      pit_entry_coords: "(42.405682,-86.140487),(42.405601,-86.140484)"
@@ -115,6 +129,7 @@ tracks:
      pit_out_direction: "N"
 
   -  name: "High Plains Raceway"
+     code: "hpr"
      start_finish_coords: "(39.735103,-103.894444),(39.734969,-103.894485)"
      start_finish_direction: "E"
      pit_entry_coords: "(39.735443,-103.895937),(39.735368,-103.895936)"
@@ -123,6 +138,7 @@ tracks:
      pit_out_direction: "NE"
 
   -  name: "Autobahn Country Club, Joliet"
+     code: "abhn"
      start_finish_coords: "(41.455158, -88.126925),(41.455263, -88.126838)"
      start_finish_direction: "SE"
      pit_entry_coords: "(41.456434, -88.12861),(41.456528, -88.128561)"
@@ -131,6 +147,7 @@ tracks:
      pit_out_direction: "SE"
 
   -  name: "NCM Motorsports Park"
+     code: "ncmp"
      start_finish_coords: "(37.001100, -86.368613),(37.000978, -86.368536)"
      start_finish_direction: "SW"
      pit_entry_coords: "(37.002003, -86.366165),(37.001941, -86.366134)"
@@ -140,6 +157,7 @@ tracks:
 
 # this is a local test track, used for testing and other things.
   -  name: "Arlington Test Track"
+     code: "test1"
      start_finish_coords: "(37.926223,-122.295029),(37.926291,-122.294879)"
      start_finish_direction: "SE"
      pit_entry_coords: "(37.928483,-122.297005),(37.928385,-122.297129)"

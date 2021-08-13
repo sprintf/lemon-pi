@@ -2,9 +2,11 @@ import bisect
 import re
 import statistics
 import unittest
+from unittest.mock import Mock
 from csv import reader
 
 # csv columns
+from lemon_pi.car.gate import Gates, GateVerifier
 from lemon_pi.car.predictor import LapTimePredictor
 from lemon_pi.car.target import Target
 
@@ -24,11 +26,89 @@ SPEED = 12
 HEADING = 13
 
 
+class PredictorTest(unittest.TestCase):
+
+    def test_choosing_track_layout_no_previous(self):
+        sonoma = Target("sonoma", (38.161340, -122.454911), (38.161589, -122.454658), direction="NW")
+        plt = LapTimePredictor(sonoma)
+        plt.gate_verifiers = []
+        orig_gates = Mock()
+        plt.gates = orig_gates
+        plt._determine_gates(1000)
+        # no gate update
+        self.assertEqual(orig_gates, plt.gates)
+
+    def test_choosing_track_too_long(self):
+        sonoma = Target("sonoma", (38.161340, -122.454911), (38.161589, -122.454658), direction="NW")
+        plt = LapTimePredictor(sonoma)
+        g1 = Gates(Target("foo", (0, 0), (1, 1), "N"))
+        gate_array = Gates(sonoma)
+        gate_array.append(g1)
+        gate_array.get_distance_feet = Mock(return_value=1060)
+        plt.gate_verifiers = [GateVerifier(gate_array)]
+        plt.gate_verifiers[0].is_match = Mock(return_value=True)
+        orig_gates = Mock()
+        plt.gates = orig_gates
+        plt._determine_gates(1000)
+        # no gate update
+        self.assertEqual(orig_gates, plt.gates)
+
+    def test_choosing_track_same_length(self):
+        sonoma = Target("sonoma", (38.161340, -122.454911), (38.161589, -122.454658), direction="NW")
+        plt = LapTimePredictor(sonoma)
+        g1 = Gates(Target("foo", (0, 0), (1, 1), "N"))
+        gate_array = Gates(sonoma)
+        gate_array.append(g1)
+        gate_array.get_distance_feet = Mock(return_value=1040)
+        plt.gate_verifiers = [GateVerifier(gate_array)]
+        plt.gate_verifiers[0].is_match = Mock(return_value=True)
+        orig_gates = Mock()
+        plt.gates = orig_gates
+        plt._determine_gates(1000)
+        # this time we pick the new one
+        self.assertEqual(gate_array, plt.gates)
+
+    def test_choosing_track_no_match(self):
+        sonoma = Target("sonoma", (38.161340, -122.454911), (38.161589, -122.454658), direction="NW")
+        plt = LapTimePredictor(sonoma)
+        g1 = Gates(Target("foo", (0, 0), (1, 1), "N"))
+        gate_array = Gates(sonoma)
+        gate_array.append(g1)
+        gate_array.get_distance_feet = Mock(return_value=1040)
+        plt.gate_verifiers = [GateVerifier(gate_array)]
+        plt.gate_verifiers[0].is_match = Mock(return_value=False)
+        orig_gates = Mock()
+        plt.gates = orig_gates
+        plt._determine_gates(1000)
+        # no gate update
+        self.assertEqual(orig_gates, plt.gates)
+
+    def test_choosing_track_most_recent(self):
+        sonoma = Target("sonoma", (38.161340, -122.454911), (38.161589, -122.454658), direction="NW")
+        plt = LapTimePredictor(sonoma)
+        g1 = Gates(Target("foo", (0, 0), (1, 1), "N"))
+        gate_array1 = Gates(sonoma)
+        gate_array1.append(g1)
+        gate_array1.get_distance_feet = Mock(return_value=1040)
+        gate_array1.timestamp = 1000
+        gate_array2 = Gates(sonoma)
+        gate_array2.append(g1)
+        gate_array2.get_distance_feet = Mock(return_value=1040)
+        gate_array2.timestamp = 2000
+        plt.gate_verifiers = [GateVerifier(gate_array1), GateVerifier(gate_array2)]
+        plt.gate_verifiers[0].is_match = Mock(return_value=True)
+        plt.gate_verifiers[1].is_match = Mock(return_value=True)
+        orig_gates = Mock()
+        plt.gates = orig_gates
+        plt._determine_gates(1000)
+        # no gate update
+        self.assertEqual(gate_array2, plt.gates)
+
 
 class PredictiveTimerTest(unittest.TestCase):
 
     def test_read_big_file(self):
-        sonoma = Target("sonoma", (38.161340,-122.454911), (38.161589,-122.454658), direction="NW")
+        sonoma = Target("sonoma", (38.161340, -122.454911), (38.161589, -122.454658), direction="NW")
         plt = LapTimePredictor(sonoma)
 
         known_lap_times = {}

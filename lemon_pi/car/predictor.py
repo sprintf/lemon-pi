@@ -1,25 +1,22 @@
 import logging
+import time
+
+from python_settings import settings
 from enum import Enum
 
-from lemon_pi.car.event_defs import DriverMessageEvent
-from lemon_pi.car.gate import Gate
+from lemon_pi.car.event_defs import DriverMessageEvent, LeaveTrackEvent
+from lemon_pi.car.gate import Gate, Gates, GateVerifier
+from lemon_pi.car.lap_session_store import LapSessionStore
 from lemon_pi.car.line_cross_detector import LineCrossDetector
 from lemon_pi.car.target import Target
 from haversine import haversine, Unit
 
+from lemon_pi.shared.events import EventHandler
+
 logger = logging.getLogger(__name__)
 
-from python_settings import settings
-
-
-# todo : move this to settings
-BREADCRUMB_DISTANCE_FEET = 200
-
-# todo : write the gates into local storage
-# see if there are gates defined when we decide on the track
-# that saves on the breadcrumbing lap
-# then also save separately the set of times : say every hour
-
+ONE_DAY_IN_SECONDS = 24 * 3600
+TWO_DAYS_IN_SECONDS = ONE_DAY_IN_SECONDS * 2
 
 class PredictorState(Enum):
     # we are awaiting crossing the start finish line
@@ -30,11 +27,11 @@ class PredictorState(Enum):
     WORKING = 3
 
 
-class LapTimePredictor:
+class LapTimePredictor(EventHandler):
 
     def __init__(self, start_finish: Target):
         self.start_finish = start_finish
-        self.gates: [Gate] = []
+        self.gates: Gates = Gates(start_finish)
         self.start_finish_detector = LineCrossDetector()
         self.gate_detector = LineCrossDetector(degrees=40)
 
@@ -46,10 +43,28 @@ class LapTimePredictor:
         self.last_time = 0
 
         self.lap_start_time = 0
-        self.just_crossed_line = False
         self.current_predicted_time = None
 
         self.gate_index = -1
+
+        LeaveTrackEvent.register_handler(self)
+        # load a set of gate verifiers for our previous sessions at this track
+        self.gate_verifiers = []
+        if LapSessionStore.get_instance():
+            gate_verifiers = [GateVerifier(f) for f in LapSessionStore.get_instance().load_sessions()]
+            # if we have a set of gates from here that is less than two days old then default to it
+            # also, we do not issue a "Learning Track" message
+            if gate_verifiers and time.time() - self.gate_verifiers[0].get_timestamp() < TWO_DAYS_IN_SECONDS:
+                self.gates = gate_verifiers[0].gates
+                self.state = PredictorState.WORKING
+                DriverMessageEvent.emit(text="Loaded track data", duration_secs=60)
+            else:
+                # we load all the candidate sessions, and we will pick the match after the first lap
+                self.gate_verifiers = gate_verifiers
+
+    def handle_event(self, event, **kwargs):
+        if event == LeaveTrackEvent:
+            LapSessionStore.get_instance().save_session(self.gates)
 
     def update_position(self, lat, long, heading, time):
         # throw out identical data, which some devices provide
@@ -68,9 +83,13 @@ class LapTimePredictor:
                     DriverMessageEvent.emit(text="learning track...", duration_secs=60)
                 elif self.state == PredictorState.BREADCRUMB:
                     self._update_gate_time_to_finish(last_lap_time)
+                    self._determine_gates(self.gates.get_distance_feet())
                     self.state = PredictorState.WORKING
                 elif self.state == PredictorState.WORKING:
-                    self._update_gate_time_to_finish(last_lap_time)
+                    # if we load previous data and jump straight into working then the last_lap_time
+                    # is from the epoch, so we ignore that
+                    if last_lap_time < ONE_DAY_IN_SECONDS:
+                        self._update_gate_time_to_finish(last_lap_time)
                 return crossed_line, crossed_time
 
             # we're on an out lap
@@ -81,6 +100,10 @@ class LapTimePredictor:
             # where gates should be placed
             if self.state == PredictorState.BREADCRUMB:
                 self._lay_breadcrumb(lat, long, heading)
+                # also, on this lap, try to match this lap against other sessions at
+                # this track, so we can load previous data
+                for verifier in self.gate_verifiers:
+                    verifier.verify(lat, long, heading, time)
 
             if self.state == PredictorState.WORKING:
                 self._process_and_predict(lat, long, heading, time)
@@ -117,7 +140,7 @@ class LapTimePredictor:
             last_gate = self.gates[len(self.gates) - 1]
             dist_from_sf = int(haversine(self.start_finish.midpoint, (lat, long), unit=Unit.FEET))
             dist_from_last_gate = int(haversine(last_gate.coords(), (lat, long), unit=Unit.FEET))
-            if dist_from_last_gate >= BREADCRUMB_DISTANCE_FEET:
+            if dist_from_last_gate >= settings.VGATE_SEPARATION_FEET:
                 self.gates.append(Gate(lat, long, heading, f"gate-{len(self.gates)}", previous=last_gate))
                 logger.info(f"added gate {len(self.gates)} dist to sf = {dist_from_sf}")
 
@@ -160,3 +183,19 @@ class LapTimePredictor:
             return
         for g in self.gates:
             g.record_lap_time(last_lap_time)
+
+    def _determine_gates(self, target_distance):
+        # after the breadcrumbing lap, see if we have a dataset already .. if we do,
+        # then switch to use that
+        matched = [g for g in self.gate_verifiers if g.is_match()]
+        if not matched:
+            return
+        close = [g for g in matched if (abs(target_distance - g.get_distance_feet()) * 100 / target_distance) < 5]
+        # sort by recent time
+        close.sort(key=lambda a: a.get_timestamp(), reverse=True)
+        # take the best match if it's less than 5% error. The 5% comes from pretending to breadcrumb
+        # 100 laps at sonoma and measuring the actual observed variance. It was never more than 3%
+        if close:
+            self.gates = close[0].gates
+        # reclaim the memory
+        self.gate_verifiers = None
