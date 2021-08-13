@@ -87,7 +87,7 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
         if settings.LOG_GPS:
             dt = datetime.fromtimestamp(time)
             gps_logger.info(
-                f"{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d},{time},{self.lap_count},{lat},{long},{speed},{heading}")
+                f"{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d}.{int(dt.microsecond * 1000):03d},{time},{self.lap_count},{lat},{long},{speed},{heading}")
 
     def handle_event(self, event, lap_count=0, ts=0):
         if event == LapInfoEvent:

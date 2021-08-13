@@ -1,4 +1,6 @@
 import logging
+import time
+
 from python_settings import settings
 from enum import Enum
 
@@ -13,6 +15,8 @@ from lemon_pi.shared.events import EventHandler
 
 logger = logging.getLogger(__name__)
 
+ONE_DAY_IN_SECONDS = 24 * 3600
+TWO_DAYS_IN_SECONDS = ONE_DAY_IN_SECONDS * 2
 
 class PredictorState(Enum):
     # we are awaiting crossing the start finish line
@@ -39,18 +43,24 @@ class LapTimePredictor(EventHandler):
         self.last_time = 0
 
         self.lap_start_time = 0
-        self.just_crossed_line = False
         self.current_predicted_time = None
 
         self.gate_index = -1
 
         LeaveTrackEvent.register_handler(self)
         # load a set of gate verifiers for our previous sessions at this track
+        self.gate_verifiers = []
         if LapSessionStore.get_instance():
-            self.gate_verifiers = [GateVerifier(f) for f in LapSessionStore.get_instance().load_sessions()]
-            # todo : if we have one from very recently then use it .. as long as data look good
-        else:
-            self.gate_verifiers = []
+            gate_verifiers = [GateVerifier(f) for f in LapSessionStore.get_instance().load_sessions()]
+            # if we have a set of gates from here that is less than two days old then default to it
+            # also, we do not issue a "Learning Track" message
+            if gate_verifiers and time.time() - self.gate_verifiers[0].get_timestamp() < TWO_DAYS_IN_SECONDS:
+                self.gates = gate_verifiers[0].gates
+                self.state = PredictorState.WORKING
+                DriverMessageEvent.emit(text="Loaded track data", duration_secs=60)
+            else:
+                # we load all the candidate sessions, and we will pick the match after the first lap
+                self.gate_verifiers = gate_verifiers
 
     def handle_event(self, event, **kwargs):
         if event == LeaveTrackEvent:
@@ -76,7 +86,10 @@ class LapTimePredictor(EventHandler):
                     self._determine_gates(self.gates.get_distance_feet())
                     self.state = PredictorState.WORKING
                 elif self.state == PredictorState.WORKING:
-                    self._update_gate_time_to_finish(last_lap_time)
+                    # if we load previous data and jump straight into working then the last_lap_time
+                    # is from the epoch, so we ignore that
+                    if last_lap_time < ONE_DAY_IN_SECONDS:
+                        self._update_gate_time_to_finish(last_lap_time)
                 return crossed_line, crossed_time
 
             # we're on an out lap
