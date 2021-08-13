@@ -39,7 +39,7 @@ class LapSessionStore:
                 with open(os.path.join(self.basedir, file), "rb") as f:
                     result.append(pickle.load(f))
         logger.info(f"loaded {len(result)} track configurations with previous data")
-        result.sort(key=lambda a: a.get_timestamp(), reverse=True)
+        result.sort(key=lambda a: a.timestamp, reverse=True)
         return result
 
     def save_session(self, gates: Gates):
