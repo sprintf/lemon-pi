@@ -30,6 +30,8 @@ class Audio(Thread, EventHandler):
         Thread.__init__(self, daemon=True)
         self.engine = pyttsx3.init()
         self.engine.setProperty('volume', 1.0)
+        # set 150 words per minute as the rate
+        self.engine.setProperty('rate', 150)
         # on Darwin we seem to need this... on RPi it blocks
         # self.engine.startLoop()
         self.queue = Queue()

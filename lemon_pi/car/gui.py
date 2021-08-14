@@ -465,11 +465,11 @@ class Gui(EventHandler):
         result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(364 * Gui.SCALE_FACTOR))
         result.set_border(4, "lightgreen")
         # child 0 = position
-        Text(result, "P??", size=Gui.TEXT_XL, font=self.font, color="white")
-        Box(result, width=24 * Gui.SCALE_FACTOR, height=64)
+        Text(result, "P??", size=Gui.TEXT_LARGE, font=self.font, color="white")
+        Box(result, width=24 * Gui.SCALE_FACTOR, height=48)
         # child 2 = parent
         container1 = Box(result, width=parent.width, height=80)
-        Text(container1, "Ahead: ", size=Gui.TEXT_SMALL, font=self.font, color="grey", align="left")
+        Text(container1, "Ahead: #", size=Gui.TEXT_SMALL, font=self.font, color="grey", align="left")
         # child [2][1] = car ahead
         Text(container1, "?? ", size=Gui.TEXT_MED, font=self.font, color="white", align="left")
         container2 = Box(result, width=parent.width, height=48)
@@ -479,7 +479,7 @@ class Gui(EventHandler):
         Box(result, width=parent.width, height=48)
         # child [5]
         container3 = Box(result, width=parent.width, height=72)
-        Text(container3, "Behind: ", size=Gui.TEXT_SMALL, font=self.font, color="grey", align="left")
+        Text(container3, "Behind: #", size=Gui.TEXT_SMALL, font=self.font, color="grey", align="left")
         # child [5][1] car behind
         Text(container3, "?? ", size=Gui.TEXT_MED, font=self.font, color="white", align="left")
         container4 = Box(result, width=parent.width, height=48)
@@ -490,7 +490,10 @@ class Gui(EventHandler):
 
     def __update_race_position(self, pos=0, pos_in_class=0, car_ahead="0", gap="?"):
         panel = self.col7.children[0]
-        panel.children[0].value = f"P{pos}({pos_in_class})"
+        if pos == pos_in_class:
+            panel.children[0].value = f"P{pos}"
+        else:
+            panel.children[0].value = f"P{pos_in_class}({pos})"
         panel.children[2].children[1].value = car_ahead
         panel.children[3].children[1].value = gap
         panel.children[5].children[1].value = ""
