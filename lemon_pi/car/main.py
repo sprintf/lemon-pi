@@ -4,6 +4,7 @@ from threading import Thread
 
 from lemon_pi.car.audio import Audio
 from lemon_pi.car.button import Button
+from lemon_pi.car.event_defs import ExitApplicationEvent
 from lemon_pi.car.gui import Gui
 from lemon_pi.car.gps_reader import GpsReader
 from lemon_pi.car.lap_session_store import LapSessionStore
@@ -72,80 +73,82 @@ if not "SETTINGS_MODULE" in os.environ:
 gui = Gui(settings.DISPLAY_WIDTH, settings.DISPLAY_HEIGHT)
 
 def init():
+    try:
+        # detect USB devices (should just be Lora)
+        UsbDetector.init()
 
-    # detect USB devices (should just be Lora)
-    UsbDetector.init()
+        # update tracks from web, if possible
+        if not WifiManager.check_wifi_enabled():
+            logger.info("enabling wifi")
+            WifiManager.enable_wifi()
 
-    # update tracks from web, if possible
-    if not WifiManager.check_wifi_enabled():
-        logger.info("enabling wifi")
-        WifiManager.enable_wifi()
+        TrackUpdater().update()
 
-    TrackUpdater().update()
+        # turn wifi off now, to save battery
+        WifiManager().disable_wifi()
 
-    # turn wifi off now, to save battery
-    WifiManager().disable_wifi()
+        # enable sound generation
+        Audio().start()
+        StateMachine.init()
+        MovementListener()
 
-    # enable sound generation
-    Audio().start()
-    StateMachine.init()
-    MovementListener()
+        maf_analyzer = MafAnalyzer(lap_logger)
+        obd = ObdReader(maf_analyzer)
+        gps = GpsReader()
+        radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY, ToCarMessage())
+        radio_interface = RadioInterface(radio, obd, None, maf_analyzer)
 
-    maf_analyzer = MafAnalyzer(lap_logger)
-    obd = ObdReader(maf_analyzer)
-    gps = GpsReader()
-    radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY, ToCarMessage())
-    radio_interface = RadioInterface(radio, obd, None, maf_analyzer)
+        # start a background thread to pull in gps data
+        if settings.GPS_DISABLED:
+            logger.warning("GPS has been disabled")
+        else:
+            gps.start()
 
-    # start a background thread to pull in gps data
-    if settings.GPS_DISABLED:
-        logger.warning("GPS has been disabled")
-    else:
-        gps.start()
+        # start a background thread to pull in OBD data
+        if settings.OBD_DISABLED:
+            logger.warning("OBD has been disabled")
+        else:
+            obd.start()
 
-    # start a background thread to pull in OBD data
-    if settings.OBD_DISABLED:
-        logger.warning("OBD has been disabled")
-    else:
-        obd.start()
+        # start a background thread to manage the radio function
+        if settings.RADIO_DISABLED:
+            logger.warning("Radio has been disabled")
+        else:
+            radio.start()
+        # and the radio interface maps car events to and from the radio
+        radio_interface.start()
 
-    # start a background thread to manage the radio function
-    if settings.RADIO_DISABLED:
-        logger.warning("Radio has been disabled")
-    else:
-        radio.start()
-    # and the radio interface maps car events to and from the radio
-    radio_interface.start()
+        logger.info("registering GUI providers")
+        gui.register_speed_provider(gps)
+        gui.register_time_provider(LocalTimeProvider())
+        gui.register_temp_provider(obd)
+        gui.register_fuel_provider(maf_analyzer)
 
-    logger.info("registering GUI providers")
-    gui.register_speed_provider(gps)
-    gui.register_time_provider(LocalTimeProvider())
-    gui.register_temp_provider(obd)
-    gui.register_fuel_provider(maf_analyzer)
+        logger.info("reading tracks")
+        tracks: [TrackLocation] = read_tracks()
 
-    logger.info("reading tracks")
-    tracks: [TrackLocation] = read_tracks()
+        # show the main application
+        gui.present_main_app()
 
-    # show the main application
-    gui.present_main_app()
+        # bring in a button listener, to read the hardware button
+        Button()
 
-    # bring in a button listener, to read the hardware button
-    Button()
-
-    logger.info("awaiting location to choose track")
-    while not gps.is_working() or gps.get_lat_long() == (0, 0):
-        time.sleep(1)
-    closest_track = min(tracks, key=lambda x: haversine(gps.get_lat_long(), x.get_start_finish_target().midpoint))
-    logger.info("closest track selected : {}".format(closest_track))
-    # initialize the store that can read previous driving session
-    # data from this track
-    LapSessionStore.init(closest_track)
-    lap_tracker = LapTracker(closest_track, maf_analyzer)
-    gps.register_position_listener(lap_tracker)
-    gui.register_lap_provider(lap_tracker)
-    radio_interface.register_lap_provider(lap_tracker)
-    radio.register_gps_provider(gps)
-
+        logger.info("awaiting location to choose track")
+        while not gps.is_working() or gps.get_lat_long() == (0, 0):
+            time.sleep(1)
+        closest_track = min(tracks, key=lambda x: haversine(gps.get_lat_long(), x.get_start_finish_target().midpoint))
+        logger.info("closest track selected : {}".format(closest_track))
+        # initialize the store that can read previous driving session
+        # data from this track
+        LapSessionStore.init(closest_track)
+        lap_tracker = LapTracker(closest_track, maf_analyzer)
+        gps.register_position_listener(lap_tracker)
+        gui.register_lap_provider(lap_tracker)
+        radio_interface.register_lap_provider(lap_tracker)
+        radio.register_gps_provider(gps)
+    except Exception:
+        logger.exception("exception in initialization")
+        ExitApplicationEvent.emit()
 
 Thread(target=init, daemon=True).start()
 

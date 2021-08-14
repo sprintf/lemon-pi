@@ -13,6 +13,10 @@ sudo apt-get install espeak
 # may not be needed : we do need aplay for sure
 # sudo apt-get install libsdl2-mixer-2.0.0
 
+sudo mkdir /var/lib/lemon-pi
+sudo chown -R pi /var/lib/lemon-pi
+sudo chmod 755 /var/lib/lemon-pi
+
 # set the 3.5mm jack plug volume to 90%
 #amixer  sset PCM,0 80%
 #or manually with alsamixer ... set headphones to 80%
