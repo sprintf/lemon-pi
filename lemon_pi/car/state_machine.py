@@ -1,10 +1,10 @@
 
 from enum import Enum
 
-from lemon_pi.car.event_defs import *
-
-
-# define a few different states the car can be in at the track
+from lemon_pi.car.event_defs import (
+    CarStoppedEvent, MovingEvent, LeaveTrackEvent, CompleteLapEvent, OBDConnectedEvent,
+    StateChangeSettingOffEvent, RefuelEvent, StateChangePittedEvent
+)
 from lemon_pi.shared.events import EventHandler
 
 
