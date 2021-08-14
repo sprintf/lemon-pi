@@ -469,7 +469,7 @@ class Gui(EventHandler):
         Box(result, width=24 * Gui.SCALE_FACTOR, height=48)
         # child 2 = parent
         container1 = Box(result, width=parent.width, height=80)
-        Text(container1, "Ahead: #", size=Gui.TEXT_SMALL, font=self.font, color="grey", align="left")
+        Text(container1, "Ahead: #", size=Gui.TEXT_TINY, font=self.font, color="grey", align="left")
         # child [2][1] = car ahead
         Text(container1, "?? ", size=Gui.TEXT_MED, font=self.font, color="white", align="left")
         container2 = Box(result, width=parent.width, height=48)
@@ -479,7 +479,7 @@ class Gui(EventHandler):
         Box(result, width=parent.width, height=48)
         # child [5]
         container3 = Box(result, width=parent.width, height=72)
-        Text(container3, "Behind: #", size=Gui.TEXT_SMALL, font=self.font, color="grey", align="left")
+        Text(container3, "Behind: #", size=Gui.TEXT_TINY, font=self.font, color="grey", align="left")
         # child [5][1] car behind
         Text(container3, "?? ", size=Gui.TEXT_MED, font=self.font, color="white", align="left")
         container4 = Box(result, width=parent.width, height=48)
@@ -492,8 +492,10 @@ class Gui(EventHandler):
         panel = self.col7.children[0]
         if pos == pos_in_class:
             panel.children[0].value = f"P{pos}"
+            panel.children[0].text_size = Gui.TEXT_LARGE
         else:
             panel.children[0].value = f"P{pos_in_class}({pos})"
+            panel.children[0].text_size = Gui.TEXT_MED
         panel.children[2].children[1].value = car_ahead
         panel.children[3].children[1].value = gap
         panel.children[5].children[1].value = ""

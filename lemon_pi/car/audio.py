@@ -110,7 +110,8 @@ class Audio(Thread, EventHandler):
 
         if gap and car_ahead:
             car_number = Audio._car_number_to_audio(car_ahead)
-            self.announce(f"Car {car_number} is {gap} ahead")
+            gap_words, extra = self._gap_to_audio(gap)
+            self.announce(f"Car {car_number} is {gap_words} ahead {extra}")
 
     @staticmethod
     def _car_number_to_audio(car_number:str):
@@ -129,4 +130,21 @@ class Audio(Thread, EventHandler):
             return result.strip()
         except KeyError:
             return car_number
+
+    @staticmethod
+    def _gap_to_audio(gap:str) -> (str, str):
+        if gap == "-":
+            return "", ""
+
+        if gap.endswith("L(p)"):
+            gap = gap[:-4]
+            return f"{gap} laps", "and is in the pits"
+
+        if gap.endswith("L"):
+            return f"{gap}aps", ""
+
+        if gap.endswith("s"):
+            return f"{gap}econds", ""
+
+        return gap, ""
 
