@@ -110,7 +110,7 @@ class Gui(EventHandler):
 
         # this is our upper text area
         self.upper_row = Box(self.app, align="top", width=Gui.WIDTH, height=int(64 * Gui.SCALE_FACTOR))
-        self.msg_area = Text(self.upper_row, "", align="left", size=48, font=self.font, color="white", bg="purple")
+        self.msg_area = Text(self.upper_row, "", align="left", size=56, font=self.font, color="white", bg="purple")
 
         self.col1 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - Gui.MESSAGE_ROW_HEIGHT)
         self.col2 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - Gui.MESSAGE_ROW_HEIGHT)
