@@ -15,7 +15,7 @@ from lemon_pi.car.event_defs import (
     LapInfoEvent,
     RadioReceiveEvent,
     RefuelEvent,
-    ExitApplicationEvent, RacePositionEvent, SetTargetTimeEvent
+    ExitApplicationEvent, RacePositionEvent, SetTargetTimeEvent, RacePersuerEvent
 )
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.generated.messages_pb2 import (
@@ -114,20 +114,11 @@ class RadioInterface(Thread, EventHandler):
                                        pos_in_class=msg.position_in_class,
                                        car_ahead=msg.car_ahead.car_number,
                                        gap=msg.car_ahead.gap_text)
-                position_text = self.format_position(msg)
-                if msg.car_ahead.car_number:
-                    text = "{}  ▲ #{} by {}".format(position_text, msg.car_ahead.car_number, msg.car_ahead.gap_text)
-                    DriverMessageEvent.emit(text=text, duration_secs=120)
-                else:
-                    # we're in the lead, there's no-one ahead
-                    text = "P1"
-                    DriverMessageEvent.emit(text=text, duration_secs=120)
                 LapInfoEvent.emit(lap_count=msg.lap_count, ts=msg.timestamp)
             else:
                 # this might be the following car behind us ... it might also be for a different car in our team
                 if msg.car_ahead and msg.car_ahead.car_number == settings.CAR_NUMBER:
-                    text = " ▼ #{} by {}".format(msg.car_number, msg.car_ahead.gap_text)
-                    DriverMessageAddendumEvent.emit(text=text)
+                    RacePersuerEvent.emit(car_behind=msg.car_number, gap=msg.car_ahead.gap_text)
             # now that this message also contains the race flag status we can emit it
             # unlike the similar message above this does not mean that the status has changed
             # it's more for corrective purposes, so the display doesn't get stuck in a bad

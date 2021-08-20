@@ -85,6 +85,11 @@ AudioAlarmEvent = Event("alrm", debounce_time=60)
 # gap=
 RacePositionEvent = Event("rpos")
 
+# an event indicating who the car behind us is
+# car_behind=
+# gap=
+RacePersuerEvent = Event("persuer")
+
 # a target lap time has been received from the pits
 # target=
 SetTargetTimeEvent = Event("target")

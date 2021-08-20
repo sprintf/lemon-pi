@@ -54,7 +54,7 @@ class LapTimePredictor(EventHandler):
             gate_verifiers = [GateVerifier(f) for f in LapSessionStore.get_instance().load_sessions()]
             # if we have a set of gates from here that is less than two days old then default to it
             # also, we do not issue a "Learning Track" message
-            if gate_verifiers and time.time() - self.gate_verifiers[0].get_timestamp() < TWO_DAYS_IN_SECONDS:
+            if gate_verifiers and time.time() - gate_verifiers[0].get_timestamp() < TWO_DAYS_IN_SECONDS:
                 self.gates = gate_verifiers[0].gates
                 self.state = PredictorState.WORKING
                 DriverMessageEvent.emit(text="Loaded track data", duration_secs=60)

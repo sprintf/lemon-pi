@@ -6,7 +6,7 @@ from lemon_pi.car.event_defs import (
     LeaveTrackEvent, StateChangePittedEvent, StateChangeSettingOffEvent, CompleteLapEvent, OBDConnectedEvent,
     OBDDisconnectedEvent, GPSConnectedEvent, GPSDisconnectedEvent, RaceFlagStatusEvent, DriverMessageEvent,
     DriverMessageAddendumEvent, ExitApplicationEvent, EnterTrackEvent, RadioReceiveEvent, ButtonPressEvent,
-    AudioAlarmEvent, SetTargetTimeEvent)
+    AudioAlarmEvent, SetTargetTimeEvent, RacePositionEvent, RacePersuerEvent)
 
 import logging
 import platform
@@ -109,7 +109,7 @@ class Gui(EventHandler):
         self.app = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, visible=False)
 
         # this is our upper text area
-        self.upper_row = Box(self.app, align="top", width=Gui.WIDTH, height=int(64 * Gui.SCALE_FACTOR))
+        self.upper_row = Box(self.app, align="top", width=Gui.WIDTH, height=int(72 * Gui.SCALE_FACTOR))
         self.msg_area = Text(self.upper_row, "", align="left", size=48, font=self.font, color="white", bg="purple")
 
         self.col1 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - Gui.MESSAGE_ROW_HEIGHT)
@@ -118,8 +118,12 @@ class Gui(EventHandler):
 
         # these are invisible displays used to show special case data when the car is pitting
         self.col4 = Box(self.app, align="left", width=self.col3.width, height=self.col3.height, visible=False)
+        # these are instructions when next driver getting in
         self.col5 = Box(self.app, align="left", width=self.col3.width, height=self.col3.height, visible=False)
+        # this is the predictive lap timer
         self.col6 = Box(self.app, align="left", width=self.col3.width, height=self.col3.height, visible=False)
+        # this is the race position display
+        self.col7 = Box(self.app, align="left", width=self.col3.width, height=self.col3.height, visible=False)
 
         self.time_widget = self.create_time_widget(self.col1)
         Box(self.col1, height=24, width=int(Gui.COL_WIDTH * 0.8))
@@ -147,6 +151,7 @@ class Gui(EventHandler):
         self.stint_ending_display = self.create_instructions(self.col4)
         self.stint_starting_display = self.create_instructions(self.col5)
         self.predictive_lap_timer = self.create_lap_timer(self.col6)
+        self.race_position_display = self.create_race_position_display(self.col7)
 
         LeaveTrackEvent.register_handler(self)
         EnterTrackEvent.register_handler(self)
@@ -162,6 +167,8 @@ class Gui(EventHandler):
         DriverMessageAddendumEvent.register_handler(self)
         RadioReceiveEvent.register_handler(self)
         SetTargetTimeEvent.register_handler(self)
+        RacePositionEvent.register_handler(self)
+        RacePersuerEvent.register_handler(self)
 
     def present_main_app(self):
         # sleep up to 5 seconds
@@ -213,6 +220,16 @@ class Gui(EventHandler):
                 self.speed_heading_widget.bg = "dark-blue"
             else:
                 logger.warning("unknown flag state : {}".format(flag))
+            return
+
+        if event == RacePositionEvent:
+            self.__update_race_position(**kwargs)
+            self._col_display(7)
+            return
+
+        if event == RacePersuerEvent:
+            self.__update_persuer_position(**kwargs)
+            return
 
         if event == DriverMessageEvent:
             self.msg_area.text_size = Gui.TEXT_LARGE
@@ -275,6 +292,8 @@ class Gui(EventHandler):
             self._col_display(3)
         if event_data.key == 'k':
             self._col_display(6)
+        if event_data.key == 'r':
+            self._col_display(7)
         if event_data.key == 'g':
             self.gps_image.on()
         if event_data.key == 'G':
@@ -299,7 +318,7 @@ class Gui(EventHandler):
                 self.__update_target_time(0)
 
     def _col_display(self, to_show):
-        for x in range(3, 7):
+        for x in range(3, 8):
             if x == to_show:
                 getattr(self, f"col{x}").show()
             else:
@@ -441,6 +460,51 @@ class Gui(EventHandler):
         Text(result, "mm:ss", size=Gui.TEXT_LARGE, font=self.font, color="white")
 
         return result
+
+    def create_race_position_display(self, parent):
+        result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(364 * Gui.SCALE_FACTOR))
+        result.set_border(4, "lightgreen")
+        # child 0 = position
+        Text(result, "P??", size=Gui.TEXT_LARGE, font=self.font, color="white")
+        Box(result, width=24 * Gui.SCALE_FACTOR, height=48)
+        # child 2 = parent
+        container1 = Box(result, width=parent.width, height=80)
+        Text(container1, "Ahead: #", size=Gui.TEXT_TINY, font=self.font, color="grey", align="left")
+        # child [2][1] = car ahead
+        Text(container1, "?? ", size=Gui.TEXT_MED, font=self.font, color="white", align="left")
+        container2 = Box(result, width=parent.width, height=48)
+        Text(container2, "By: ", size=Gui.TEXT_SMALL, font=self.font, color="grey", align="left")
+        # child [3][1] = gap
+        Text(container2, "?? ", size=Gui.TEXT_MED, font=self.font, color="white", align="left")
+        Box(result, width=parent.width, height=48)
+        # child [5]
+        container3 = Box(result, width=parent.width, height=72)
+        Text(container3, "Behind: #", size=Gui.TEXT_TINY, font=self.font, color="grey", align="left")
+        # child [5][1] car behind
+        Text(container3, "?? ", size=Gui.TEXT_MED, font=self.font, color="white", align="left")
+        container4 = Box(result, width=parent.width, height=48)
+        Text(container4, "By: ", size=Gui.TEXT_SMALL, font=self.font, color="grey", align="left")
+        # child [6][1] gap to car behind
+        Text(container4, "?? ", size=Gui.TEXT_MED, font=self.font, color="white", align="left")
+        return result
+
+    def __update_race_position(self, pos=0, pos_in_class=0, car_ahead="0", gap="?"):
+        panel = self.col7.children[0]
+        if pos == pos_in_class:
+            panel.children[0].value = f"P{pos}"
+            panel.children[0].text_size = Gui.TEXT_LARGE
+        else:
+            panel.children[0].value = f"P{pos_in_class}({pos})"
+            panel.children[0].text_size = Gui.TEXT_MED
+        panel.children[2].children[1].value = car_ahead
+        panel.children[3].children[1].value = gap
+        panel.children[5].children[1].value = ""
+        panel.children[6].children[1].value = ""
+
+    def __update_persuer_position(self, car_behind=0, gap="?"):
+        panel = self.col7.children[0]
+        panel.children[5].children[1].value = car_behind
+        panel.children[6].children[1].value = gap
 
     def __update_temp(self, provider: TemperatureProvider):
         val = provider.get_temp_f()
