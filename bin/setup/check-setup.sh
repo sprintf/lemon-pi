@@ -9,7 +9,6 @@ check_for() {
 }
 
 check_for "gpsd"
-check_for "fart"
 check_for "espeak"
 check_for "protoc"
 check_for "aplay"
