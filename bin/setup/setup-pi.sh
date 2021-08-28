@@ -8,7 +8,7 @@ sudo apt-get update
 
 sudo apt-get install git gpsd gpsd-clients
 # needed for text to speech
-sudo apt-get install espeak
+sudo apt-get install espeak alsa-utils
 # needed for pygame sounds
 # may not be needed : we do need aplay for sure
 # sudo apt-get install libsdl2-mixer-2.0.0
@@ -20,7 +20,7 @@ sudo chmod 755 /var/lib/lemon-pi
 # set the 3.5mm jack plug volume to 90%
 #amixer  sset PCM,0 80%
 #or manually with alsamixer ... set headphones to 80%
-echo "manually set the headphone volume to 80% with alsamixer"
+echo "manually set the headphone volume to 80% with alsamixer (if using drivers headset)"
 
 git clone https://github.com/sprintf/lemon-pi.git
 
@@ -37,6 +37,7 @@ sudo apt-get install -y libatlas-base-dev
 sudo apt-get install -y protobuf-compiler
 
 #turn off screen saver/blanking
+xset s 0
 xset dpms 0 0 0
 
 echo "you need to disable screen saving"
