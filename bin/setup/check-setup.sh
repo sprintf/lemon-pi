@@ -34,7 +34,7 @@ fi
 
 
 # check the screen saver is disabled
-if ! ( xset q | grep -A 2 Screen | grep "timeout:  0" )
+if ! ( xset q | grep -A 2 Screen | grep -q "timeout:  0" )
 then
   echo "screen saver not disabled"
   exit
