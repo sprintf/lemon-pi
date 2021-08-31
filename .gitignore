@@ -7,6 +7,7 @@ logs
 venv
 traces
 secrets.py
+upload-creds.json
 mymap.html
 python-OBD
 lemon_pi/shared/generated

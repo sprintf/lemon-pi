@@ -50,7 +50,7 @@ gps_logger.addHandler(gps_file_handler)
 gps_logger.propagate = False
 
 handler = RotatingFileHandler("logs/lemon-pi.log",
-                              maxBytes=10000000,
+                              maxBytes=1000000,
                               backupCount=10)
 handler.setFormatter(logging.Formatter(fmt='%(asctime)s.%(msecs)03d %(name)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
 handler.setLevel(logging.INFO)
