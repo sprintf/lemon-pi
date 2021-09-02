@@ -4,7 +4,7 @@ from lemon_pi.pit.event_defs import (
     PittingEvent,
     PingEvent,
     TelemetryEvent,
-    SendMessageEvent, RadioReceiveEvent, SendTargetTimeEvent, ResetFastLapEvent, SendFastLapResetEvent
+    SendMessageEvent, RadioReceiveEvent, SendTargetTimeEvent, SendFastLapResetEvent
 )
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.generated.messages_pb2 import (
@@ -33,7 +33,7 @@ class RadioInterface(Thread, EventHandler):
         LapCompletedEvent.register_handler(self)
         SendMessageEvent.register_handler(self)
         SendTargetTimeEvent.register_handler(self)
-        ResetFastLapEvent.register_handler(self)
+        SendFastLapResetEvent.register_handler(self)
 
     def handle_event(self, event, **kwargs):
         if event == RaceStatusEvent:

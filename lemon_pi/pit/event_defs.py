@@ -68,4 +68,4 @@ SendTargetTimeEvent = Event("send-target-time")
 
 # Reset the fast lap on a car's pi
 # car=
-SendFastLapResetEvent = Event("reset-fast-lap")
+SendFastLapResetEvent = Event("send-fast-lap-reset")

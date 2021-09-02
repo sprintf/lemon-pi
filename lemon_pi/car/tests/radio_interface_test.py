@@ -59,6 +59,7 @@ class RadioInterfaceTestCase(LemonPiTestCase):
         ri = RadioInterface(Mock(), None, None, None)
         target_message = SetTargetTime()
         target_message.car_number = "999"
+        target_message.target_lap_time = 128.5
         ri.process_incoming(target_message)
         target_time_event.assert_called_with(target=128.5)
 
