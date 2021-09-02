@@ -65,3 +65,7 @@ CarSettingsEvent = Event("car-settings")
 # car=
 # target_time=
 SendTargetTimeEvent = Event("send-target-time")
+
+# Reset the fast lap on a car's pi
+# car=
+SendFastLapResetEvent = Event("send-fast-lap-reset")

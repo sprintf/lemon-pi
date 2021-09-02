@@ -4,7 +4,7 @@ from lemon_pi.pit.event_defs import (
     PittingEvent,
     PingEvent,
     TelemetryEvent,
-    SendMessageEvent, RadioReceiveEvent, SendTargetTimeEvent
+    SendMessageEvent, RadioReceiveEvent, SendTargetTimeEvent, SendFastLapResetEvent
 )
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.generated.messages_pb2 import (
@@ -33,6 +33,7 @@ class RadioInterface(Thread, EventHandler):
         LapCompletedEvent.register_handler(self)
         SendMessageEvent.register_handler(self)
         SendTargetTimeEvent.register_handler(self)
+        SendFastLapResetEvent.register_handler(self)
 
     def handle_event(self, event, **kwargs):
         if event == RaceStatusEvent:
@@ -49,6 +50,10 @@ class RadioInterface(Thread, EventHandler):
 
         if event == SendTargetTimeEvent:
             self.send_target_time(**kwargs)
+            return
+
+        if event == SendFastLapResetEvent:
+            self.send_fast_lap_reset(**kwargs)
             return
 
     def run(self):
@@ -107,6 +112,11 @@ class RadioInterface(Thread, EventHandler):
         wrapper.set_target.target_lap_time = target_time
         self.radio.send_async(wrapper)
 
+    def send_fast_lap_reset(self, car=""):
+        wrapper = ToCarMessage()
+        wrapper.reset_fast_lap.car_number = car
+        self.radio.send_async(wrapper)
+
     @classmethod
     def convert_to_event(cls, proto_msg):
         if type(proto_msg) == EnteringPits:
@@ -130,3 +140,5 @@ class RadioInterface(Thread, EventHandler):
     def __delayed_send__(self, pos, delay):
         time.sleep(delay)
         self.radio.send_async(pos)
+
+

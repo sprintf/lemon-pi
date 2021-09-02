@@ -55,10 +55,6 @@ CarStoppedEvent = Event("CarStopped", suppress_logs=True, debounce_time=10)
 DriverMessageEvent = Event("driver-message")
 
 # emit() will contain
-#   text=
-DriverMessageAddendumEvent = Event("driver-message-addendum")
-
-# emit() will contain
 #   flag=(GREEN|YELLOW|RED|BLACK|UNKNOWN)
 RaceFlagStatusEvent = Event("flag-status")
 
@@ -93,6 +89,10 @@ RacePersuerEvent = Event("persuer")
 # a target lap time has been received from the pits
 # target=
 SetTargetTimeEvent = Event("target")
+
+# reset the fastest lap
+# no args
+ResetFastLapEvent = Event("reset-fast-lap")
 
 
 
