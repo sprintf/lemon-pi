@@ -5,7 +5,7 @@ from lemon_pi.car.event_defs import (
 
     LeaveTrackEvent, StateChangePittedEvent, StateChangeSettingOffEvent, CompleteLapEvent, OBDConnectedEvent,
     OBDDisconnectedEvent, GPSConnectedEvent, GPSDisconnectedEvent, RaceFlagStatusEvent, DriverMessageEvent,
-    DriverMessageAddendumEvent, ExitApplicationEvent, EnterTrackEvent, RadioReceiveEvent, ButtonPressEvent,
+    ExitApplicationEvent, EnterTrackEvent, RadioReceiveEvent, ButtonPressEvent,
     AudioAlarmEvent, SetTargetTimeEvent, RacePositionEvent, RacePersuerEvent)
 
 import logging
@@ -78,7 +78,7 @@ class Gui(EventHandler):
         Gui.WIDTH = width
         Gui.HEIGHT = height
         Gui.COL_WIDTH = int(width / 3)
-        Gui.MESSAGE_ROW_HEIGHT = int(Gui.HEIGHT / 5)
+        Gui.MESSAGE_ROW_HEIGHT = int(Gui.HEIGHT / 7)
         Gui.SCALE_FACTOR = Gui.WIDTH / 800
         
         if width > 1000:
@@ -109,12 +109,17 @@ class Gui(EventHandler):
         self.app = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, visible=False)
 
         # this is our upper text area
-        self.upper_row = Box(self.app, align="top", width=Gui.WIDTH, height=int(72 * Gui.SCALE_FACTOR))
+        self.upper_row = Box(self.app, align="top", width=Gui.WIDTH, height=Gui.MESSAGE_ROW_HEIGHT - 16)
+        # useful to uncomment this to debug layout
+        # self.upper_row.set_border(2, color="red")
         self.msg_area = Text(self.upper_row, "", align="left", size=48, font=self.font, color="white", bg="purple")
 
-        self.col1 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - Gui.MESSAGE_ROW_HEIGHT)
-        self.col2 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - Gui.MESSAGE_ROW_HEIGHT)
-        self.col3 = Box(self.app, align="left", width=Gui.COL_WIDTH, height=Gui.HEIGHT - Gui.MESSAGE_ROW_HEIGHT)
+        self.col1 = Box(self.app, align="left",
+                        width=Gui.COL_WIDTH, height=Gui.HEIGHT - Gui.MESSAGE_ROW_HEIGHT)
+        self.col2 = Box(self.app, align="left",
+                        width=Gui.COL_WIDTH, height=Gui.HEIGHT - Gui.MESSAGE_ROW_HEIGHT)
+        self.col3 = Box(self.app, align="left",
+                        width=Gui.COL_WIDTH, height=Gui.HEIGHT - Gui.MESSAGE_ROW_HEIGHT, visible=False)
 
         # these are invisible displays used to show special case data when the car is pitting
         self.col4 = Box(self.app, align="left", width=self.col3.width, height=self.col3.height, visible=False)
@@ -122,8 +127,8 @@ class Gui(EventHandler):
         self.col5 = Box(self.app, align="left", width=self.col3.width, height=self.col3.height, visible=False)
         # this is the predictive lap timer
         self.col6 = Box(self.app, align="left", width=self.col3.width, height=self.col3.height, visible=False)
-        # this is the race position display
-        self.col7 = Box(self.app, align="left", width=self.col3.width, height=self.col3.height, visible=False)
+        # this is the race position display,we're now defaulting to show it rather than fuel
+        self.col7 = Box(self.app, align="left", width=self.col3.width, height=self.col3.height, visible=True)
 
         self.time_widget = self.create_time_widget(self.col1)
         Box(self.col1, height=24, width=int(Gui.COL_WIDTH * 0.8))
@@ -164,7 +169,6 @@ class Gui(EventHandler):
         GPSDisconnectedEvent.register_handler(self)
         RaceFlagStatusEvent.register_handler(self)
         DriverMessageEvent.register_handler(self)
-        DriverMessageAddendumEvent.register_handler(self)
         RadioReceiveEvent.register_handler(self)
         SetTargetTimeEvent.register_handler(self)
         RacePositionEvent.register_handler(self)
@@ -243,13 +247,6 @@ class Gui(EventHandler):
             self.msg_area.after(duration_secs * 1000, self.__remove_message)
             return
 
-        # when the car behind us crosses the line we get an update on the time
-        # between them and us, so we add this to the message on show
-        if event == DriverMessageAddendumEvent:
-            self.msg_area.text_size = Gui.TEXT_SMALL
-            self.msg_area.value = self.msg_area.value + kwargs.get("text")
-            return
-
         if event == SetTargetTimeEvent:
             self.__update_target_time(kwargs.get("target"))
             return
@@ -311,6 +308,8 @@ class Gui(EventHandler):
             ButtonPressEvent.emit(button=0)
         if event_data.key == 'a':
             CompleteLapEvent.emit(lap_time=randomLapTimeProvider.get_last_lap_time(), lap_count=1)
+        if event_data.key == 'd':
+            DriverMessageEvent.emit(text="plonker, PLONKER!", duration_secs=10)
         if event_data.key == 't':
             if self.target_time == 0:
                 self.__update_target_time(67.43)
@@ -394,14 +393,15 @@ class Gui(EventHandler):
         return result
 
     def create_lap_widget(self, parent):
-        result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(260 * Gui.SCALE_FACTOR))
+        result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(212 * Gui.SCALE_FACTOR))
         result.set_border(4, "darkgreen")
-        Text(result, "LAP", size=Gui.TEXT_SMALL, font=self.font, color="white")
-        Text(result, "---", size=Gui.TEXT_SMALL, font=self.font, color="white")
-        Text(result, "mm:ss", size=Gui.TEXT_MED, font=self.font, color="white")
+        lap_box = Box(result)
+        Text(lap_box, "LAP", size=Gui.TEXT_SMALL, font=self.font, color="white", align="left")
+        Text(lap_box, "---", size=Gui.TEXT_SMALL, font=self.font, color="white", align="left")
+        Text(result, "mm:ss", size=Gui.TEXT_LARGE, font=self.font, color="white")
         Box(result, width=200, height=16)
         Text(result, "Last Lap", size=Gui.TEXT_TINY, font=self.font, color="white")
-        Text(result, "mm:ss.S", size=Gui.TEXT_MED, font=self.font, color="white")
+        Text(result, "mm:ss.S", size=Gui.TEXT_LARGE, font=self.font, color="white")
         return result
 
     def create_fuel_widget(self, parent):
@@ -526,17 +526,17 @@ class Gui(EventHandler):
         # self.speed_heading_widget.children[2].value = str(provider.get_heading())
 
     def __update_lap(self, provider: LapProvider):
-        self.lap_display.children[1].value = provider.get_lap_count()
+        self.lap_display.children[0].children[1].value = provider.get_lap_count()
         if provider.get_lap_count() != 999:
             minutes = int(provider.get_lap_timer() / 60)
             seconds = int(provider.get_lap_timer()) % 60
-            self.lap_display.children[2].value = "{:02d}:{:02d}".format(minutes, seconds)
+            self.lap_display.children[1].value = "{:02d}:{:02d}".format(minutes, seconds)
         if provider.get_last_lap_time() > 0:
             ll = provider.get_last_lap_time()
             minutes = int(ll / 60)
             seconds = int(ll) % 60
             tenths = int((ll - int(ll)) * 10)
-            self.lap_display.children[5].value = "{:02d}:{:02d}.{:01d}".format(minutes, seconds, tenths)
+            self.lap_display.children[4].value = "{:02d}:{:02d}.{:01d}".format(minutes, seconds, tenths)
 
     def __update_target_time(self, target_time: float):
         self.target_time = target_time

@@ -6,7 +6,7 @@ from lemon_pi.car.event_defs import (
     LeaveTrackEvent,
     CompleteLapEvent,
     RadioSyncEvent,
-    LapInfoEvent, EnterTrackEvent
+    LapInfoEvent, EnterTrackEvent, ResetFastLapEvent
 )
 
 import time
@@ -38,6 +38,7 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
         LapInfoEvent.register_handler(self)
         LeaveTrackEvent.register_handler(self)
         EnterTrackEvent.register_handler(self)
+        ResetFastLapEvent.register_handler(self)
 
     def update_position(self, lat: float, long: float, heading: float, time: float, speed: int) -> None:
         if (lat, long) == self.last_pos:
@@ -108,6 +109,8 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
             self.lap_start_time = ts
             if self.lap_count == 999:
                 self.lap_count = 0
+        if event == ResetFastLapEvent:
+            self.best_lap_time = None
 
     def get_lap_count(self) -> int:
         return self.lap_count

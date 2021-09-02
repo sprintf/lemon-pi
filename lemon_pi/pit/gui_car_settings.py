@@ -3,7 +3,7 @@ import logging
 
 from guizero import App, Window, PushButton, CheckBox, TextBox, Box, Text
 
-from lemon_pi.pit.event_defs import CarSettingsEvent, SendTargetTimeEvent
+from lemon_pi.pit.event_defs import CarSettingsEvent, SendTargetTimeEvent, SendFastLapResetEvent
 
 
 # todo : add columns to display
@@ -39,6 +39,13 @@ class CarSettings:
         self.target_secs = TextBox(middle_box, text="00", width=2, align="left")
         self.target_secs.text_size = 26
 
+        Box(self.window, height=16, width=self.window.width)
+
+        next_box = Box(self.window, height=48, width=self.window.width)
+        self.fast_reset_title = Text(next_box, "Reset Fastest Lap:", align="left", size=26)
+        self.fast_reset_check = CheckBox(next_box, align="left")
+        self.fast_reset_check.value = False
+
         lower_box = Box(self.window, height=48, width=self.window.width)
         self.cancel = PushButton(lower_box, text="Cancel",command=self.handle_close, align="left")
         self.save = PushButton(lower_box, text="Save", command=self.handle_save_and_close, align="right")
@@ -66,6 +73,9 @@ class CarSettings:
             else:
                 # send event saving car settings
                 CarSettingsEvent.emit(car=self.car_number, chase_mode=True, target_car=self.target_car.value)
+
+        if self.fast_reset_check.value:
+            SendFastLapResetEvent.emit(car=self.car_number)
         self.handle_close()
 
     def handle_close(self):

@@ -5,7 +5,7 @@ import time
 from lemon_pi.car.display_providers import TemperatureProvider, LapProvider, FuelProvider
 from lemon_pi.car.event_defs import RadioSyncEvent
 from lemon_pi.car.radio_interface import RadioInterface
-from lemon_pi.shared.generated.messages_pb2 import SetFuelLevel, RaceStatus, RaceFlagStatus, SetTargetTime
+from lemon_pi.shared.generated.messages_pb2 import SetFuelLevel, RaceStatus, RaceFlagStatus, SetTargetTime, ResetFastLap
 from lemon_pi.shared.tests.lemon_pi_test_case import LemonPiTestCase
 
 
@@ -59,9 +59,16 @@ class RadioInterfaceTestCase(LemonPiTestCase):
         ri = RadioInterface(Mock(), None, None, None)
         target_message = SetTargetTime()
         target_message.car_number = "999"
-        target_message.target_lap_time = 128.5
         ri.process_incoming(target_message)
         target_time_event.assert_called_with(target=128.5)
+
+    @patch("lemon_pi.car.event_defs.ResetFastLapEvent.emit")
+    def test_reset_fast_lap_message(self, reset_fast_lap_event):
+        ri = RadioInterface(Mock(), None, None, None)
+        target_message = ResetFastLap()
+        target_message.car_number = "999"
+        ri.process_incoming(target_message)
+        reset_fast_lap_event.assert_called_once()
 
     def test_handling_radio_sync(self):
         temp_provider = TemperatureProvider()

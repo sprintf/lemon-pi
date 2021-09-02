@@ -10,12 +10,11 @@ from lemon_pi.car.event_defs import (
     LeaveTrackEvent,
     RadioSyncEvent,
     DriverMessageEvent,
-    DriverMessageAddendumEvent,
     RaceFlagStatusEvent,
     LapInfoEvent,
     RadioReceiveEvent,
     RefuelEvent,
-    ExitApplicationEvent, RacePositionEvent, SetTargetTimeEvent, RacePersuerEvent
+    ExitApplicationEvent, RacePositionEvent, SetTargetTimeEvent, RacePersuerEvent, ResetFastLapEvent
 )
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.generated.messages_pb2 import (
@@ -25,7 +24,7 @@ from lemon_pi.shared.generated.messages_pb2 import (
     RacePosition,
     RaceFlagStatus,
     SetFuelLevel,
-    ToPitMessage, RemoteReboot, SetTargetTime)
+    ToPitMessage, RemoteReboot, SetTargetTime, ResetFastLap)
 
 from python_settings import settings
 
@@ -152,6 +151,12 @@ class RadioInterface(Thread, EventHandler):
                 return
             logger.info(f"got a target time of {msg.target_lap_time}")
             SetTargetTimeEvent.emit(target=msg.target_lap_time)
+        elif type(msg) == ResetFastLap:
+            if msg.car_number != settings.CAR_NUMBER:
+                logger.info("it's not for me, ignoring")
+                return
+            logger.info(f"got a reset fast lap message")
+            ResetFastLapEvent.emit()
         else:
             logger.info("got unexpected message : {}".format(type(msg)))
 

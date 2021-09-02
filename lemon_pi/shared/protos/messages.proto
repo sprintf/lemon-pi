@@ -171,6 +171,16 @@ message SetTargetTime {
   float target_lap_time = 5;  // set to zero to unset
 }
 
+message ResetFastLap {
+  int32 seq_num = 1;
+
+  int32 timestamp = 2;
+
+  string sender = 3;
+
+  string car_number = 4;
+}
+
 message ToCarMessage {
   oneof to_car {
     Ping ping = 1;
@@ -180,6 +190,7 @@ message ToCarMessage {
     SetFuelLevel set_fuel = 5;
     RemoteReboot reboot = 6;
     SetTargetTime set_target = 7;
+    ResetFastLap reset_fast_lap = 8;
   }
 }
 
