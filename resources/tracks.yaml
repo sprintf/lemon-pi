@@ -52,7 +52,7 @@ tracks:
 
   -  name: "Buttonwillow"
      code: "btnw"
-     start_finish_coords: "(35.489031,-119.544530),(35.488713,-119.544510)"
+     start_finish_coords: "(35.488697,-119.544508),(35.488841,-119.544516)"
      start_finish_direction: "E"
      pit_entry_coords: "(35.488943,-119.547690),(35.489060,-119.547604)"
      pit_entry_direction: "SE"
