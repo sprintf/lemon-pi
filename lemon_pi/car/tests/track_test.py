@@ -11,6 +11,8 @@ class TrackTestCase(unittest.TestCase):
         track_codes = set()
         for t in tracks:
             print(f"reading {t.name}")
+            # this screws up the name gen in html
+            self.assertTrue("," not in t.name)
             self.assertTrue(re.match("[a-zA-Z0-9-_]{3,6}", t.code))
             self.assertFalse(t.code in track_codes)
             track_codes.add(t.code)

@@ -4,7 +4,11 @@ from lemon_pi.pit.event_defs import (
     PittingEvent,
     PingEvent,
     TelemetryEvent,
-    SendMessageEvent, RadioReceiveEvent, SendTargetTimeEvent, SendFastLapResetEvent
+    SendMessageEvent,
+    RadioReceiveEvent,
+    SendTargetTimeEvent,
+    SendFastLapResetEvent,
+    LeavingPitEvent
 )
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.generated.messages_pb2 import (
@@ -12,7 +16,7 @@ from lemon_pi.shared.generated.messages_pb2 import (
     Ping,
     CarTelemetry,
     RaceFlagStatus,
-    ToCarMessage
+    ToCarMessage, LeavingPits
 )
 from lemon_pi.shared.radio import Radio
 from python_settings import settings
@@ -122,7 +126,12 @@ class RadioInterface(Thread, EventHandler):
         if type(proto_msg) == EnteringPits:
             PittingEvent.emit(car=proto_msg.sender)
             return
-        elif type(proto_msg) == CarTelemetry:
+
+        if type(proto_msg) == LeavingPits:
+            LeavingPitEvent.emit(car=proto_msg.sender)
+            return
+
+        if type(proto_msg) == CarTelemetry:
             TelemetryEvent.emit(car=proto_msg.sender,
                                 ts=proto_msg.timestamp,
                                 coolant_temp=proto_msg.coolant_temp,
@@ -130,10 +139,13 @@ class RadioInterface(Thread, EventHandler):
                                 last_lap_time=proto_msg.last_lap_time,
                                 last_lap_fuel=proto_msg.last_lap_fuel_usage,
                                 fuel_percent=proto_msg.fuel_remaining_percent)
-        elif type(proto_msg) == Ping:
+            return
+
+        if type(proto_msg) == Ping:
             PingEvent.emit(car=proto_msg.sender, ts=proto_msg.timestamp)
-        else:
-            logger.info("unknown radio message {}".format(type(proto_msg)))
+            return
+
+        logger.info("unknown radio message {}".format(type(proto_msg)))
 
     # sleep for a moment before sending data to the car so it doesn't collide with
     # data coming from the car as it passes the line

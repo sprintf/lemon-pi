@@ -137,6 +137,15 @@ message EnteringPits {
 
 }
 
+message LeavingPits {
+
+  int32 seq_num = 1;
+
+  int32 timestamp = 2;
+
+  string sender = 3;
+}
+
 message SetFuelLevel {
   int32 seq_num = 1;
 
@@ -199,5 +208,6 @@ message ToPitMessage {
     Ping ping = 1;
     CarTelemetry telemetry = 2;
     EnteringPits pitting = 3;
+    LeavingPits entering = 4;
   }
 }

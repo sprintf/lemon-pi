@@ -24,6 +24,10 @@ LapCompletedEvent = Event("lap-completed")
 #   car=
 PittingEvent = Event("pitting")
 
+#
+#   car=
+LeavingPitEvent = Event("entering-track")
+
 # emit() sends out
 #   car=
 #   ts=

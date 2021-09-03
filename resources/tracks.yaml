@@ -137,7 +137,7 @@ tracks:
      pit_out_coords: "(39.734942, -103.892095),(39.734862, -103.892041)"
      pit_out_direction: "NE"
 
-  -  name: "Autobahn Country Club, Joliet"
+  -  name: "Autobahn Country Club Joliet"
      code: "abhn"
      start_finish_coords: "(41.455158, -88.126925),(41.455263, -88.126838)"
      start_finish_direction: "SE"

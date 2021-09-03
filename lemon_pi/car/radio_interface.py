@@ -14,7 +14,7 @@ from lemon_pi.car.event_defs import (
     LapInfoEvent,
     RadioReceiveEvent,
     RefuelEvent,
-    ExitApplicationEvent, RacePositionEvent, SetTargetTimeEvent, RacePersuerEvent, ResetFastLapEvent
+    ExitApplicationEvent, RacePositionEvent, SetTargetTimeEvent, RacePersuerEvent, ResetFastLapEvent, EnterTrackEvent
 )
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.generated.messages_pb2 import (
@@ -72,10 +72,22 @@ class RadioInterface(Thread, EventHandler):
             # we send the event asynchronously, because the radio can take multiple seconds
             # to transmit, so there is no guarantee that this message will be sent exactly now
             self.radio.send_async(msg)
+            return
+
         if event == LeaveTrackEvent:
             msg = ToPitMessage()
+            # we have to set some field to let protobuf know the message type
             msg.pitting.timestamp = 1
             self.radio.send_async(msg)
+            return
+
+        if event == EnterTrackEvent:
+            msg = ToPitMessage()
+            # we have to set some field to let protobuf know the message type
+            msg.entering.timestamp = 1
+            self.radio.send_async(msg)
+            return
+
 
     def run(self):
         while True:
