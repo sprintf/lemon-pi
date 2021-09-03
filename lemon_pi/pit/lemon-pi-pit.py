@@ -6,6 +6,7 @@ from logging.handlers import RotatingFileHandler
 from threading import Thread
 from python_settings import settings
 
+from lemon_pi.pit.race_position_transmitter import RacePositionTransmitter
 from lemon_pi.pit.radio_interface import RadioInterface
 from lemon_pi.pit.datasource.datasource1 import DataSource
 from lemon_pi.pit.datasource.datasource_handler import DataSourceHandler
@@ -67,6 +68,8 @@ def run():
             leaderboard = RaceOrder()
             # filter race updates down to updates related to our car
             updater = DataSourceHandler(leaderboard, settings.TARGET_CARS)
+            # provide a means to send initial race position to cars
+            position_transmitter = RacePositionTransmitter(leaderboard, settings.TARGET_CARS)
             # provide a strategy analyzer
             sa = StrategyAnalyzer(leaderboard, settings.TARGET_CARS)
             sa.start()
