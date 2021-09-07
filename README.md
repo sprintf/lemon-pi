@@ -61,7 +61,7 @@ Sunfounder 7" HDMI display. $65.99 [Amazon Link](https://www.amazon.com/SunFound
 GPS USB Receiver $12.99 [Amazon Link](https://www.amazon.com/gp/product/B01MTU9KTF/ref=ppx_yo_dt_b_asin_title_o07_s00?ie=UTF8&psc=1)
 
 Adafruit Ultimate USB GPS $29.95 [Digi-Key](https://www.digikey.com/en/products/detail/adafruit-industries-llc/4279/10263862?s=N4IgjCBcoLQBxVAYygMwIYBsDOBTANCAPZQDa4ArAEwIC6AvvYVWSACxUDsAnCA0A)
-> *** Note *** In theory this receiver can operate at 10Hz, providing a lot more GPS data. However, the fastest we've been able to get this working is 2.5Hz and we still only get 1Hz when calling through Python.
+> *** Note *** In theory this receiver can operate at 10Hz, providing a lot more GPS data. However, the fastest we've been able to get this working is 2.5Hz.
 
 > DO NOT USE 
 Global Sat BU3-353S4 $28.38 [Amazon Link](https://www.amazon.com/GlobalSat-BU-353-S4-USB-Receiver-Black/dp/B008200LHW) as it doesn't work so well with gpsd on the RPi. 
