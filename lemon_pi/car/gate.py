@@ -191,7 +191,11 @@ class GateVerifier:
     def verify(self, lat, long, heading, time):
         if self.index >= len(self.gates):
             return
-        crossed, crossed_time = self.cross_detector.crossed_line(lat, long, heading, time, self.gates[self.index])
+        crossed, crossed_time = self.cross_detector.crossed_line(lat,
+                                                                 long,
+                                                                 heading,
+                                                                 time,
+                                                                 self.gates[self.index].target)
         if crossed:
             self.index += 1
             self.matched += 1
