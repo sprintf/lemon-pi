@@ -30,7 +30,7 @@ class Event:
         self.last_event_time = 0
         self.handlers = []
 
-    def register_handler(self, handler:EventHandler):
+    def register_handler(self, handler: EventHandler):
         if handler not in self.handlers:
             self.handlers.append(handler)
         else:
@@ -51,7 +51,10 @@ class Event:
             Event.last_event = self
             # call all the registered handlers
             for handler in self.handlers:
-                handler.handle_event(self, **kwargs)
+                try:
+                    handler.handle_event(self, **kwargs)
+                except Exception as e:
+                    logger.exception("exception handling event", e)
 
     @classmethod
     def instance_iterator(cls):

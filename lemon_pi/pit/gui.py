@@ -242,7 +242,7 @@ class Gui:
 
     def create_message_field(self, parent, grid):
         result = Box(parent, grid=grid)
-        BigText(result, "Send driver message", align="left")
+        BigText(result, "message driver:", align="left")
         tb = TextBox(result, "", width=16, align="left")
         tb.text_color = "grey"
         tb.text_size = 32
