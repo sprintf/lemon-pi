@@ -7,7 +7,7 @@ It consists of several components
 ## Protobuf Message Definitions
 
 Lemon-Pi uses Google's protobuf message definition mechanism to create tightly packed on the wire messages.
-The proto definition is in [shared/protos/messages.proto](lemon_pi/shared/protos/messages.proto)
+The proto definition is in [shared/protos/lemon-pi.proto](lemon_pi/shared/protos/lemon-pi.proto)
 There is an additional explanation in the [protos directory](lemon_pi/shared/protos/) 
 
 ## Lora Radio Control 

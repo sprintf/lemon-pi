@@ -1,7 +1,7 @@
 
 import blowfish
 
-from lemon_pi.shared.generated.messages_pb2 import ToCarMessage, ToPitMessage
+from lemon_pi_pb2 import ToCarMessage, ToPitMessage
 
 from google.protobuf.message import Message
 from google.protobuf.message import DecodeError

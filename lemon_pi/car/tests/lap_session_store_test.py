@@ -12,7 +12,7 @@ class LapSessionStoreTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         for file in os.listdir("/tmp/test-lss/code"):
-            os.remove(os.path.join("/tmp/test-lss/code",file))
+            os.remove(os.path.join("/tmp/test-lss/code", file))
         os.rmdir("/tmp/test-lss/code")
         os.rmdir("/tmp/test-lss")
         LapSessionStore.destroy()
@@ -39,4 +39,3 @@ class LapSessionStoreTest(unittest.TestCase):
         saved_gates = LapSessionStore.get_instance().load_sessions()
         self.assertEqual(1, len(saved_gates))
         self.assertEqual(4, saved_gates[0].lap_count())
-

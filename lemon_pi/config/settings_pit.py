@@ -20,3 +20,6 @@ TEMP_BAND_LOW = 180
 TEMP_BAND_WARN = 205
 TEMP_BAND_HIGH = 215
 
+# current track location code
+TRACK_CODE = "test1"
+

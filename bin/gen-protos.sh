@@ -2,23 +2,35 @@
 
 needs_building=0
 
-if [ ! -d lemon_pi/shared/generated ] ; then
-  mkdir lemon_pi/shared/generated
+package_dir="./"
+
+if [ ! -d ${package_dir} ] ; then
+  mkdir ${package_dir}
   needs_building=1
 fi
 
-if [ ! -f lemon_pi/shared/generated/messages_pb2.py ] ; then
+if [ ! -f ${package_dir}/lemon_pi_pb2.py ] ; then
   needs_building=1
 fi
 
-if [ lemon_pi/shared/generated/messages_pb2.py -ot lemon_pi/shared/protos/messages.proto ] ; then
+if [ ! -f ${package_dir}/lemon_pi_pb2_grpc.py ] ; then
+  needs_building=1
+fi
+
+if [ ${package_dir}/lemon_pi_pb2.py -ot ${package_dir}/lemon-pi.proto ] ; then
+  needs_building=1
+fi
+
+if [ ${package_dir}/lemon_pi_pb2_grpc.py -ot ${package_dir}/lemon-pi.proto ] ; then
   needs_building=1
 fi
 
 if [ ${needs_building} -eq 1 ] ; then
-  protoc --python_out=lemon_pi/shared/generated \
+  python -m grpc_tools.protoc \
+        --python_out=${package_dir} \
+        --grpc_python_out=${package_dir} \
         -I=lemon_pi/shared/protos \
-        messages.proto
+        lemon-pi.proto
 else
   echo "no generation needed"
 fi

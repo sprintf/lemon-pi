@@ -29,10 +29,6 @@ jobs:
         if [ -f requirements-linux.txt ]; then pip install -r requirements-linux.txt; fi
     - name: Generate protobufs
       run: |
-        arch=`uname -p`
-        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/protoc-3.14.0-linux-${arch}.zip
-        unzip protoc-*.zip -d protoc
-        export PATH="protoc/bin:$PATH"
         bin/gen-protos.sh
     - name: Lint with flake8
       run: |

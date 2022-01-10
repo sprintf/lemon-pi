@@ -7,7 +7,7 @@ from lemon_pi.shared.message_decoder import (
     NoiseException,
     LPiNoiseException
 )
-from lemon_pi.shared.generated.messages_pb2 import ToCarMessage, ToPitMessage
+from lemon_pi_pb2 import ToCarMessage, ToPitMessage
 
 
 class DecoderTestCase(unittest.TestCase):

@@ -60,3 +60,6 @@ GPS_CYCLE = 1.0
 
 # distance between virtual gates on the track
 VGATE_SEPARATION_FEET = 200
+
+# should we turn off wifi on the lemon-pi to conserve battery
+WIFI_DISABLED = True

@@ -3,7 +3,7 @@ import time
 import blowfish
 
 from google.protobuf.message import Message
-from lemon_pi.shared.generated.messages_pb2 import ToCarMessage, ToPitMessage
+from lemon_pi_pb2 import ToCarMessage, ToPitMessage
 
 
 class MessageTooLongException(Exception):

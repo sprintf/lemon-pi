@@ -20,7 +20,7 @@ from python_settings import settings
 
 from lemon_pi.shared.data_provider_interface import GpsProvider
 from lemon_pi.shared.events import EventHandler
-from lemon_pi.shared.generated.messages_pb2 import GpsPosition
+from lemon_pi_pb2 import GpsPosition
 from lemon_pi.shared.usb_detector import UsbDetector, UsbDevice
 
 logger = logging.getLogger(__name__)
