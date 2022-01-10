@@ -16,6 +16,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Checkout protos from shared repo
+      uses: actions/checkout@v2
+      with:
+        repository: sprintf/lemon-pi-protos
+        path:'./protos'
+    - name: Relink protos
+      run: |
+             rm lemon-pi/proto/*.proto && \
+             ln -s `pwd`/protos/lemon-pi.proto lemon-pi/shared/protos/lemon-pi.proto
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
