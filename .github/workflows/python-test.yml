@@ -23,8 +23,8 @@ jobs:
         path: './protos'
     - name: Relink protos
       run: |
-             rm lemon-pi/shared/protos/*.proto && \
-             ln -s `pwd`/protos/lemon-pi.proto lemon-pi/shared/protos/lemon-pi.proto
+             rm lemon_pi/shared/protos/*.proto && \
+             ln -s `pwd`/protos/lemon-pi.proto lemon_pi/shared/protos/lemon-pi.proto
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
