@@ -243,7 +243,7 @@ if __name__ == "__main__":
 
     UsbDetector.init()
     tracker = GpsReader()
-    tracker.set_cycle(0.5)
+    tracker.set_cycle(1.0)
     tracker.register_position_listener(FileLogger())
     tracker.run()
 

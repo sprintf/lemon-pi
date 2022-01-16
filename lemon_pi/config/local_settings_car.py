@@ -9,7 +9,7 @@ RADIO_KEY = "mykey"
 
 # your car number is used for identifying your radio device
 # as well as working out which messages are for this car
-RADIO_DEVICE = CAR_NUMBER = "181"
+RADIO_DEVICE = CAR_NUMBER = "62"
 
 
 # optionally disable OBD
@@ -26,4 +26,7 @@ GPS_CYCLE = 1.0
 VGATE_SEPARATION_FEET = 100
 
 WIFI_DISABLED = False
-MERINGUE_GRPC_OVERRIDE_URL = "localhost:8080"
+# MERINGUE_GRPC_OVERRIDE_URL = "localhost:9090"
+
+# don't make audio announcements (mac-only disablement)
+# AUDIO_DISABLED = True

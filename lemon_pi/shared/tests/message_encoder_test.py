@@ -2,11 +2,15 @@ import unittest
 
 from lemon_pi.shared.message_encoder import MessageEncoder
 from lemon_pi.shared.message_decoder import MessageDecoder
+from lemon_pi.shared.message_postmarker import MessagePostmarker
 
 from lemon_pi_pb2 import ToCarMessage
 
 
 class EncoderTestCase(unittest.TestCase):
+
+    def setUp(self):
+        MessagePostmarker.instance = None
 
     def test_encoding(self):
         e = MessageEncoder("car-180", "letmein")

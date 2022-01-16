@@ -6,6 +6,7 @@ from logging.handlers import RotatingFileHandler
 from threading import Thread
 from python_settings import settings
 
+from lemon_pi.pit.meringue_comms_pit import MeringueCommsPitsReader
 from lemon_pi.pit.race_position_transmitter import RacePositionTransmitter
 from lemon_pi.pit.radio_interface import RadioInterface
 from lemon_pi.pit.datasource.datasource1 import DataSource
@@ -55,7 +56,7 @@ def run():
         # start the radio thread
         try:
             radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY, ToPitMessage())
-            meringue_comms = MeringueComms(settings.RADIO_DEVICE, settings.RADIO_KEY)
+            meringue_comms = MeringueCommsPitsReader(settings.RADIO_DEVICE, settings.TARGET_CARS, settings.RADIO_KEY)
             RadioInterface(radio, meringue_comms).start()
             radio.start()
 
@@ -65,6 +66,8 @@ def run():
             else:
                 meringue_comms.configure(None)
 
+            # this launches a series of threads, so we do not actually call start() on it
+            meringue_comms.run()
             time.sleep(2)
             gui.progress(85)
         except KeyError:

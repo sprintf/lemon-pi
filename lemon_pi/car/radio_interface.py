@@ -106,6 +106,7 @@ class RadioInterface(Thread, EventHandler):
 
     def process_incoming(self, msg):
         RadioReceiveEvent.emit()
+        # todo : check hash of timestamp + seqNum + sender => if it's been handled then skip it
         if type(msg) == RaceStatus:
             logger.info("got race status message...{}".format(msg))
             RaceFlagStatusEvent.emit(flag=RaceFlagStatus.Name(msg.flag_status))

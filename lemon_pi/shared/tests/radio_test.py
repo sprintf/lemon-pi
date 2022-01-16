@@ -2,6 +2,8 @@
 
 import unittest
 from unittest.mock import MagicMock
+
+from lemon_pi.shared.message_postmarker import MessagePostmarker
 from lemon_pi_pb2 import ToCarMessage, ToPitMessage
 from lemon_pi.shared.radio import Radio
 
@@ -13,6 +15,9 @@ if not settings.configured:
 
 
 class RadioTestCase(unittest.TestCase):
+
+    def setUp(self):
+        MessagePostmarker.instance = None
 
     # def test_radio(self):
     #     radio = Radio("team", "password", ser=MagicMock())

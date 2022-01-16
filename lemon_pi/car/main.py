@@ -9,6 +9,7 @@ from lemon_pi.car.gui import Gui
 from lemon_pi.car.gps_reader import GpsReader
 from lemon_pi.car.lap_session_store import LapSessionStore
 from lemon_pi.car.maf_analyzer import MafAnalyzer
+from lemon_pi.car.meringue_comms_car import MeringueCommsCar
 from lemon_pi.car.obd_reader import ObdReader
 from lemon_pi.car.lap_tracker import LapTracker
 from lemon_pi.car.radio_interface import RadioInterface
@@ -73,6 +74,7 @@ if not "SETTINGS_MODULE" in os.environ:
 
 gui = Gui(settings.DISPLAY_WIDTH, settings.DISPLAY_HEIGHT)
 
+
 def init():
     try:
         # detect USB devices (should just be Lora)
@@ -90,7 +92,8 @@ def init():
             WifiManager().disable_wifi()
 
         # enable sound generation
-        Audio().start()
+        if not settings.AUDIO_DISABLED:
+            Audio().start()
         StateMachine.init()
         MovementListener()
 
@@ -98,8 +101,10 @@ def init():
         obd = ObdReader(maf_analyzer)
         gps = GpsReader()
         radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY, ToCarMessage())
-        meringue_comms = MeringueComms(settings.RADIO_DEVICE, settings.RADIO_KEY)
+        meringue_comms = MeringueCommsCar(settings.RADIO_DEVICE, settings.RADIO_KEY)
         radio_interface = RadioInterface(radio, meringue_comms, obd, None, maf_analyzer)
+        meringue_comms.set_radio_interface(radio_interface)
+        meringue_comms.register_gps_provider(gps)
 
         # start a background thread to pull in gps data
         if settings.GPS_DISABLED:
@@ -154,9 +159,8 @@ def init():
             meringue_comms.configure(settings.MERINGUE_GRPC_OVERRIDE_URL)
         else:
             meringue_comms.configure(None)
-        # todo : if wifi is enabled, then create a wifi thingy and start it up
-        # and register it with the radio_interface
-        # radio interface ... on send, will see if it is set, and call it
+        if not settings.WIFI_DISABLED:
+            meringue_comms.start()
     except Exception:
         logger.exception("exception in initialization")
         ExitApplicationEvent.emit()
