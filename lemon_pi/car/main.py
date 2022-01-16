@@ -9,12 +9,14 @@ from lemon_pi.car.gui import Gui
 from lemon_pi.car.gps_reader import GpsReader
 from lemon_pi.car.lap_session_store import LapSessionStore
 from lemon_pi.car.maf_analyzer import MafAnalyzer
+from lemon_pi.car.meringue_comms_car import MeringueCommsCar
 from lemon_pi.car.obd_reader import ObdReader
 from lemon_pi.car.lap_tracker import LapTracker
 from lemon_pi.car.radio_interface import RadioInterface
 from lemon_pi.car.update_tracks import TrackUpdater
 from lemon_pi.car.wifi import WifiManager
-from lemon_pi.shared.generated.messages_pb2 import ToCarMessage
+from lemon_pi.shared.meringue_comms import MeringueComms
+from lemon_pi_pb2 import ToCarMessage
 from lemon_pi.shared.time_provider import LocalTimeProvider
 from lemon_pi.car.track import TrackLocation, read_tracks
 from lemon_pi.car.state_machine import StateMachine
@@ -64,13 +66,14 @@ if not "SETTINGS_MODULE" in os.environ:
 
 # main control thread
 # responsibilities
-#  0. disable wifi (to save battery)
+#  0. disable wifi (to save battery) (or not)
 #  1. launch UI
 #  2. fire up OBD thread
 #  3. fire up GPS thread
 #  4. fire up Lora
 
 gui = Gui(settings.DISPLAY_WIDTH, settings.DISPLAY_HEIGHT)
+
 
 def init():
     try:
@@ -85,10 +88,12 @@ def init():
         TrackUpdater().update()
 
         # turn wifi off now, to save battery
-        WifiManager().disable_wifi()
+        if settings.WIFI_DISABLED:
+            WifiManager().disable_wifi()
 
         # enable sound generation
-        Audio().start()
+        if not settings.AUDIO_DISABLED:
+            Audio().start()
         StateMachine.init()
         MovementListener()
 
@@ -96,7 +101,10 @@ def init():
         obd = ObdReader(maf_analyzer)
         gps = GpsReader()
         radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY, ToCarMessage())
-        radio_interface = RadioInterface(radio, obd, None, maf_analyzer)
+        meringue_comms = MeringueCommsCar(settings.RADIO_DEVICE, settings.RADIO_KEY)
+        radio_interface = RadioInterface(radio, meringue_comms, obd, None, maf_analyzer)
+        meringue_comms.set_radio_interface(radio_interface)
+        meringue_comms.register_gps_provider(gps)
 
         # start a background thread to pull in gps data
         if settings.GPS_DISABLED:
@@ -146,6 +154,13 @@ def init():
         gui.register_lap_provider(lap_tracker)
         radio_interface.register_lap_provider(lap_tracker)
         radio.register_gps_provider(gps)
+        meringue_comms.set_track_id(closest_track.code)
+        if hasattr(settings, "MERINGUE_GRPC_OVERRIDE_URL"):
+            meringue_comms.configure(settings.MERINGUE_GRPC_OVERRIDE_URL)
+        else:
+            meringue_comms.configure(None)
+        if not settings.WIFI_DISABLED:
+            meringue_comms.start()
     except Exception:
         logger.exception("exception in initialization")
         ExitApplicationEvent.emit()

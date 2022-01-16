@@ -1,4 +1,4 @@
-from lemon_pi.shared.generated.messages_pb2 import GpsPosition
+from lemon_pi_pb2 import GpsPosition
 
 
 class GpsProvider:

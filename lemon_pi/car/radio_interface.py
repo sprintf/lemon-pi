@@ -17,7 +17,8 @@ from lemon_pi.car.event_defs import (
     ExitApplicationEvent, RacePositionEvent, SetTargetTimeEvent, RacePersuerEvent, ResetFastLapEvent, EnterTrackEvent
 )
 from lemon_pi.shared.events import EventHandler
-from lemon_pi.shared.generated.messages_pb2 import (
+from lemon_pi.shared.meringue_comms import MeringueComms
+from lemon_pi_pb2 import (
     RaceStatus,
     DriverMessage,
     Ping,
@@ -43,11 +44,13 @@ logger = logging.getLogger(__name__)
 class RadioInterface(Thread, EventHandler):
 
     def __init__(self, radio:Radio,
+                 comms_server: MeringueComms,
                  temp_provider:TemperatureProvider,
                  lap_provider:LapProvider,
                  fuel_provider:FuelProvider):
         Thread.__init__(self)
         self.radio = radio
+        self.comms_server = comms_server
         self.temp_provider = temp_provider
         self.lap_provider = lap_provider
         self.gps_provider = None
@@ -72,6 +75,7 @@ class RadioInterface(Thread, EventHandler):
             # we send the event asynchronously, because the radio can take multiple seconds
             # to transmit, so there is no guarantee that this message will be sent exactly now
             self.radio.send_async(msg)
+            self.comms_server.send_message_from_car(msg)
             return
 
         if event == LeaveTrackEvent:
@@ -79,6 +83,7 @@ class RadioInterface(Thread, EventHandler):
             # we have to set some field to let protobuf know the message type
             msg.pitting.timestamp = 1
             self.radio.send_async(msg)
+            self.comms_server.send_message_from_car(msg)
             return
 
         if event == EnterTrackEvent:
@@ -86,6 +91,7 @@ class RadioInterface(Thread, EventHandler):
             # we have to set some field to let protobuf know the message type
             msg.entering.timestamp = 1
             self.radio.send_async(msg)
+            self.comms_server.send_message_from_car(msg)
             return
 
 
@@ -100,6 +106,7 @@ class RadioInterface(Thread, EventHandler):
 
     def process_incoming(self, msg):
         RadioReceiveEvent.emit()
+        # todo : check hash of timestamp + seqNum + sender => if it's been handled then skip it
         if type(msg) == RaceStatus:
             logger.info("got race status message...{}".format(msg))
             RaceFlagStatusEvent.emit(flag=RaceFlagStatus.Name(msg.flag_status))

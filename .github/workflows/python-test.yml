@@ -16,6 +16,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Checkout protos from shared repo
+      uses: actions/checkout@v2
+      with:
+        repository: sprintf/lemon-pi-protos
+        path: './protos'
+    - name: Relink protos
+      run: |
+             rm lemon_pi/shared/protos/*.proto && \
+             ln -s `pwd`/protos/lemon-pi.proto lemon_pi/shared/protos/lemon-pi.proto
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
@@ -29,10 +38,6 @@ jobs:
         if [ -f requirements-linux.txt ]; then pip install -r requirements-linux.txt; fi
     - name: Generate protobufs
       run: |
-        arch=`uname -p`
-        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/protoc-3.14.0-linux-${arch}.zip
-        unzip protoc-*.zip -d protoc
-        export PATH="protoc/bin:$PATH"
         bin/gen-protos.sh
     - name: Lint with flake8
       run: |

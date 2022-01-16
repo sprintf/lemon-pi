@@ -6,13 +6,15 @@ from logging.handlers import RotatingFileHandler
 from threading import Thread
 from python_settings import settings
 
+from lemon_pi.pit.meringue_comms_pit import MeringueCommsPitsReader
 from lemon_pi.pit.race_position_transmitter import RacePositionTransmitter
 from lemon_pi.pit.radio_interface import RadioInterface
 from lemon_pi.pit.datasource.datasource1 import DataSource
 from lemon_pi.pit.datasource.datasource_handler import DataSourceHandler
 from lemon_pi.pit.leaderboard import RaceOrder
 from lemon_pi.pit.strategy_analyzer import StrategyAnalyzer
-from lemon_pi.shared.generated.messages_pb2 import ToPitMessage
+from lemon_pi.shared.meringue_comms import MeringueComms
+from lemon_pi_pb2 import ToPitMessage
 from lemon_pi.shared.radio import Radio
 from lemon_pi.shared.time_provider import LocalTimeProvider
 from lemon_pi.shared.usb_detector import UsbDetector
@@ -54,9 +56,19 @@ def run():
         # start the radio thread
         try:
             radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY, ToPitMessage())
-            RadioInterface(radio).start()
+            meringue_comms = MeringueCommsPitsReader(settings.RADIO_DEVICE, settings.TARGET_CARS, settings.RADIO_KEY)
+            RadioInterface(radio, meringue_comms).start()
             radio.start()
-            time.sleep(3)
+
+            meringue_comms.set_track_id(settings.TRACK_CODE)
+            if hasattr(settings, "MERINGUE_GRPC_OVERRIDE_URL"):
+                meringue_comms.configure(settings.MERINGUE_GRPC_OVERRIDE_URL)
+            else:
+                meringue_comms.configure(None)
+
+            # this launches a series of threads, so we do not actually call start() on it
+            meringue_comms.run()
+            time.sleep(2)
             gui.progress(85)
         except KeyError:
             print("ERROR : Lora radio device not detected")

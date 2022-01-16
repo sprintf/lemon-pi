@@ -1,10 +1,8 @@
 
-import time
 import blowfish
 
 from google.protobuf.message import Message
-from lemon_pi.shared.generated.messages_pb2 import ToCarMessage, ToPitMessage
-
+from lemon_pi.shared.message_postmarker import MessagePostmarker
 
 class MessageTooLongException(Exception):
     pass
@@ -17,22 +15,11 @@ class MessageEncoder:
         self.sender = sender
         self.key = key
         self.cipher = blowfish.Cipher(key.encode("UTF-8")) if len(key) else None
+        self.postmarker = MessagePostmarker.get_instance(sender)
 
     def encode(self, msg:Message) -> [bytes]:
-        self.seq += 1
-        subfield = None
-        if isinstance(msg, ToCarMessage):
-            subfield = msg.WhichOneof("to_car")
-        if isinstance(msg, ToPitMessage):
-            subfield = msg.WhichOneof("to_pit")
-
-        if subfield is None:
-            raise Exception("no particular message type indicated")
-
-        subfield_attr = getattr(msg, subfield)
-        setattr(subfield_attr, "seq_num", self.seq)
-        setattr(subfield_attr, "sender", self.sender)
-        setattr(subfield_attr, "timestamp", int(time.time()))
+        # stamp the message, in case this hasn't happened yet
+        self.postmarker.stamp(msg)
 
         payload = msg.SerializeToString()
         encrypted_payload = self.__do_encrypt(payload)

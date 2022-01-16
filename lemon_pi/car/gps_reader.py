@@ -20,7 +20,7 @@ from python_settings import settings
 
 from lemon_pi.shared.data_provider_interface import GpsProvider
 from lemon_pi.shared.events import EventHandler
-from lemon_pi.shared.generated.messages_pb2 import GpsPosition
+from lemon_pi_pb2 import GpsPosition
 from lemon_pi.shared.usb_detector import UsbDetector, UsbDevice
 
 logger = logging.getLogger(__name__)
@@ -243,7 +243,7 @@ if __name__ == "__main__":
 
     UsbDetector.init()
     tracker = GpsReader()
-    tracker.set_cycle(0.5)
+    tracker.set_cycle(1.0)
     tracker.register_position_listener(FileLogger())
     tracker.run()
 

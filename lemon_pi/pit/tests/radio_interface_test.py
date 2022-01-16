@@ -5,7 +5,7 @@ import time
 from lemon_pi.pit.event_defs import RaceStatusEvent, LapCompletedEvent, PingEvent, PittingEvent, TelemetryEvent, \
     SendTargetTimeEvent
 from lemon_pi.pit.radio_interface import RadioInterface
-from lemon_pi.shared.generated.messages_pb2 import Ping, EnteringPits, CarTelemetry, RaceFlagStatus
+from lemon_pi_pb2 import Ping, EnteringPits, CarTelemetry, RaceFlagStatus
 from python_settings import settings
 import lemon_pi.config.test_settings as my_local_settings
 from lemon_pi.shared.tests.lemon_pi_test_case import LemonPiTestCase
@@ -15,17 +15,19 @@ if not settings.configured:
 
 class RadioInterfaceTestCase(LemonPiTestCase):
 
+    @patch("lemon_pi.shared.meringue_comms.MeringueComms")
     @patch("lemon_pi.shared.radio.Radio")
-    def test_flags(self, radio):
-        ri = RadioInterface(radio)
+    def test_flags(self, radio, comms):
+        ri = RadioInterface(radio, comms)
         for flag in ['Red', 'Green', 'Black', 'Yellow', '']:
             radio.send_async = MagicMock()
             ri.handle_event(RaceStatusEvent, flag=flag)
             radio.send_async.assert_called_once()
 
+    @patch("lemon_pi.shared.meringue_comms.MeringueComms")
     @patch("lemon_pi.shared.radio.Radio")
-    def test_race_position(self, radio):
-        ri = RadioInterface(radio)
+    def test_race_position(self, radio, comms):
+        ri = RadioInterface(radio, comms)
         radio.send_async = MagicMock()
         ri.handle_event(LapCompletedEvent, car='1', laps=2, position=3)
         fields = radio.send_async.call_args.args[0]
@@ -33,9 +35,10 @@ class RadioInterfaceTestCase(LemonPiTestCase):
         self.assertEqual(2, fields.race_position.lap_count)
         self.assertEqual(3, fields.race_position.position)
 
+    @patch("lemon_pi.shared.meringue_comms.MeringueComms")
     @patch("lemon_pi.shared.radio.Radio")
-    def test_race_position_behind(self, radio):
-        ri = RadioInterface(radio)
+    def test_race_position_behind(self, radio, comms):
+        ri = RadioInterface(radio, comms)
         radio.send_async = MagicMock()
         ri.handle_event(LapCompletedEvent, car='1', laps=2, position=3, ahead="181", gap="5 laps")
         fields = radio.send_async.call_args.args[0]
@@ -45,9 +48,10 @@ class RadioInterfaceTestCase(LemonPiTestCase):
         self.assertEqual("181", fields.race_position.car_ahead.car_number)
         self.assertEqual("5 laps", fields.race_position.car_ahead.gap_text)
 
+    @patch("lemon_pi.shared.meringue_comms.MeringueComms")
     @patch("lemon_pi.shared.radio.Radio")
-    def test_race_position_with_flag(self, radio):
-        ri = RadioInterface(radio)
+    def test_race_position_with_flag(self, radio, comms):
+        ri = RadioInterface(radio, comms)
         radio.send_async = MagicMock()
         ri.handle_event(LapCompletedEvent, car='1', laps=2, position=3, ahead="181", flag="Green")
         fields = radio.send_async.call_args.args[0]
@@ -57,18 +61,20 @@ class RadioInterfaceTestCase(LemonPiTestCase):
         self.assertEqual("181", fields.race_position.car_ahead.car_number)
         self.assertEqual(RaceFlagStatus.GREEN, fields.race_position.flag_status)
 
+    @patch("lemon_pi.shared.meringue_comms.MeringueComms")
     @patch("lemon_pi.shared.radio.Radio")
-    def test_target_time_int(self, radio):
-        ri = RadioInterface(radio)
+    def test_target_time_int(self, radio, comms):
+        ri = RadioInterface(radio, comms)
         radio.send_async = MagicMock()
         ri.handle_event(SendTargetTimeEvent, car='1', target_time=0)
         fields = radio.send_async.call_args.args[0]
         self.assertEqual("1", fields.set_target.car_number)
         self.assertEqual(0.0, fields.set_target.target_lap_time)
 
+    @patch("lemon_pi.shared.meringue_comms.MeringueComms")
     @patch("lemon_pi.shared.radio.Radio")
-    def test_target_time_float(self, radio):
-        ri = RadioInterface(radio)
+    def test_target_time_float(self, radio, comms):
+        ri = RadioInterface(radio, comms)
         radio.send_async = MagicMock()
         ri.handle_event(SendTargetTimeEvent, car='1', target_time=128.5)
         fields = radio.send_async.call_args.args[0]
@@ -76,7 +82,7 @@ class RadioInterfaceTestCase(LemonPiTestCase):
         self.assertEqual(128.5, fields.set_target.target_lap_time)
 
     def test_ping_processing(self):
-        ri = RadioInterface(MagicMock())
+        ri = RadioInterface(MagicMock(), MagicMock())
         handler = MagicMock()
         PingEvent.register_handler(handler)
         ping = Ping()
@@ -86,7 +92,7 @@ class RadioInterfaceTestCase(LemonPiTestCase):
         handler.handle_event.assert_called_once_with(PingEvent, car=ping.sender, ts=ping.timestamp)
 
     def test_pitting_processing(self):
-        ri = RadioInterface(MagicMock())
+        ri = RadioInterface(MagicMock(), MagicMock())
         handler = MagicMock()
         PittingEvent.register_handler(handler)
         pit = EnteringPits()
@@ -95,7 +101,7 @@ class RadioInterfaceTestCase(LemonPiTestCase):
         handler.handle_event.assert_called_once_with(PittingEvent, car=pit.sender)
 
     def test_telemetry_processing(self):
-        ri = RadioInterface(MagicMock())
+        ri = RadioInterface(MagicMock(), MagicMock())
         handler = MagicMock()
         TelemetryEvent.register_handler(handler)
         car = CarTelemetry()

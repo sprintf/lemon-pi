@@ -11,7 +11,8 @@ from lemon_pi.pit.event_defs import (
     LeavingPitEvent
 )
 from lemon_pi.shared.events import EventHandler
-from lemon_pi.shared.generated.messages_pb2 import (
+from lemon_pi.shared.meringue_comms import MeringueComms
+from lemon_pi_pb2 import (
     EnteringPits,
     Ping,
     CarTelemetry,
@@ -30,9 +31,10 @@ logger = logging.getLogger(__name__)
 
 class RadioInterface(Thread, EventHandler):
 
-    def __init__(self, radio: Radio):
+    def __init__(self, radio: Radio, comms_server: MeringueComms):
         Thread.__init__(self, daemon=True)
         self.radio = radio
+        self.comms_server = comms_server
         RaceStatusEvent.register_handler(self)
         LapCompletedEvent.register_handler(self)
         SendMessageEvent.register_handler(self)
@@ -73,6 +75,7 @@ class RadioInterface(Thread, EventHandler):
         msg = ToCarMessage()
         msg.race_status.flag_status = self.set_flag_status(flag)
         self.radio.send_async(msg)
+        self.comms_server.send_message_to_car(msg)
 
     @classmethod
     def set_flag_status(cls, flag):
@@ -103,23 +106,27 @@ class RadioInterface(Thread, EventHandler):
         else:
             # run it in foreground for unittests
             delayed_send.run()
+        self.comms_server.send_message_to_car(msg)
 
     def send_driver_message(self, car="", msg=""):
         wrapper = ToCarMessage()
         wrapper.message.text = msg
         wrapper.message.car_number = car
         self.radio.send_async(wrapper)
+        self.comms_server.send_message_to_car(wrapper)
 
     def send_target_time(self, car="", target_time=2.0):
         wrapper = ToCarMessage()
         wrapper.set_target.car_number = car
         wrapper.set_target.target_lap_time = target_time
         self.radio.send_async(wrapper)
+        self.comms_server.send_message_to_car(wrapper)
 
     def send_fast_lap_reset(self, car=""):
         wrapper = ToCarMessage()
         wrapper.reset_fast_lap.car_number = car
         self.radio.send_async(wrapper)
+        self.comms_server.send_message_to_car(wrapper)
 
     @classmethod
     def convert_to_event(cls, proto_msg):
