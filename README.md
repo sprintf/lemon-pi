@@ -10,19 +10,25 @@ A Raspberry-Pi based dashboard display for endurance car racers.
 
 Under active hackery, but the basic premise is to solve the following issues
 1. provide a display of the current time
-2. provide an indication of the amount of fuel remaining and the rate it is being used
-3. boldly inform the driver when the engine is overheating
-4. let the driver know their position in the race, and the gaps to the cars around them
-5. provide a predictive/delta lap timer
-6. avoid over-burdening the driver with visual information by making audio announcements in the drivers ear.
+2. boldly inform the driver when the engine is overheating
+3. let the driver know their position in the race, and the gaps to the cars around them
+4. provide a predictive/delta lap timer
+5. avoid over-burdening the driver with visual information by making audio announcements in the drivers ear.
 
 In order to achieve the above we use a Raspberry Pi and a screen. The Rpi attaches to the OBD connector in the car and pulls in coolant temperature as well as constantly monitoring MAF in order to infer the fuel usage (that bit is fairly unreliable)
 
 We also use GPS, which allows us to detect when the car crosses the start/finish line, and then show per-lap timing and fuel usage.
 
-And we use [Lora](https://en.wikipedia.org/wiki/LoRa), a IoT radio mechanism to send data from the car to the pits and back to the car again.
+We started off using [Lora](https://en.wikipedia.org/wiki/LoRa),
+a IoT radio mechanism to send data from the car to the pits and back to the car again,
+but it's turning out to be easier to put a phone in the car as a personal
+hotspot and just use Wifi from the RPi to the cell phone. Unlike radio,
+which is peer-to-peer, we built a server to handle the communications
+between the car and the pit. The server is called [Meringue](https://github.com/sprintf/lemon-pi-meringue). 
 
-The target hardware is to use Raspberry Pi in the car and a Mac in the pits, although all the software is common-or-garden Python so it should run on Windows/Linux in the pits too. 
+
+The target hardware is to use Raspberry Pi in the car and a Mac in the pits,
+although all the software is common-or-garden Python so it should run on Windows/Linux in the pits too. 
 
 # Pit Software
 Lemon-Pi has a pit module that is designed to run on a Mac. 
@@ -69,7 +75,8 @@ Global Sat BU3-353S4 $28.38 [Amazon Link](https://www.amazon.com/GlobalSat-BU-35
 ## OBD 
 OBD USB $16 [Amazon Link](https://www.amazon.com/gp/product/B07MNX424C/ref=ppx_yo_dt_b_asin_title_o04_s00?ie=UTF8&psc=1) 
 
-## Lora Radio 
+## Lora Radio
+ _Being phased out in favor of internet connection in car + pit_
 Lostik Lora Radio [Ronoth](https://ronoth.com/products/lostik) you'll need may need one or two of these [cables](https://www.amazon.com/gp/product/B089ZV9Y31/ref=ppx_yo_dt_b_asin_title_o00_s00?ie=UTF8&psc=1) so you can elevate the antenna.
 
 All the above plug-and-play with the Raspberry Pi.
