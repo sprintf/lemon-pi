@@ -37,8 +37,6 @@ class MeringueComms:
         else:
             url = self._lookup_service_url()
             logger.info(f"connecting to secure gRPC channel at {url}")
-            ca_cert = '/Users/pauln/perplexus_public_key.pem'
-            client_certs = open(ca_cert).read()
             credentials = grpc.ssl_channel_credentials()
             self.channel = grpc.secure_channel(f"{url}:443", credentials)
             logger.info("secure channel established")

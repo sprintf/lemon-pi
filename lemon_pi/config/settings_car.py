@@ -63,3 +63,6 @@ VGATE_SEPARATION_FEET = 200
 
 # should we turn off wifi on the lemon-pi to conserve battery
 WIFI_DISABLED = True
+
+# don't make audio announcements (mac-only disablement)
+AUDIO_DISABLED = False

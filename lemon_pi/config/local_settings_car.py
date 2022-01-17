@@ -29,4 +29,4 @@ WIFI_DISABLED = False
 # MERINGUE_GRPC_OVERRIDE_URL = "localhost:9090"
 
 # don't make audio announcements (mac-only disablement)
-# AUDIO_DISABLED = True
+AUDIO_DISABLED = False

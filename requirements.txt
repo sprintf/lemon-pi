@@ -3,8 +3,8 @@ freezegun==1.0.0
 google-cloud-storage==1.42.0
 gmplot==1.4.1
 gps==3.19
-grpcio==1.41.1
-grpcio-tools==1.41.1
+grpcio==1.40.0
+grpcio-tools==1.40.0
 guizero==1.1.1
 haversine==2.3.0
 numpy==1.19.4
