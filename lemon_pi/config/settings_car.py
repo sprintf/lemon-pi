@@ -66,3 +66,4 @@ WIFI_DISABLED = True
 
 # don't make audio announcements (mac-only disablement)
 AUDIO_DISABLED = False
+
