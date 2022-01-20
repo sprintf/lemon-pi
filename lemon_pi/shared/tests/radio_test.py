@@ -33,10 +33,10 @@ class RadioTestCase(unittest.TestCase):
 
         # expect four calls : stop receiving, light on, tx, light off
         self.assertEqual(4, protocol.send_cmd.call_count)
-        self.assertEqual("radio rxstop", protocol.send_cmd.call_args_list[0].args[0])
-        self.assertEqual("sys set pindig GPIO11 1", protocol.send_cmd.call_args_list[1].args[0])
-        self.assertTrue(protocol.send_cmd.call_args_list[2].args[0].startswith("radio tx "))
-        self.assertEqual("sys set pindig GPIO11 0", protocol.send_cmd.call_args_list[3].args[0])
+        self.assertEqual("radio rxstop", protocol.send_cmd.mock_calls[0][1][0])
+        self.assertEqual("sys set pindig GPIO11 1", protocol.send_cmd.mock_calls[1][1][0])
+        self.assertTrue(protocol.send_cmd.mock_calls[2][1][0].startswith("radio tx "))
+        self.assertEqual("sys set pindig GPIO11 0", protocol.send_cmd.mock_calls[3][1][0])
 
     def test_radio_freq(self):
         radio = Radio("team", "password", ToPitMessage(), ser=MagicMock())
