@@ -81,7 +81,7 @@ def run():
             # filter race updates down to updates related to our car
             updater = DataSourceHandler(leaderboard, settings.TARGET_CARS)
             # provide a means to send initial race position to cars
-            position_transmitter = RacePositionTransmitter(leaderboard, settings.TARGET_CARS)
+            position_transmitter = RacePositionTransmitter(leaderboard)
             # provide a strategy analyzer
             sa = StrategyAnalyzer(leaderboard, settings.TARGET_CARS)
             sa.start()
