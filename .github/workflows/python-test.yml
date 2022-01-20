@@ -25,15 +25,16 @@ jobs:
       run: |
              rm lemon_pi/shared/protos/*.proto && \
              ln -s `pwd`/protos/lemon-pi.proto lemon_pi/shared/protos/lemon-pi.proto
-    - name: Set up Python 3.8
+    - name: Set up Python 3.7
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8
+        python-version: 3.7
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install wget espeak
         python -m pip install --upgrade pip
+        pip install --upgrade setuptools
         pip install flake8
         if [ -f requirements-linux.txt ]; then pip install -r requirements-linux.txt; fi
     - name: Generate protobufs
