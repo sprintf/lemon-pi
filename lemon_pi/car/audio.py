@@ -104,7 +104,7 @@ class Audio(Thread, EventHandler):
             return
 
         if pos_in_class == pos:
-            self.announce("You are in P {pos}")
+            self.announce(f"You are in P {pos}")
         else:
             self.announce(f"You are P {pos_in_class} in class, P {pos} overall")
 
