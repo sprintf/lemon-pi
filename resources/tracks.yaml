@@ -13,8 +13,8 @@ tracks:
      code: "snma"
      start_finish_coords: "(38.161469,-122.454784),(38.161588,-122.454659)"
      start_finish_direction: "NW"
-     pit_entry_coords: "(38.158549,-122.452756),(38.158343,-122.452689)"
-     pit_entry_direction: "W"
+     pit_entry_coords: "(38.158761,-122.451792),(38.158751,-122.451679)"
+     pit_entry_direction: "S"
      pit_out_coords: "(38.161335,-122.454918),(38.161462, -122.454790)"
      pit_out_direction: "NW"
 
@@ -49,6 +49,8 @@ tracks:
      start_finish_direction: "SW"
      pit_entry_coords: "(36.588199,-121.754397),(36.588241,-121.754311)"
      pit_entry_direction: "NW"
+     pit_out_coords: "(36.585962,-121.756935),(36.585903,-121.756816)"
+     pit_out_direction: "SW"
 
   -  name: "Buttonwillow"
      code: "btnw"
