@@ -1,6 +1,6 @@
 
-# Autobahn Country Club, Joliet
-<a href="https://storage.googleapis.com/perplexus/public/tracks/autobahn-country-club,-joliet.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/autobahn-country-club,-joliet.jpg"></a>
+# Autobahn Country Club Joliet
+<a href="https://storage.googleapis.com/perplexus/public/tracks/autobahn-country-club-joliet.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/autobahn-country-club-joliet.jpg"></a>
 
 
 # Buttonwillow
