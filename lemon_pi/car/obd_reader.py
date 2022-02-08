@@ -8,42 +8,32 @@ import platform
 from threading import Thread
 from python_settings import settings
 
-from lemon_pi.car.display_providers import TemperatureProvider
-from lemon_pi.car.updaters import FuelUsageUpdater
+from lemon_pi.car.display_providers import TemperatureProvider, FuelProvider
 from lemon_pi.car.event_defs import OBDConnectedEvent, OBDDisconnectedEvent, ExitApplicationEvent
 from lemon_pi.shared.usb_detector import UsbDetector, UsbDevice
 
 logger = logging.getLogger(__name__)
 
 
-#
-#  useful reading : https://www.autoserviceprofessional.com/articles/6237-fuel-trim-how-it-works-and-how-to-make-it-work-for-you
-#
-# Fuel mass = Air mass x (short-term fuel trim x long-term fuel trim) divided by (equivalence ratio x 14.64)
-#
-# Although, I add the short and long term fuel trims together as it makes more sense (to me)
-#
-class ObdReader(Thread, TemperatureProvider):
+class ObdReader(Thread, TemperatureProvider, FuelProvider):
+
+    # todo : have a enable/disabled flag on these, and disable any that give errors
 
     refresh_rate = {
         obd.commands.COOLANT_TEMP: 10,
-#        obd.commands.FUEL_STATUS: 1,
-#        obd.commands.LONG_FUEL_TRIM_1: 10,
-#        obd.commands.SHORT_FUEL_TRIM_1: 0.1,
-        obd.commands.MAF: 0.2,
+        obd.commands.FUEL_LEVEL: 10,
     }
 
-    def __init__(self, fuel_listener: FuelUsageUpdater):
+    def __init__(self):
         Thread.__init__(self)
         self.working = False
         self.no_data_count = 0
         self.temp_f = 0
         # the time the temperature was last read from OBD
         self.temp_time = 0
-        self.short_term_fuel_trim = 0.0
-        self.long_term_fuel_trim = 0.0
+        self.fuel_level = 100
+        self.fuel_level_time = 0
         self.last_update_time = {}
-        self.fuel_listener = fuel_listener
         self.finished = False
         self.is_rpi = platform.system() == "Linux"
         ExitApplicationEvent.register_handler(self)
@@ -77,13 +67,15 @@ class ObdReader(Thread, TemperatureProvider):
                                 self.process_result(cmd, r)
                                 self.no_data_count = 0
                             else:
-                                logger.info("no data, waiting")
+                                logger.info(f"no data, removing {cmd}")
+                                del ObdReader.refresh_rate[cmd]
                                 time.sleep(0.5)
                                 # after 10 of these close the connection
                                 self.no_data_count += 1
                                 if self.no_data_count > 10:
                                     logger.info("giving up")
                                     connection.close()
+                                break
                     # I think we need MAF as fast as poss
                     # time.sleep(1)
             except Exception as e:
@@ -109,14 +101,19 @@ class ObdReader(Thread, TemperatureProvider):
             result.close()
             return None
 
+        logger.info(f"Car Connected")
         time.sleep(0.5)
 
         cmds = result.query(obd.commands.PIDS_A)
         if cmds.value:
-            logger.debug("available PIDS_A commands {}".format(cmds.value))
+            logger.info("available PIDS_A commands {}".format(cmds.value))
             OBDConnectedEvent.emit()
+            cmds = result.query(obd.commands.PIDS_B)
+            if cmds.value:
+                logger.info("available PIDS_B commands {}".format(cmds.value))
             return result
         else:
+            logger.info("no response to PIDS_A command")
             result.close()
 
         return None
@@ -128,19 +125,10 @@ class ObdReader(Thread, TemperatureProvider):
         if cmd == obd.commands.COOLANT_TEMP:
             self.temp_f = int(response.value.to('degF').magnitude)
             self.temp_time = response.time
-        elif cmd == obd.commands.MAF:
-            fuel_usage = self.calc_fuel_rate(response.value.to('gps').magnitude,
-                                             settings.FUEL_FIDDLE_PERCENT)
-            self.fuel_listener.update_fuel(fuel_usage, response.time)
-        elif cmd == obd.commands.SHORT_FUEL_TRIM_1:
+        elif cmd == obd.commands.FUEL_LEVEL:
             if response.value:
-                self.short_term_fuel_trim = response.value.magnitude
-        elif cmd == obd.commands.LONG_FUEL_TRIM_1:
-            if response.value:
-                self.long_term_fuel_trim = response.value.magnitude
-        elif cmd == obd.commands.FUEL_STATUS:
-            pass
-
+                self.fuel_level = int(response.value.magnitude)
+                self.fuel_level_time = response.time
         else:
             raise RuntimeWarning("no handler for {}".format(cmd))
 
@@ -149,18 +137,12 @@ class ObdReader(Thread, TemperatureProvider):
             return -1
         return self.temp_f
 
+    def get_fuel_percent_remaining(self) -> int:
+        # todo : see if it's been updated recently
+        return self.fuel_level
+
     def is_working(self) -> bool:
         return self.working
-
-    def calc_fuel_rate(self, maf_value, fuel_fiddle_percent):
-        raw_fuel_mass = maf_value / 14.64
-        trim_adjustment = raw_fuel_mass * ((self.short_term_fuel_trim + self.long_term_fuel_trim) / 100)
-        adjusted_fuel_mass = raw_fuel_mass + trim_adjustment
-        ml_per_second = adjusted_fuel_mass * (1000/757)
-        if fuel_fiddle_percent != 0:
-            adjustment = ml_per_second * (fuel_fiddle_percent / 100)
-            ml_per_second += adjustment
-        return ml_per_second
 
 
 if __name__ == "__main__":
@@ -172,10 +154,5 @@ if __name__ == "__main__":
                         datefmt='%Y-%m-%d %H:%M:%S',
                         level=logging.DEBUG)
 
-    class OBDLogger(FuelUsageUpdater):
-
-        def update_fuel(self, ml_per_second: float, time: float):
-            print("Fuel: {:.2f} ml per sec".format(ml_per_second))
-
     UsbDetector.init()
-    ObdReader(OBDLogger()).run()
+    ObdReader().run()

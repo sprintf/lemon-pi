@@ -22,9 +22,8 @@ gps_logger = logging.getLogger("gps-logger")
 
 class LapTracker(PositionUpdater, LapProvider, EventHandler):
 
-    def __init__(self, track: TrackLocation, listener: LapUpdater):
+    def __init__(self, track: TrackLocation):
         self.track = track
-        self.listener = listener
         self.on_track = False
         self.lap_start_time = time.time()
         self.last_pos = (0, 0)
@@ -59,16 +58,12 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                     # drivers view as their own
                     self.lap_count = 0
                     self.on_track = True
-                    if self.listener:
-                        self.listener.update_lap(0, 0)
                 else:
                     logger.info("completed lap!")
                     self.lap_count += 1
                     self.last_lap_time = lap_time
                     if self.best_lap_time is None or lap_time < self.best_lap_time:
                         self.best_lap_time = lap_time
-                    if self.listener:
-                        self.listener.update_lap(self.lap_count, self.last_lap_time)
                 self.lap_start_time = cross_time
 
                 RadioSyncEvent.emit(ts=cross_time)
@@ -137,7 +132,7 @@ if __name__ == "__main__":
                         level=logging.DEBUG)
     tracks = read_tracks()
 
-    tracker = LapTracker(tracks[1], None)
+    tracker = LapTracker(tracks[1])
     with open("traces/trace-1608347418.csv") as csvfile:
         points = csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC)
         x = 0

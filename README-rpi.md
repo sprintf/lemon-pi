@@ -42,7 +42,9 @@ pip3 install -r requirements-pi.txt
 7. fix up numpy dependency to work on rpi
 
 ```sh
+
 sudo apt-get install libatlas-base-dev
+
 ```
 
 8. Install protobuf 
