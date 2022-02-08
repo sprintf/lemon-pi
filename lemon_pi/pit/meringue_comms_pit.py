@@ -43,6 +43,8 @@ class MeringueCommsPitsReader(Thread, MeringueComms):
                 if error.code() == grpc.StatusCode.UNAVAILABLE:
                     logger.info("meringue server not available, sleeping")
                     sleep(60)
+                elif error.code() == grpc.StatusCode.UNKNOWN and error.details() == "Stream removed":
+                    logger.info("reconnecting to meringue, connection reset")
                 else:
                     logger.exception("unknown error")
                     sleep(10)

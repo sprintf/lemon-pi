@@ -54,14 +54,5 @@ class LapProvider:
 
 class FuelProvider:
 
-    def get_fuel_used_ml(self) -> int:
-        pass
-
-    def get_fuel_used_last_lap_ml(self) -> int:
-        pass
-
-    def get_fuel_used_last_hour_ml(self) -> int:
-        pass
-
     def get_fuel_percent_remaining(self) -> int:
         pass

@@ -39,11 +39,13 @@ pip3 install -e ./python-obd/
 pip3 install -r requirements-pi.txt
 ```
 
-7. fix up numpy dependency to work on rpi
+[comment]: <> (7. fix up numpy dependency to work on rpi)
 
-```sh
-sudo apt-get install libatlas-base-dev
-```
+[comment]: <> (```sh)
+
+[comment]: <> (sudo apt-get install libatlas-base-dev)
+
+[comment]: <> (```)
 
 8. Install protobuf 
 

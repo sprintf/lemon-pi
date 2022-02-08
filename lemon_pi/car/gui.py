@@ -407,22 +407,11 @@ class Gui(EventHandler):
     def create_fuel_widget(self, parent):
         result = Box(parent)
         result.set_border(4, "darkgreen")
-        Text(result, "FUEL (Gal)", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
-        total_box = Box(result, height=int(100 * Gui.SCALE_FACTOR), width=int(Gui.COL_WIDTH * 0.8))
-        Text(total_box, "Total\nUsed", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left")
-        Text(total_box, "--.--", size=Gui.TEXT_MED, color="lightgreen", font=self.font, align="left")
-
-        last_lap_box = Box(result, height=int(100 * Gui.SCALE_FACTOR), width=int(Gui.COL_WIDTH * 0.8))
-        Text(last_lap_box, "Last\nLap", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left")
-        # a wee spacer to align this row with the one above
-        Box(last_lap_box, width=12 * Gui.SCALE_FACTOR, height=10, align="left")
-        Text(last_lap_box, "--.--", size=Gui.TEXT_MED, color="lightgreen", font=self.font, align="left")
-
+        Text(result, "FUEL", size=Gui.TEXT_SMALL, color="lightgreen", font=self.font)
         remaining_box = Box(result, height=int(100 * Gui.SCALE_FACTOR), width=int(Gui.COL_WIDTH * 0.8))
         Text(remaining_box, "Rem.", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left")
         Text(remaining_box, "--.--", size=Gui.TEXT_MED, color="lightgreen", font=self.font, align="left")
         Text(remaining_box, "%", size=Gui.TEXT_TINY, color="lightgreen", font=self.font, align="left")
-
         return result
 
     def create_instructions(self, parent):
@@ -593,14 +582,7 @@ class Gui(EventHandler):
 
     def __update_fuel(self, provider: FuelProvider):
         # children offsets:
-        total_used_box : Box = self.fuel_display.children[1]
-        # last_hour_box : Box  = self.fuel_display.children[2]
-        last_lap_box : Box = self.fuel_display.children[2]
-        remaining_box : Box = self.fuel_display.children[3]
-
-        total_used_box.children[1].value = "{:02.2f}".format(provider.get_fuel_used_ml() / MILLILITRES_PER_GALLON)
-        # last_hour_box.children[1].value = "{:02.2f}".format(provider.get_fuel_used_last_hour_ml() / MILLILITRES_PER_GALLON)
-        last_lap_box.children[1].value = "{:1.02f}".format(provider.get_fuel_used_last_lap_ml() / MILLILITRES_PER_GALLON)
+        remaining_box : Box = self.fuel_display.children[1]
         remaining_box.children[1].value = "{:02d}".format(provider.get_fuel_percent_remaining())
 
     def __identify_font(self, platform):

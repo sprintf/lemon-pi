@@ -8,7 +8,6 @@ from lemon_pi.car.event_defs import ExitApplicationEvent
 from lemon_pi.car.gui import Gui
 from lemon_pi.car.gps_reader import GpsReader
 from lemon_pi.car.lap_session_store import LapSessionStore
-from lemon_pi.car.maf_analyzer import MafAnalyzer
 from lemon_pi.car.meringue_comms_car import MeringueCommsCar
 from lemon_pi.car.obd_reader import ObdReader
 from lemon_pi.car.lap_tracker import LapTracker
@@ -97,12 +96,11 @@ def init():
         StateMachine.init()
         MovementListener()
 
-        maf_analyzer = MafAnalyzer(lap_logger)
-        obd = ObdReader(maf_analyzer)
+        obd = ObdReader()
         gps = GpsReader()
         radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY, ToCarMessage())
         meringue_comms = MeringueCommsCar(settings.RADIO_DEVICE, settings.RADIO_KEY)
-        radio_interface = RadioInterface(radio, meringue_comms, obd, None, maf_analyzer)
+        radio_interface = RadioInterface(radio, meringue_comms, obd, None, obd)
         meringue_comms.set_radio_interface(radio_interface)
         meringue_comms.register_gps_provider(gps)
 
@@ -130,7 +128,7 @@ def init():
         gui.register_speed_provider(gps)
         gui.register_time_provider(LocalTimeProvider())
         gui.register_temp_provider(obd)
-        gui.register_fuel_provider(maf_analyzer)
+        gui.register_fuel_provider(obd)
 
         logger.info("reading tracks")
         tracks: [TrackLocation] = read_tracks()
@@ -149,7 +147,7 @@ def init():
         # initialize the store that can read previous driving session
         # data from this track
         LapSessionStore.init(closest_track)
-        lap_tracker = LapTracker(closest_track, maf_analyzer)
+        lap_tracker = LapTracker(closest_track)
         gps.register_position_listener(lap_tracker)
         gui.register_lap_provider(lap_tracker)
         radio_interface.register_lap_provider(lap_tracker)
