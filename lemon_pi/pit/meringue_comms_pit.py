@@ -23,7 +23,7 @@ class MeringueCommsPitsReader(Thread, MeringueComms):
         self.stopped: bool = False
 
     def per_car_runner(self, car_num):
-        logger.info(f"launching reciever thread for car {car_num}")
+        logger.info(f"launching receiver thread for car {car_num}")
         cn = CarNumber()
         cn.car_number = car_num
         while not self.stopped:

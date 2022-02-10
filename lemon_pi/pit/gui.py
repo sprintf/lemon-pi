@@ -288,19 +288,18 @@ class Gui:
         self.status.value = text
 
     def __update_car_data__(self, car="", coolant_temp=0, lap_count=0, ts=0,
-                            last_lap_time=0, last_lap_fuel=0, fuel_percent=-1):
+                            last_lap_time=0, fuel_percent=-1):
         minutes = int(last_lap_time / 60)
         seconds = int(last_lap_time) % 60
-        entry = "{}  {:03d} {:02d}:{:02d}   {:03d}".format(car.ljust(3), lap_count, minutes, seconds, last_lap_fuel)
+        entry = "{}  {:03d} {:02d}:{:02d}   {:03d}".format(car.ljust(3), lap_count, minutes, seconds, fuel_percent)
 
         # always 1 in here for the title row
         if len(self.lap_list.items) > 1:
             top_entry = self.lap_list.items[1]
             top_lap = int(top_entry.split(' ')[0])
             if top_lap == lap_count:
-                if last_lap_fuel > 0:
-                    self.lap_list.insert(1, entry)
-                    self.lap_list.remove(2)
+                self.lap_list.insert(1, entry)
+                self.lap_list.remove(2)
             else:
                 self.lap_list.insert(1, entry)
         else:

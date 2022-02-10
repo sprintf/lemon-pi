@@ -70,7 +70,6 @@ class RadioInterface(Thread, EventHandler):
             msg.telemetry.coolant_temp = self.temp_provider.get_temp_f()
             msg.telemetry.last_lap_time = self.lap_provider.get_last_lap_time()
             msg.telemetry.lap_count = self.lap_provider.get_lap_count()
-            msg.telemetry.last_lap_fuel_usage = self.fuel_provider.get_fuel_used_last_lap_ml()
             msg.telemetry.fuel_remaining_percent = self.fuel_provider.get_fuel_percent_remaining()
             # we send the event asynchronously, because the radio can take multiple seconds
             # to transmit, so there is no guarantee that this message will be sent exactly now
