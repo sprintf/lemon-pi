@@ -39,7 +39,6 @@ PingEvent = Event("ping")
 #   coolant_temp=
 #   lap_count=
 #   last_lap_time=
-#   last_lap_fuel=
 #   fuel_percent=
 TelemetryEvent = Event("telemetry")
 

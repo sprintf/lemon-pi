@@ -17,7 +17,7 @@ from lemon_pi_pb2 import (
     Ping,
     CarTelemetry,
     RaceFlagStatus,
-    ToCarMessage, LeavingPits
+    ToCarMessage, LeavingPits, RaceStatus, RacePosition
 )
 from lemon_pi.shared.radio import Radio
 from python_settings import settings
@@ -144,12 +144,30 @@ class RadioInterface(Thread, EventHandler):
                                 coolant_temp=proto_msg.coolant_temp,
                                 lap_count=proto_msg.lap_count,
                                 last_lap_time=proto_msg.last_lap_time,
-                                last_lap_fuel=proto_msg.last_lap_fuel_usage,
                                 fuel_percent=proto_msg.fuel_remaining_percent)
             return
 
         if type(proto_msg) == Ping:
             PingEvent.emit(car=proto_msg.sender, ts=proto_msg.timestamp)
+            return
+
+        if type(proto_msg) == RaceStatus:
+            # prevent us calling ourselves
+            RaceStatusEvent.deregister_handler(RadioInterface)
+            RaceStatusEvent.emit(flag=RaceFlagStatus.Name(proto_msg.flag_status))
+            return
+
+        if type(proto_msg) == RacePosition:
+            # prevent us calling ourselves
+            LapCompletedEvent.deregister_handler(RadioInterface)
+            LapCompletedEvent.emit(
+                car=proto_msg.car_number,
+                laps=proto_msg.lap_count,
+                position=proto_msg.position,
+                class_position=proto_msg.position_in_class,
+                last_lap_time=proto_msg.last_lap_time,
+                gap=proto_msg.car_ahead.gap_text,
+            )
             return
 
         logger.info("unknown radio message {}".format(type(proto_msg)))

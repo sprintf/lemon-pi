@@ -36,6 +36,16 @@ class Event:
         else:
             logger.error("{} attempted to register same handler twice {}", self.name, handler.__class__)
 
+    def deregister_handler(self, handler_type: type):
+        target = None
+        for handler in self.handlers:
+            if isinstance(handler, handler_type):
+                logger.info(f"removing {handler_type} event handler")
+                target = handler
+                break
+        if target:
+            self.handlers.remove(target)
+
     def emit(self, **kwargs):
         if self == Event.last_event and self.suppress_logs:
             Event.last_event_count += 1
