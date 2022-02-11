@@ -67,8 +67,11 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
                                 self.process_result(cmd, r)
                                 self.no_data_count = 0
                             else:
-                                logger.info(f"no data, removing {cmd}")
-                                del ObdReader.refresh_rate[cmd]
+                                logger.info(f"no data, for {cmd}")
+                                if self.last_update_time[cmd] == 0.0:
+                                    # we never got any data for this command, remove it
+                                    del ObdReader.refresh_rate[cmd]
+                                    logger.info("removed {cmd}")
                                 time.sleep(0.5)
                                 # after 10 of these close the connection
                                 self.no_data_count += 1
