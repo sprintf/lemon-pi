@@ -26,7 +26,6 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
 
     def __init__(self):
         Thread.__init__(self)
-        self.data_received = {}
         self.working = False
         self.no_data_count = 0
         self.temp_f = 0
