@@ -202,7 +202,10 @@ class Gui(EventHandler):
             self._col_display(5)
             return
         if event == StateChangeSettingOffEvent or event == EnterTrackEvent:
-            self._col_display(3)
+            if settings.OBD_DISABLED:
+                self._col_display(7)
+            else:
+                self._col_display(3)
             return
 
         if event == RadioReceiveEvent:
@@ -252,7 +255,7 @@ class Gui(EventHandler):
             return
 
         # go back to the fuel display if we complete a lap and it is not showing.
-        if event == CompleteLapEvent and not self.col3.visible:
+        if event == CompleteLapEvent and not self.col3.visible and not settings.OBD_DISABLED:
             self._col_display(3)
             return
 
