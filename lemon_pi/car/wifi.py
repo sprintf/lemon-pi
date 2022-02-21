@@ -21,7 +21,7 @@ class WifiManager:
         elif sys == "Darwin":
             return ['ifconfig', 'en0']
         else:
-            raise Exception("unknwn platform")
+            raise Exception("unknown platform")
 
 
     @classmethod
@@ -48,13 +48,13 @@ class WifiManager:
         if platform.system() == "Linux":
             # if there's a particular wifi in settings then make sure we're configured
             needs_writing = False
-            if "WIFI_SSID" in settings:
+            if settings.WIFI_SSID:
                 with open('/etc/wpa_supplicant/wpa_supplicant.conf') as wifi_config_file:
                     whole_file = wifi_config_file.read()
-                    if not settings['WIFI_SSID'] in whole_file or not settings['WIFI_PASSWORD'] in whole_file:
+                    if not settings.WIFI_SSID in whole_file or not settings.WIFI_PASSWORD in whole_file:
                         needs_writing = True
                 if needs_writing:
-                    WifiManager._write_wifi_config_file(settings['WIFI_SSID'], settings['WIFI_PASSWORD'])
+                    WifiManager._write_wifi_config_file(settings.WIFI_SSID, settings.WIFI_PASSWORD)
                     WifiManager.disable_wifi()
 
             WifiManager._command(['sudo', 'rfkill', 'unblock', 'wifi'])
