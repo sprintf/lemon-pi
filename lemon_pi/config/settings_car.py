@@ -65,7 +65,7 @@ VGATE_SEPARATION_FEET = 200
 WIFI_DISABLED = True
 
 # You can set these in here, but you must manually run
-#  sudo python lemon_pi/car/wifi.py
+#  sudo PYTHONPATH=. ./venv/bin/python3 lemon_pi/car/wifi.py
 # This command will update the local settings, then reboot to connect
 WIFI_SSID = None
 WIFI_PASSWORD = None
