@@ -3,22 +3,38 @@ import subprocess
 import platform
 import time
 import logging
+from python_settings import settings
+
+from lemon_pi.car.event_defs import WifiConnectedEvent, WifiDisconnectedEvent
 
 logger = logging.getLogger(__name__)
+
 
 
 class WifiManager:
 
     @classmethod
+    def _get_wifi_command(cls):
+        sys = platform.system()
+        if sys == "Linux":
+            return ['ifconfig', 'wlan0']
+        elif sys == "Darwin":
+            return ['ifconfig', 'en0']
+        else:
+            raise Exception("unknwn platform")
+
+
+    @classmethod
     def check_wifi_enabled(cls):
-        if platform.system() == "Linux":
-            logger.info("detecting wifi...")
-            response = WifiManager._command(['ifconfig', 'wlan0'])
-            if "RUNNING" in response and "inet " in response:
-                logger.info("wifi operating")
-                return True
-            else:
-                logger.info("wifi is disabled")
+        logger.info("detecting wifi...")
+        response = WifiManager._command(WifiManager._get_wifi_command())
+        if "RUNNING" in response and "inet " in response:
+            logger.info("wifi operating")
+            WifiConnectedEvent.emit()
+            return True
+        else:
+            logger.info("wifi is disabled")
+            WifiDisconnectedEvent.emit()
         return False
 
     @classmethod
@@ -30,10 +46,34 @@ class WifiManager:
     @classmethod
     def enable_wifi(cls):
         if platform.system() == "Linux":
+            # if there's a particular wifi in settings then make sure we're configured
+            needs_writing = False
+            if "WIFI_SSID" in settings:
+                with open('/etc/wpa_supplicant/wpa_supplicant.conf') as wifi_config_file:
+                    whole_file = wifi_config_file.read()
+                    if not settings['WIFI_SSID'] in whole_file or not settings['WIFI_PASSWORD'] in whole_file:
+                        needs_writing = True
+                if needs_writing:
+                    WifiManager._write_wifi_config_file(settings['WIFI_SSID'], settings['WIFI_PASSWORD'])
+                    WifiManager.disable_wifi()
+
             WifiManager._command(['sudo', 'rfkill', 'unblock', 'wifi'])
             logger.info("waiting for wifi to enable...")
-            time.sleep(7)
+            time.sleep(10)
             logger.info("that's enough waiting")
+            WifiManager.check_wifi_enabled()
+
+    @classmethod
+    def _write_wifi_config_file(cls, ssid, password):
+        with open('/etc/wpa_supplicant/wpa_supplicant.conf', 'a') as wifi_config_file:
+            network_setting = (
+                "network={"
+                f"ssid={ssid}"
+                f"psk={password}"
+                "}"
+            )
+            wifi_config_file.write(network_setting)
+
 
     @classmethod
     def _command(cls, args:[]):

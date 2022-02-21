@@ -40,6 +40,10 @@ OBDDisconnectedEvent = Event("OBD-Disconnected")
 GPSConnectedEvent = Event("GPS-Connected")
 GPSDisconnectedEvent = Event("GPS-Disconnected")
 
+### Wifi Connected
+WifiConnectedEvent = Event("Wifi-Connected")
+WifiDisconnectedEvent = Event("Wifi-Disconnected")
+
 ### Refuel event
 # percent_full=
 RefuelEvent = Event("Refuel")
