@@ -64,6 +64,9 @@ VGATE_SEPARATION_FEET = 200
 # should we turn off wifi on the lemon-pi to conserve battery
 WIFI_DISABLED = True
 
+# You can set these in here, but you must manually run
+#  sudo python lemon_pi/car/wifi.py
+# This command will update the local settings, then reboot to connect
 WIFI_SSID = None
 WIFI_PASSWORD = None
 

@@ -3,6 +3,7 @@ import subprocess
 import platform
 import time
 import logging
+import os
 from python_settings import settings
 
 from lemon_pi.car.event_defs import WifiConnectedEvent, WifiDisconnectedEvent
@@ -55,7 +56,6 @@ class WifiManager:
                         needs_writing = True
                 if needs_writing:
                     WifiManager._write_wifi_config_file(settings.WIFI_SSID, settings.WIFI_PASSWORD)
-                    WifiManager.disable_wifi()
 
             WifiManager._command(['sudo', 'rfkill', 'unblock', 'wifi'])
             logger.info("waiting for wifi to enable...")
@@ -68,8 +68,8 @@ class WifiManager:
         with open('/etc/wpa_supplicant/wpa_supplicant.conf', 'a') as wifi_config_file:
             network_setting = (
                 "network={"
-                f"ssid={ssid}"
-                f"psk={password}"
+                f"    ssid={ssid}"
+                f"    psk={password}"
                 "}"
             )
             wifi_config_file.write(network_setting)
@@ -79,4 +79,14 @@ class WifiManager:
     def _command(cls, args:[]):
         result = subprocess.run(args, stdout=subprocess.PIPE)
         return result.stdout.decode("UTF-8").strip()
+
+if __name__ == "__main__":
+    logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S',
+                        level=logging.INFO)
+
+    if not "SETTINGS_MODULE" in os.environ:
+        os.environ["SETTINGS_MODULE"] = "lemon_pi.config.local_settings_pit"
+
+    WifiManager._write_wifi_config_file(settings.WIFI_SSID, settings.WIFI_PASSWORD)
 
