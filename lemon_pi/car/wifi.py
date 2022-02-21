@@ -11,7 +11,6 @@ from lemon_pi.car.event_defs import WifiConnectedEvent, WifiDisconnectedEvent
 logger = logging.getLogger(__name__)
 
 
-
 class WifiManager:
 
     @classmethod
@@ -23,7 +22,6 @@ class WifiManager:
             return ['ifconfig', 'en0']
         else:
             raise Exception("unknown platform")
-
 
     @classmethod
     def check_wifi_enabled(cls):
@@ -52,7 +50,7 @@ class WifiManager:
             if settings.WIFI_SSID:
                 with open('/etc/wpa_supplicant/wpa_supplicant.conf') as wifi_config_file:
                     whole_file = wifi_config_file.read()
-                    if not settings.WIFI_SSID in whole_file or not settings.WIFI_PASSWORD in whole_file:
+                    if settings.WIFI_SSID not in whole_file or settings.WIFI_PASSWORD not in whole_file:
                         needs_writing = True
                 if needs_writing:
                     WifiManager._write_wifi_config_file(settings.WIFI_SSID, settings.WIFI_PASSWORD)
@@ -68,25 +66,24 @@ class WifiManager:
         with open('/etc/wpa_supplicant/wpa_supplicant.conf', 'a') as wifi_config_file:
             network_setting = """
 network={
-    ssid="%s"
-    psk="%s"
+    ssid="{0}"
+    psk="{1}"
 }
 """.format(ssid, password)
             wifi_config_file.write(network_setting)
 
-
     @classmethod
-    def _command(cls, args:[]):
+    def _command(cls, args):
         result = subprocess.run(args, stdout=subprocess.PIPE)
         return result.stdout.decode("UTF-8").strip()
+
 
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(name)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
                         level=logging.INFO)
 
-    if not "SETTINGS_MODULE" in os.environ:
-        os.environ["SETTINGS_MODULE"] = "lemon_pi.config.local_settings_pit"
+    if "SETTINGS_MODULE" not in os.environ:
+        os.environ["SETTINGS_MODULE"] = "lemon_pi.config.local_settings_car"
 
     WifiManager._write_wifi_config_file(settings.WIFI_SSID, settings.WIFI_PASSWORD)
-
