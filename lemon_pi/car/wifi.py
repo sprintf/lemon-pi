@@ -66,12 +66,12 @@ class WifiManager:
     @classmethod
     def _write_wifi_config_file(cls, ssid, password):
         with open('/etc/wpa_supplicant/wpa_supplicant.conf', 'a') as wifi_config_file:
-            network_setting = (
-                f"network={{"
-                f"    ssid=\"{ssid}\""
-                f"    psk=\"{password}\""
-                f"}}"
-            )
+            network_setting = """
+network={
+    ssid="%s"
+    psk="%s"
+}
+""".format(ssid, password)
             wifi_config_file.write(network_setting)
 
 
