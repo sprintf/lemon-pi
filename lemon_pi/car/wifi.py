@@ -4,6 +4,8 @@ import platform
 import time
 import logging
 import os
+from threading import Thread
+
 from python_settings import settings
 
 from lemon_pi.car.event_defs import WifiConnectedEvent, WifiDisconnectedEvent
@@ -12,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class WifiManager:
+
+    wifi_connected: bool = False
 
     @classmethod
     def _get_wifi_command(cls):
@@ -24,16 +28,29 @@ class WifiManager:
             raise Exception("unknown platform")
 
     @classmethod
+    def monitor_wifi(cls):
+        Thread(target=WifiManager.check_wifi_repeatedly, daemon=True).start()
+
+    @classmethod
+    def check_wifi_repeatedly(cls):
+        while True:
+            WifiManager.check_wifi_enabled()
+            time.sleep(5)
+
+    @classmethod
     def check_wifi_enabled(cls):
-        logger.info("detecting wifi...")
         response = WifiManager._command(WifiManager._get_wifi_command())
-        if "RUNNING" in response and "inet " in response:
-            logger.info("wifi operating")
-            WifiConnectedEvent.emit()
+        if "RUNNING" in response and "inet " in response and "active" in response:
+            if not WifiManager.wifi_connected:
+                logger.info("wifi operating")
+                WifiManager.wifi_connected = True
+                WifiConnectedEvent.emit()
             return True
         else:
-            logger.info("wifi is disabled")
-            WifiDisconnectedEvent.emit()
+            if WifiManager.wifi_connected:
+                logger.info("wifi is disconnected")
+                WifiManager.wifi_connected = False
+                WifiDisconnectedEvent.emit()
         return False
 
     @classmethod
