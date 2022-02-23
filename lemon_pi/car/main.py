@@ -90,7 +90,7 @@ def init():
 
         # turn wifi off now, to save battery
         if settings.WIFI_DISABLED:
-            WifiManager().disable_wifi()
+            WifiManager.disable_wifi()
         else:
             WifiManager.monitor_wifi()
 

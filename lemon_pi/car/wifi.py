@@ -40,7 +40,7 @@ class WifiManager:
     @classmethod
     def check_wifi_enabled(cls):
         response = WifiManager._command(WifiManager._get_wifi_command())
-        if "RUNNING" in response and "inet " in response and "active" in response:
+        if "RUNNING" in response and "inet " in response:
             if not WifiManager.wifi_connected:
                 logger.info("wifi operating")
                 WifiManager.wifi_connected = True
