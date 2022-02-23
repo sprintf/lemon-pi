@@ -2,9 +2,11 @@
 import time, os
 from threading import Thread
 
+from grpc._channel import _InactiveRpcError
+
 from lemon_pi.car.audio import Audio
 from lemon_pi.car.button import Button
-from lemon_pi.car.event_defs import ExitApplicationEvent
+from lemon_pi.car.event_defs import ExitApplicationEvent, WifiConnectedEvent, WifiDisconnectedEvent
 from lemon_pi.car.gui import Gui
 from lemon_pi.car.gps_reader import GpsReader
 from lemon_pi.car.lap_session_store import LapSessionStore
@@ -88,7 +90,9 @@ def init():
 
         # turn wifi off now, to save battery
         if settings.WIFI_DISABLED:
-            WifiManager().disable_wifi()
+            WifiManager.disable_wifi()
+        else:
+            WifiManager.monitor_wifi()
 
         # enable sound generation
         if not settings.AUDIO_DISABLED:
@@ -153,12 +157,14 @@ def init():
         radio_interface.register_lap_provider(lap_tracker)
         radio.register_gps_provider(gps)
         meringue_comms.set_track_id(closest_track.code)
-        if hasattr(settings, "MERINGUE_GRPC_OVERRIDE_URL"):
-            meringue_comms.configure(settings.MERINGUE_GRPC_OVERRIDE_URL)
+        configure_meringue(meringue_comms)
+        if not meringue_comms.is_ready():
+            logger.warning("failed to configure meringue, will keep retrying")
+            WifiDisconnectedEvent.emit()
+            Thread(target=retry_configuring_meringue, args=[meringue_comms], daemon=True)
         else:
-            meringue_comms.configure(None)
-        if not settings.WIFI_DISABLED:
-            meringue_comms.start()
+            WifiConnectedEvent.emit()
+
     except Exception:
         logger.exception("exception in initialization")
         ExitApplicationEvent.emit()
@@ -166,3 +172,24 @@ def init():
 Thread(target=init, daemon=True).start()
 
 gui.display()
+
+
+def retry_configuring_meringue(meringue_comms):
+    while(not meringue_comms.is_ready()):
+        configure_meringue(meringue_comms)
+        if not meringue_comms.is_ready():
+            logger.info("sleeping for 60s")
+            time.sleep(60)
+    WifiConnectedEvent.emit()
+
+
+def configure_meringue(meringue_comms):
+    try:
+        if hasattr(settings, "MERINGUE_GRPC_OVERRIDE_URL"):
+            meringue_comms.configure(settings.MERINGUE_GRPC_OVERRIDE_URL)
+        else:
+            meringue_comms.configure(None)
+        if not settings.WIFI_DISABLED:
+            meringue_comms.start()
+    except _InactiveRpcError:
+        logger.exception("exception configuring meringue")

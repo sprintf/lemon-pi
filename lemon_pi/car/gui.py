@@ -6,7 +6,7 @@ from lemon_pi.car.event_defs import (
     LeaveTrackEvent, StateChangePittedEvent, StateChangeSettingOffEvent, CompleteLapEvent, OBDConnectedEvent,
     OBDDisconnectedEvent, GPSConnectedEvent, GPSDisconnectedEvent, RaceFlagStatusEvent, DriverMessageEvent,
     ExitApplicationEvent, EnterTrackEvent, RadioReceiveEvent, ButtonPressEvent,
-    AudioAlarmEvent, SetTargetTimeEvent, RacePositionEvent, RacePersuerEvent)
+    AudioAlarmEvent, SetTargetTimeEvent, RacePositionEvent, RacePersuerEvent, WifiDisconnectedEvent, WifiConnectedEvent)
 
 import logging
 import platform
@@ -142,7 +142,7 @@ class Gui(EventHandler):
         Box(self.col2, height=24, width=int(Gui.COL_WIDTH * 0.8))
 
         # adding obd + gps images
-        (self.gps_image, self.radio_signal, self.obd_image) = self.create_gps_obd_images(self.col2)
+        (self.gps_image, self.radio_signal, self.obd_image, self.wifi_image) = self.create_gps_obd_images(self.col2)
         # add a quit button
         if settings.EXIT_BUTTON_ENABLED:
             PushButton(self.col2, image="resources/images/exitbutton.gif", command=self.quit)
@@ -167,6 +167,8 @@ class Gui(EventHandler):
         OBDDisconnectedEvent.register_handler(self)
         GPSConnectedEvent.register_handler(self)
         GPSDisconnectedEvent.register_handler(self)
+        WifiConnectedEvent.register_handler(self)
+        WifiDisconnectedEvent.register_handler(self)
         RaceFlagStatusEvent.register_handler(self)
         DriverMessageEvent.register_handler(self)
         RadioReceiveEvent.register_handler(self)
@@ -275,6 +277,14 @@ class Gui(EventHandler):
             self.gps_image.off()
             return
 
+        if event == WifiConnectedEvent:
+            self.wifi_image.on()
+            return
+
+        if event == WifiDisconnectedEvent:
+            self.wifi_image.off()
+            return
+
     def handle_keyboard(self, event_data):
         logger.info("Key Pressed : {}".format(event_data.key))
 
@@ -360,14 +370,18 @@ class Gui(EventHandler):
                           "resources/images/gps_ok.gif",
                           "resources/images/gps_off.gif",
                           align="left")
-        Box(result, width=32, height=32, align="left")
-        Text(result, "Radio", size=Gui.TEXT_TINY, color="darkgreen", align="left")
+        Box(result, width=28, height=32, align="left")
+        wifi = ToggleImage(result,
+                          "resources/images/wifi_ok.gif",
+                          "resources/images/wifi_off.gif",
+                          align="left")
+        Box(result, width=28, height=32, align="left")
         radio = FadingBox(result, width=32, height=32, align="left")
         obd = ToggleImage(result,
                           "resources/images/obd_ok.gif",
                           "resources/images/obd_off.gif",
                           align="right")
-        return gps, radio, obd
+        return gps, radio, obd, wifi
 
     def create_temp_widget(self, parent):
         result = AlertBox(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(112 * Gui.SCALE_FACTOR))

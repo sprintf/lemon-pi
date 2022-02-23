@@ -25,6 +25,9 @@ class MeringueComms:
         self.ready = False
         self.postmarker = MessagePostmarker.get_instance(sender)
 
+    def is_ready(self):
+        return self.ready
+
     def set_track_id(self, track_id):
         self.track_id = track_id
         logger.info(f"track id set to {track_id}")
