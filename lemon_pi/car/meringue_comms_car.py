@@ -52,7 +52,7 @@ class MeringueCommsCar(Thread, MeringueComms):
                                                      metadata=build_auth_header(self.track_id,
                                                                                 self.car_number,
                                                                                 self.key)):
-                    logger.info(f"received {wrapped_message}")
+                    logger.debug(f"received {wrapped_message}")
                     if isinstance(wrapped_message, ToCarMessage) and wrapped_message.HasField("to_car"):
                         car_msg = getattr(wrapped_message, wrapped_message.WhichOneof("to_car"))
                         self.radio_interface.process_incoming(car_msg)

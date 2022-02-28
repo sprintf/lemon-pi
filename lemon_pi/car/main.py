@@ -1,11 +1,11 @@
 
-import time, os
+import time
+import os
 from threading import Thread
 
 from grpc._channel import _InactiveRpcError
 
 from lemon_pi.car.audio import Audio
-from lemon_pi.car.button import Button
 from lemon_pi.car.event_defs import ExitApplicationEvent, WifiConnectedEvent, WifiDisconnectedEvent
 from lemon_pi.car.gui import Gui
 from lemon_pi.car.gps_reader import GpsReader
@@ -16,7 +16,6 @@ from lemon_pi.car.lap_tracker import LapTracker
 from lemon_pi.car.radio_interface import RadioInterface
 from lemon_pi.car.update_tracks import TrackUpdater
 from lemon_pi.car.wifi import WifiManager
-from lemon_pi.shared.meringue_comms import MeringueComms
 from lemon_pi_pb2 import ToCarMessage
 from lemon_pi.shared.time_provider import LocalTimeProvider
 from lemon_pi.car.track import TrackLocation, read_tracks
@@ -55,7 +54,10 @@ gps_logger.propagate = False
 handler = RotatingFileHandler("logs/lemon-pi.log",
                               maxBytes=1000000,
                               backupCount=10)
-handler.setFormatter(logging.Formatter(fmt='%(asctime)s.%(msecs)03d %(name)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
+handler.setFormatter(
+    logging.Formatter(
+        fmt='%(asctime)s.%(msecs)03d %(name)s %(levelname)s %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'))
 handler.setLevel(logging.INFO)
 logging.getLogger().addHandler(handler)
 logging.getLogger().setLevel(logging.INFO)
@@ -71,7 +73,29 @@ if not "SETTINGS_MODULE" in os.environ:
 #  1. launch UI
 #  2. fire up OBD thread
 #  3. fire up GPS thread
-#  4. fire up Lora
+#  4. fire up Wifi
+#  5. start talking to the server
+
+def retry_configuring_meringue(meringue_comms):
+    while not meringue_comms.is_ready():
+        configure_meringue(meringue_comms)
+        if not meringue_comms.is_ready():
+            logger.info("sleeping for 60s")
+            time.sleep(60)
+    WifiConnectedEvent.emit()
+
+
+def configure_meringue(meringue_comms):
+    try:
+        if hasattr(settings, "MERINGUE_GRPC_OVERRIDE_URL"):
+            meringue_comms.configure(settings.MERINGUE_GRPC_OVERRIDE_URL)
+        else:
+            meringue_comms.configure(None)
+        if not settings.WIFI_DISABLED:
+            meringue_comms.start()
+    except _InactiveRpcError:
+        logger.exception("exception configuring meringue")
+
 
 gui = Gui(settings.DISPLAY_WIDTH, settings.DISPLAY_HEIGHT)
 
@@ -141,7 +165,8 @@ def init():
         gui.present_main_app()
 
         # bring in a button listener, to read the hardware button
-        Button()
+        # disabled, as the button is completely unreliable in the car
+        # Button()
 
         logger.info("awaiting location to choose track")
         while not gps.is_working() or gps.get_lat_long() == (0, 0):
@@ -172,24 +197,3 @@ def init():
 Thread(target=init, daemon=True).start()
 
 gui.display()
-
-
-def retry_configuring_meringue(meringue_comms):
-    while(not meringue_comms.is_ready()):
-        configure_meringue(meringue_comms)
-        if not meringue_comms.is_ready():
-            logger.info("sleeping for 60s")
-            time.sleep(60)
-    WifiConnectedEvent.emit()
-
-
-def configure_meringue(meringue_comms):
-    try:
-        if hasattr(settings, "MERINGUE_GRPC_OVERRIDE_URL"):
-            meringue_comms.configure(settings.MERINGUE_GRPC_OVERRIDE_URL)
-        else:
-            meringue_comms.configure(None)
-        if not settings.WIFI_DISABLED:
-            meringue_comms.start()
-    except _InactiveRpcError:
-        logger.exception("exception configuring meringue")
