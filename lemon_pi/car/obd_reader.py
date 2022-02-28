@@ -17,8 +17,6 @@ logger = logging.getLogger(__name__)
 
 class ObdReader(Thread, TemperatureProvider, FuelProvider):
 
-    # todo : have a enable/disabled flag on these, and disable any that give errors
-
     refresh_rate = {
         obd.commands.COOLANT_TEMP: 10,
         obd.commands.FUEL_LEVEL: 10,
@@ -29,6 +27,7 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
         self.working = False
         self.no_data_count = 0
         self.temp_f = 0
+        self.initialization_time = time.time()
         # the time the temperature was last read from OBD
         self.temp_time = 0
         self.fuel_level = 100
@@ -68,10 +67,11 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
                                 self.no_data_count = 0
                             else:
                                 logger.info(f"no data, for {cmd}")
-                                if self.last_update_time[cmd] == 0.0:
+                                # keep trying for 5 minutes, then remove the setting
+                                if self.last_update_time[cmd] == 0.0 and time.time() - self.initialization_time > 300:
                                     # we never got any data for this command, remove it
                                     del ObdReader.refresh_rate[cmd]
-                                    logger.info("removed {cmd}")
+                                    logger.info(f"removed {cmd}")
                                 time.sleep(0.5)
                                 # after 10 of these close the connection
                                 self.no_data_count += 1
@@ -104,16 +104,16 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
             result.close()
             return None
 
-        logger.info(f"Car Connected")
+        logger.info("Car Connected")
         time.sleep(0.5)
 
         cmds = result.query(obd.commands.PIDS_A)
         if cmds.value:
-            logger.info("available PIDS_A commands {}".format(cmds.value))
+            logger.info(f"available PIDS_A commands {cmds.value}")
             OBDConnectedEvent.emit()
             cmds = result.query(obd.commands.PIDS_B)
             if cmds.value:
-                logger.info("available PIDS_B commands {}".format(cmds.value))
+                logger.info(f"available PIDS_B commands {cmds.value}")
             return result
         else:
             logger.info("no response to PIDS_A command")
@@ -124,7 +124,7 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
     def process_result(self, cmd, response: OBDResponse):
         if response.value is None:
             return
-        logger.debug("processing {} at {}".format(cmd, response))
+        logger.debug(f"processing {cmd} at {response}")
         if cmd == obd.commands.COOLANT_TEMP:
             self.temp_f = int(response.value.to('degF').magnitude)
             self.temp_time = response.time
@@ -133,7 +133,7 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
                 self.fuel_level = int(response.value.magnitude)
                 self.fuel_level_time = response.time
         else:
-            raise RuntimeWarning("no handler for {}".format(cmd))
+            raise RuntimeWarning(f"no handler for {cmd}")
 
     def get_temp_f(self) -> int:
         if time.time() - self.temp_time > 60:
