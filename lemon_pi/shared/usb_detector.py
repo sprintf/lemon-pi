@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class UsbDevice(Enum):
     OBD = 1
-    LORA = 2
+    LORA = 2  # unused
     GPS = 3
 
 
@@ -27,8 +27,8 @@ class UsbDetector:
     __instance = None
 
     def __init__(self):
-        self.usb_map : {UsbDevice, str} = {}
-        self.device_map : {str, UsbDevice} = {}
+        self.usb_map: {UsbDevice, str} = {}
+        self.device_map: {str, UsbDevice} = {}
         self.last_scan_time = 0
 
     @classmethod
@@ -41,11 +41,11 @@ class UsbDetector:
         return UsbDetector.__instance
 
     @classmethod
-    def get(cls, device_type:UsbDevice):
+    def get(cls, device_type: UsbDevice):
         return UsbDetector.__instance.usb_map[device_type]
 
     @classmethod
-    def detected(cls, device_type:UsbDevice):
+    def detected(cls, device_type: UsbDevice):
         return UsbDetector.__instance.usb_map.get(device_type) is not None
 
     def __scan__(self):
@@ -63,14 +63,14 @@ class UsbDetector:
             session = None
             try:
                 session = gps()
-                session.read() # needed to get past version info
+                session.read()  # needed to get past version info
                 session.send('?DEVICES;')
                 code = session.read()
                 if code == 0:
                     for gps_device in session.data["devices"]:
                         device_path = gps_device['path']
                         self.usb_map[UsbDevice.GPS] = device_path
-                        self.device_map[device_path] = UsbDevice.LORA
+                        self.device_map[device_path] = UsbDevice.GPS
                         logger.info("associated {} with GPS".format(device_path))
             except Exception:
                 logger.info("didn't find connected GPS device")
@@ -78,34 +78,7 @@ class UsbDetector:
                 if session:
                     session.close()
 
-        # step 2 ... see if any are radio
-        logger.info("detecting Lora devices")
-        for device in devices:
-            if self.device_map.get(device):
-                # it's been identified
-                continue
-            with serial.Serial(device, baudrate=57600, timeout=2) as ser:
-                try:
-                    while len(ser.readline()):
-                        logger.debug("throwing away... ")
-
-                    ser.write("sys get ver\r\n".encode("UTF-8"))
-                    time.sleep(0.5)
-                    # set timeout ...? ?
-                    resp_bytes = ser.readline()
-                    logger.info(resp_bytes)
-                    if resp_bytes:
-                        resp = resp_bytes.decode("UTF-8")
-                        if resp.startswith("RN2903"):
-                            self.usb_map[UsbDevice.LORA] = device
-                            self.device_map[device] = UsbDevice.LORA
-                            logger.info("associated {} with Lora".format(device))
-
-                except UnicodeDecodeError:
-                    # we get into this when we try to talk to OBD like this
-                    pass
-
-        # step 3 ..
+        # step 2 ..
         logger.info("detecting OBD devices")
         for device in devices:
             if self.device_map.get(device):
@@ -144,15 +117,11 @@ class UsbDetector:
         for c in range(1, 16):
             try:
                 device = "COM{}".format(c)
-                with serial.Serial(device, baudrate=38400, timeout=2) as ser:
+                with serial.Serial(device, baudrate=38400, timeout=2):
                     connected_devices.append(device)
-            except FileNotFoundError as f:
+            except FileNotFoundError:
                 pass
         return connected_devices
-
-
-
-
 
 
 if __name__ == "__main__":
