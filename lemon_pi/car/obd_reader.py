@@ -25,7 +25,6 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
     def __init__(self):
         Thread.__init__(self)
         self.working = False
-        self.no_data_count = 0
         self.temp_f = 0
         self.initialization_time = time.time()
         # the time the temperature was last read from OBD
@@ -53,7 +52,6 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
                     logger.info("no connection, waiting 30s")
                     time.sleep(30)
                     continue
-                self.no_data_count = 0
 
                 while connection.status() == obd.OBDStatus.CAR_CONNECTED and not self.finished:
                     now = time.time()
@@ -64,7 +62,6 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
                                 self.working = True
                                 self.last_update_time[cmd] = r.time
                                 self.process_result(cmd, r)
-                                self.no_data_count = 0
                             else:
                                 logger.info(f"no data, for {cmd}")
                                 # keep trying for 5 minutes, then remove the setting
@@ -72,15 +69,8 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
                                     # we never got any data for this command, remove it
                                     del ObdReader.refresh_rate[cmd]
                                     logger.info(f"removed {cmd}")
-                                time.sleep(0.5)
-                                # after 10 of these close the connection
-                                self.no_data_count += 1
-                                if self.no_data_count > 10:
-                                    logger.info("giving up")
-                                    connection.close()
-                                break
-                    # I think we need MAF as fast as poss
-                    # time.sleep(1)
+                                time.sleep(10)
+                    time.sleep(0.5)
             except Exception as e:
                 logger.exception("bad stuff in OBD land %s", e)
                 if connection:
