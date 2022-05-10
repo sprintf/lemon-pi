@@ -24,7 +24,8 @@ jobs:
     - name: Relink protos
       run: |
              rm lemon_pi/shared/protos/*.proto && \
-             ln -s `pwd`/protos/lemon-pi.proto lemon_pi/shared/protos/lemon-pi.proto
+             ln -s `pwd`/protos/src/main/proto/lemon-pi.proto lemon_pi/shared/protos/lemon-pi.proto
+             ln -s `pwd`/protos/src/main/proto/race-flag-status.proto lemon_pi/shared/protos/race-flag-status.proto
     - name: Set up Python 3.7
       uses: actions/setup-python@v2
       with:
