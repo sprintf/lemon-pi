@@ -1,9 +1,13 @@
 import base64
 import logging
+import time
 import urllib
+from queue import Queue
+from threading import Thread
 
 import grpc
 from google.protobuf.empty_pb2 import Empty
+from grpc._channel import _InactiveRpcError
 
 from lemon_pi.shared.message_postmarker import MessagePostmarker
 from lemon_pi_pb2 import ToCarMessage, ToPitMessage
@@ -21,8 +25,9 @@ class MeringueComms:
         self.key = key
         self.seq = 0
         self.channel = None
-        self.stub = None
         self.ready = False
+        self.send_queue = Queue()
+        self.send_thread = Thread(target=self.__send_outbound_messages__, daemon=True)
         self.postmarker = MessagePostmarker.get_instance(sender)
 
     def is_ready(self):
@@ -44,28 +49,56 @@ class MeringueComms:
             self.channel = grpc.secure_channel(f"{url}:443", credentials)
             logger.info("secure channel established")
 
-        self.stub = CommsServiceStub(self.channel)
+        stub = CommsServiceStub(self.channel)
+        stub.PingPong(request=Empty())
         self.ready = self.track_id is not None
+        self.send_thread.start()
         logger.info("ready to talk to meringue")
-        self.stub.PingPong(request=Empty())
 
     def send_message_to_car(self, msg:ToCarMessage):
         if not self.ready:
             logger.info("not ready to talk to meringue")
             return
         self.postmarker.stamp(msg)
-        self.stub.sendMessageFromPits(request=msg,
-                                      metadata=build_auth_header(self.track_id, self.sender, self.key))
-        logger.info("sent message to car")
+        self.send_queue.put(msg)
+        logger.info("queued message to car")
 
     def send_message_from_car(self, msg:ToPitMessage):
         if not self.ready:
             logger.info("not ready to talk to meringue")
             return
         self.postmarker.stamp(msg)
-        self.stub.sendMessageFromCar(request=msg,
-                                     metadata=build_auth_header(self.track_id, self.sender, self.key))
-        logger.info("sent message to pit")
+        self.send_queue.put(msg)
+        logger.info("queued message to pit")
+
+    def __send_outbound_messages__(self):
+        stub = CommsServiceStub(self.channel)
+        logger.info("sending outbound messages...")
+        while True:
+            try:
+                logger.info("awaiting message...")
+                msg = self.send_queue.get()
+                logger.info("got a message to send!!")
+                # if the message is more than 60 seconds old then discard it
+                if time.time() - self.postmarker.get_timestamp(msg) > 60:
+                    logger.info("discarding out of date message")
+                    continue
+
+                if isinstance(msg, ToCarMessage):
+                    stub.sendMessageFromPits(request=msg, timeout=10,
+                                             metadata=build_auth_header(self.track_id, self.sender, self.key))
+                if isinstance(msg, ToPitMessage):
+                    logger.info("sending message to pit")
+                    stub.sendMessageFromCar(request=msg, timeout=10,
+                                            metadata=build_auth_header(self.track_id, self.sender, self.key))
+                logger.info("sent message")
+            except _InactiveRpcError:
+                logger.info("failed to send message")
+            except Exception:
+                logger.exception("surprise!")
+            finally:
+                self.send_queue.task_done()
+
 
     # also Todo : allow override of this when running locally
     def _lookup_service_url(self):

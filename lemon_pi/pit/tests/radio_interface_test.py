@@ -5,7 +5,8 @@ import time
 from lemon_pi.pit.event_defs import RaceStatusEvent, LapCompletedEvent, PingEvent, PittingEvent, TelemetryEvent, \
     SendTargetTimeEvent
 from lemon_pi.pit.radio_interface import RadioInterface
-from lemon_pi_pb2 import Ping, EnteringPits, CarTelemetry, RaceFlagStatus, ToCarMessage, RaceStatus, RacePosition
+from lemon_pi_pb2 import Ping, EnteringPits, CarTelemetry, ToCarMessage, RaceStatus, RacePosition
+from race_flag_status_pb2 import RaceFlagStatus
 from python_settings import settings
 import lemon_pi.config.test_settings as my_local_settings
 from lemon_pi.shared.tests.lemon_pi_test_case import LemonPiTestCase

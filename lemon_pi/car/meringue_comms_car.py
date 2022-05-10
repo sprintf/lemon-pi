@@ -8,6 +8,7 @@ from lemon_pi.car.radio_interface import RadioInterface
 from lemon_pi.shared.data_provider_interface import GpsProvider
 from lemon_pi.shared.meringue_comms import MeringueComms, build_auth_header
 from lemon_pi_pb2 import CarNumber, ToCarMessage, ToPitMessage
+from lemon_pi_pb2_grpc import CommsServiceStub
 
 logger = logging.getLogger(__name__)
 
@@ -45,13 +46,15 @@ class MeringueCommsCar(Thread, MeringueComms):
         Thread(target=self.pinger, daemon=True).start()
         cn = CarNumber()
         cn.car_number = self.car_number
+        stub = CommsServiceStub(self.channel)
         while not self.stopped:
             try:
+                # sleep(10)
                 for wrapped_message in \
-                        self.stub.receivePitMessages(request=cn,
-                                                     metadata=build_auth_header(self.track_id,
-                                                                                self.car_number,
-                                                                                self.key)):
+                        stub.receivePitMessages(request=cn,
+                                                 metadata=build_auth_header(self.track_id,
+                                                                            self.car_number,
+                                                                            self.key)):
                     logger.debug(f"received {wrapped_message}")
                     if isinstance(wrapped_message, ToCarMessage) and wrapped_message.HasField("to_car"):
                         car_msg = getattr(wrapped_message, wrapped_message.WhichOneof("to_car"))

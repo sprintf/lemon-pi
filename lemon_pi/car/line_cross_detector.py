@@ -51,7 +51,7 @@ class LineCrossDetector:
                     if not self.line_in_front:
                         return False, 0
 
-                    logger.info("GONE PASSED {} line!!!!".format(target.name))
+                    logger.debug("GONE PASSED {} line!!!!".format(target.name))
                     logger.debug("my heading = {}, target heading = {}".format(heading, target.target_heading))
 
                     # work out the precise time we crossed the line

@@ -19,15 +19,7 @@ class MessagePostmarker:
         return MessagePostmarker.instance
 
     def stamp(self, msg):
-        subfield = None
-        if isinstance(msg, ToCarMessage):
-            subfield = msg.WhichOneof("to_car")
-        if isinstance(msg, ToPitMessage):
-            subfield = msg.WhichOneof("to_pit")
-
-        if subfield is None:
-            raise Exception("no particular message type indicated")
-
+        subfield = self._get_subfield(msg)
         subfield_attr = getattr(msg, subfield)
 
         if getattr(subfield_attr, "seq_num") != 0:
@@ -36,3 +28,17 @@ class MessagePostmarker:
         setattr(subfield_attr, "seq_num", self.seq)
         setattr(subfield_attr, "sender", self.sender)
         setattr(subfield_attr, "timestamp", int(time.time()))
+
+    def get_timestamp(self, msg):
+        subfield = self._get_subfield(msg)
+        subfield_attr = getattr(msg, subfield)
+        return getattr(subfield_attr, "timestamp")
+
+    @staticmethod
+    def _get_subfield(msg):
+        if isinstance(msg, ToCarMessage):
+            return msg.WhichOneof("to_car")
+        if isinstance(msg, ToPitMessage):
+            return msg.WhichOneof("to_pit")
+        raise Exception("no particular message type indicated")
+

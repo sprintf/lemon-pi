@@ -186,7 +186,7 @@ def init():
         if not meringue_comms.is_ready():
             logger.warning("failed to configure meringue, will keep retrying")
             WifiDisconnectedEvent.emit()
-            Thread(target=retry_configuring_meringue, args=[meringue_comms], daemon=True)
+            Thread(target=retry_configuring_meringue, args=[meringue_comms], daemon=True).start()
         else:
             WifiConnectedEvent.emit()
 
@@ -197,24 +197,3 @@ def init():
 Thread(target=init, daemon=True).start()
 
 gui.display()
-
-
-def retry_configuring_meringue(meringue_comms):
-    while(not meringue_comms.is_ready()):
-        configure_meringue(meringue_comms)
-        if not meringue_comms.is_ready():
-            logger.info("sleeping for 60s")
-            time.sleep(60)
-    WifiConnectedEvent.emit()
-
-
-def configure_meringue(meringue_comms):
-    try:
-        if hasattr(settings, "MERINGUE_GRPC_OVERRIDE_URL"):
-            meringue_comms.configure(settings.MERINGUE_GRPC_OVERRIDE_URL)
-        else:
-            meringue_comms.configure(None)
-        if not settings.WIFI_DISABLED:
-            meringue_comms.start()
-    except _InactiveRpcError:
-        logger.exception("exception configuring meringue")

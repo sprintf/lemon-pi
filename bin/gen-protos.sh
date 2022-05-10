@@ -30,7 +30,7 @@ if [ ${needs_building} -eq 1 ] ; then
         --python_out=${package_dir} \
         --grpc_python_out=${package_dir} \
         -I=lemon_pi/shared/protos \
-        lemon-pi.proto
+        lemon-pi.proto race-flag-status.proto
 else
   echo "no generation needed"
 fi

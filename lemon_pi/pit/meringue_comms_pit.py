@@ -8,6 +8,7 @@ from lemon_pi.pit.event_defs import RadioReceiveEvent
 from lemon_pi.pit.radio_interface import RadioInterface
 from lemon_pi.shared.meringue_comms import MeringueComms, build_auth_header
 from lemon_pi_pb2 import CarNumber, ToPitMessage
+from lemon_pi_pb2_grpc import CommsServiceStub
 
 logger = logging.getLogger(__name__)
 
@@ -26,13 +27,14 @@ class MeringueCommsPitsReader(Thread, MeringueComms):
         logger.info(f"launching receiver thread for car {car_num}")
         cn = CarNumber()
         cn.car_number = car_num
+        stub = CommsServiceStub(self.channel)
         while not self.stopped:
             try:
                 for wrapped_message in \
-                        self.stub.receiveCarMessages(request=cn,
-                                                     metadata=build_auth_header(self.track_id,
-                                                                                self.pit_identifier,
-                                                                                self.key)):
+                        stub.receiveCarMessages(request=cn,
+                                                 metadata=build_auth_header(self.track_id,
+                                                                            self.pit_identifier,
+                                                                            self.key)):
                     logger.info(f"received {wrapped_message}")
                     if isinstance(wrapped_message, ToPitMessage) and wrapped_message.HasField("to_pit"):
                         pit_msg = getattr(wrapped_message, wrapped_message.WhichOneof("to_pit"))
