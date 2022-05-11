@@ -16,9 +16,9 @@ from lemon_pi_pb2 import (
     EnteringPits,
     Ping,
     CarTelemetry,
-    RaceFlagStatus,
     ToCarMessage, LeavingPits, RaceStatus, RacePosition
 )
+from race_flag_status_pb2 import RaceFlagStatus
 from lemon_pi.shared.radio import Radio
 from python_settings import settings
 

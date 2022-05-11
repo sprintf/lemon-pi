@@ -23,9 +23,9 @@ from lemon_pi_pb2 import (
     DriverMessage,
     Ping,
     RacePosition,
-    RaceFlagStatus,
     SetFuelLevel,
     ToPitMessage, RemoteReboot, SetTargetTime, ResetFastLap)
+from race_flag_status_pb2 import RaceFlagStatus
 
 from python_settings import settings
 

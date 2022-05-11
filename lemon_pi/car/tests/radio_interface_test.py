@@ -5,7 +5,8 @@ import time
 from lemon_pi.car.display_providers import TemperatureProvider, LapProvider, FuelProvider
 from lemon_pi.car.event_defs import RadioSyncEvent
 from lemon_pi.car.radio_interface import RadioInterface
-from lemon_pi_pb2 import SetFuelLevel, RaceStatus, RaceFlagStatus, SetTargetTime, ResetFastLap
+from lemon_pi_pb2 import SetFuelLevel, RaceStatus, SetTargetTime, ResetFastLap
+from race_flag_status_pb2 import RaceFlagStatus
 from lemon_pi.shared.tests.lemon_pi_test_case import LemonPiTestCase
 
 
