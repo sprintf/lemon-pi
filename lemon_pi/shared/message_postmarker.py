@@ -20,6 +20,8 @@ class MessagePostmarker:
 
     def stamp(self, msg):
         subfield = self._get_subfield(msg)
+        if not subfield:
+            return
         subfield_attr = getattr(msg, subfield)
 
         if getattr(subfield_attr, "seq_num") != 0:
@@ -31,6 +33,8 @@ class MessagePostmarker:
 
     def get_timestamp(self, msg):
         subfield = self._get_subfield(msg)
+        if not subfield:
+            return 0
         subfield_attr = getattr(msg, subfield)
         return getattr(subfield_attr, "timestamp")
 

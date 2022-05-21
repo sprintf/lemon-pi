@@ -13,6 +13,11 @@ FUEL_CAPACITY_US_GALLONS = 15
 # if you are using 10% less fuel than expected then set this to -10
 FUEL_FIDDLE_PERCENT = 0
 
+# the frequency the car should ping it's position to the server.
+# set to 30 for very occasional pings
+# set to 1 for constant updates. There's no point going more than the GPS can provide
+CAR_PING_FREQUENCY = 5
+
 # the time taken to complete a radio command
 RADIO_CMD_COMPLETION_TIME = 0.1
 

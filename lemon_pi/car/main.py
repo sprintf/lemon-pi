@@ -127,7 +127,7 @@ def init():
         obd = ObdReader()
         gps = GpsReader()
         radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY, ToCarMessage())
-        meringue_comms = MeringueCommsCar(settings.RADIO_DEVICE, settings.RADIO_KEY)
+        meringue_comms = MeringueCommsCar(settings.RADIO_DEVICE, settings.RADIO_KEY, settings.CAR_PING_FREQUENCY)
         radio_interface = RadioInterface(radio, meringue_comms, obd, None, obd)
         meringue_comms.set_radio_interface(radio_interface)
         meringue_comms.register_gps_provider(gps)

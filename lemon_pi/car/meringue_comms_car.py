@@ -15,11 +15,12 @@ logger = logging.getLogger(__name__)
 
 class MeringueCommsCar(Thread, MeringueComms):
 
-    def __init__(self, car_number: str, key: str, ):
+    def __init__(self, car_number: str, key: str, ping_frequency: int):
         Thread.__init__(self)
         MeringueComms.__init__(self, car_number, key)
         self.car_number = car_number
         self.key = key
+        self.ping_frequency = ping_frequency
         self.radio_interface = None
         self.stopped: bool = False
         self.gps_provider = None
@@ -40,7 +41,7 @@ class MeringueCommsCar(Thread, MeringueComms):
                 self.send_message_from_car(msg)
             except grpc.RpcError:
                 pass
-            sleep(30)
+            sleep(self.ping_frequency)
 
     def run(self):
         Thread(target=self.pinger, daemon=True).start()
