@@ -61,7 +61,7 @@ class MeringueComms:
             return
         self.postmarker.stamp(msg)
         self.send_queue.put(msg)
-        logger.info("queued message to car")
+        logger.debug("queued message to car")
 
     def send_message_from_car(self, msg:ToPitMessage):
         if not self.ready:
@@ -69,16 +69,16 @@ class MeringueComms:
             return
         self.postmarker.stamp(msg)
         self.send_queue.put(msg)
-        logger.info("queued message to pit")
+        logger.debug("queued message to pit")
 
     def __send_outbound_messages__(self):
         stub = CommsServiceStub(self.channel)
-        logger.info("sending outbound messages...")
+        logger.debug("sending outbound messages...")
         while True:
             try:
-                logger.info("awaiting message...")
+                logger.debug("awaiting message...")
                 msg = self.send_queue.get()
-                logger.info("got a message to send!!")
+                logger.debug("got a message to send!!")
                 # if the message is more than 60 seconds old then discard it
                 if time.time() - self.postmarker.get_timestamp(msg) > 60:
                     logger.info("discarding out of date message")
@@ -91,7 +91,7 @@ class MeringueComms:
                     logger.info("sending message to pit")
                     stub.sendMessageFromCar(request=msg, timeout=10,
                                             metadata=build_auth_header(self.track_id, self.sender, self.key))
-                logger.info("sent message")
+                logger.debug("sent message")
             except _InactiveRpcError:
                 logger.info("failed to send message")
             except Exception:
