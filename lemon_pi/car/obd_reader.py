@@ -64,8 +64,8 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
                                 self.process_result(cmd, r)
                             else:
                                 logger.info(f"no data, for {cmd}")
-                                # keep trying for 5 minutes, then remove the setting
-                                if self.last_update_time[cmd] == 0.0 and time.time() - self.initialization_time > 300:
+                                # keep trying for 15 minutes, then remove the setting
+                                if self.last_update_time[cmd] == 0.0 and time.time() - self.initialization_time > 900:
                                     # we never got any data for this command, remove it
                                     del ObdReader.refresh_rate[cmd]
                                     logger.info(f"removed {cmd}")
