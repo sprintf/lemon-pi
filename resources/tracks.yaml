@@ -67,6 +67,8 @@ tracks:
      start_finish_direction: "S"
      pit_entry_coords: "(45.365624, -120.744398),(45.365573, -120.744325)"
      pit_entry_direction: "SW"
+     pit_out_coords: "(45.362999, -120.744368),(45.363009, -120.744228)"
+     pit_out_direction: "S"
 
   -  name: "The Ridge"
      code: "rdg"
