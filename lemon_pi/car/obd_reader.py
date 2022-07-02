@@ -19,7 +19,8 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
 
     refresh_rate = {
         obd.commands.COOLANT_TEMP: 10,
-        obd.commands.FUEL_LEVEL: 10,
+        # temporarily deleting this
+        # obd.commands.FUEL_LEVEL: 10,
     }
 
     def __init__(self):
@@ -53,8 +54,14 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
                     time.sleep(30)
                     continue
 
+                while connection.status() != obd.OBDStatus.CAR_CONNECTED and not self.finished:
+                    time.sleep(30)
+
+                self.initialization_time = time.time()
+
                 while connection.status() == obd.OBDStatus.CAR_CONNECTED and not self.finished:
                     now = time.time()
+                    keys_to_delete = []
                     for cmd in ObdReader.refresh_rate.keys():
                         if now - self.last_update_time[cmd] > ObdReader.refresh_rate[cmd]:
                             r = connection.query(cmd)
@@ -67,10 +74,13 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
                                 # keep trying for 5 minutes, then remove the setting
                                 if self.last_update_time[cmd] == 0.0 and time.time() - self.initialization_time > 300:
                                     # we never got any data for this command, remove it
-                                    del ObdReader.refresh_rate[cmd]
-                                    logger.info(f"removed {cmd}")
+                                    keys_to_delete.append(cmd)
                                 time.sleep(10)
                     time.sleep(0.5)
+                    for dead_key in keys_to_delete:
+                        del ObdReader.refresh_rate[dead_key]
+                        logger.info(f"removed {dead_key}")
+
             except Exception as e:
                 logger.exception("bad stuff in OBD land %s", e)
                 if connection:

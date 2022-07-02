@@ -18,6 +18,7 @@ from lemon_pi.shared.events import EventHandler
 
 logger = logging.getLogger(__name__)
 gps_logger = logging.getLogger("gps-logger")
+lap_logger = logging.getLogger("lap-logger")
 
 
 class LapTracker(PositionUpdater, LapProvider, EventHandler):
@@ -64,6 +65,7 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                     self.last_lap_time = lap_time
                     if self.best_lap_time is None or lap_time < self.best_lap_time:
                         self.best_lap_time = lap_time
+                    lap_logger.info(f"{self.lap_count},{self.last_lap_time:.1f}")
                 self.lap_start_time = cross_time
 
                 RadioSyncEvent.emit(ts=cross_time)
