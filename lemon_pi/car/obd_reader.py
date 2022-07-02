@@ -46,7 +46,6 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
 
     def run(self) -> None:
         connection = None
-        sleep_time = 10
         while not self.finished:
             try:
                 connection = self.connect(connection)
@@ -55,7 +54,7 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
                     time.sleep(30)
                     continue
 
-                while connection.status() != obd.OBDStatus.CAR_CONNECTED:
+                while connection.status() != obd.OBDStatus.CAR_CONNECTED and not self.finished:
                     time.sleep(30)
 
                 self.initialization_time = time.time()
@@ -72,8 +71,8 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
                                 self.process_result(cmd, r)
                             else:
                                 logger.info(f"no data, for {cmd}")
-                                # keep trying for 15 minutes, then remove the setting
-                                if self.last_update_time[cmd] == 0.0 and time.time() - self.initialization_time > 900:
+                                # keep trying for 5 minutes, then remove the setting
+                                if self.last_update_time[cmd] == 0.0 and time.time() - self.initialization_time > 300:
                                     # we never got any data for this command, remove it
                                     keys_to_delete.append(cmd)
                                 time.sleep(10)
