@@ -77,9 +77,10 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
                                     keys_to_delete.append(cmd)
                                 time.sleep(10)
                     time.sleep(0.5)
-                    for dead_key in keys_to_delete:
-                        del ObdReader.refresh_rate[dead_key]
-                        logger.info(f"removed {dead_key}")
+                    # leaving this functionality out for now, seems fragile and harmful
+                    # for dead_key in keys_to_delete:
+                    #     del ObdReader.refresh_rate[dead_key]
+                    #     logger.info(f"removed {dead_key}")
 
             except Exception as e:
                 logger.exception("bad stuff in OBD land %s", e)
@@ -90,6 +91,9 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
                 time.sleep(10)
 
     def connect(self, old_connection):
+        if not UsbDetector.detected(UsbDevice.OBD):
+            return None
+
         port = UsbDetector.get(UsbDevice.OBD)
         if not port:
             return None

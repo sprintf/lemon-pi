@@ -4,8 +4,10 @@ from time import sleep
 
 import grpc
 
+from lemon_pi.car.event_defs import WifiConnectedEvent, WifiDisconnectedEvent
 from lemon_pi.car.radio_interface import RadioInterface
 from lemon_pi.shared.data_provider_interface import GpsProvider
+from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.meringue_comms import MeringueComms, build_auth_header
 from lemon_pi_pb2 import CarNumber, ToCarMessage, ToPitMessage
 from lemon_pi_pb2_grpc import CommsServiceStub
@@ -13,7 +15,7 @@ from lemon_pi_pb2_grpc import CommsServiceStub
 logger = logging.getLogger(__name__)
 
 
-class MeringueCommsCar(Thread, MeringueComms):
+class MeringueCommsCar(Thread, MeringueComms, EventHandler):
 
     def __init__(self, car_number: str, key: str, ping_frequency: int):
         Thread.__init__(self)
@@ -24,6 +26,9 @@ class MeringueCommsCar(Thread, MeringueComms):
         self.radio_interface = None
         self.stopped: bool = False
         self.gps_provider = None
+        self.wifi_working = False
+        WifiConnectedEvent.register_handler(self)
+        WifiDisconnectedEvent.register_handler(self)
 
     def set_radio_interface(self, radio_interface: RadioInterface):
         self.radio_interface = radio_interface
@@ -38,7 +43,9 @@ class MeringueCommsCar(Thread, MeringueComms):
                 position = self.gps_provider.get_gps_position()
                 if position:
                     msg.ping.gps.CopyFrom(position)
-                self.send_message_from_car(msg)
+                # do not emit these if wifi is not connected
+                if self.wifi_working:
+                    self.send_message_from_car(msg)
             except grpc.RpcError:
                 pass
             sleep(self.ping_frequency)
@@ -69,3 +76,12 @@ class MeringueCommsCar(Thread, MeringueComms):
                 else:
                     logger.exception("unknown error")
                     sleep(10)
+
+    def handle_event(self, event, **kwargs):
+        if event == WifiConnectedEvent:
+            self.wifi_working = True
+            return
+
+        if event == WifiDisconnectedEvent:
+            self.wifi_working = False
+            return
