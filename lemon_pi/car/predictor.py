@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 ONE_DAY_IN_SECONDS = 24 * 3600
 TWO_DAYS_IN_SECONDS = ONE_DAY_IN_SECONDS * 2
 
+
 class PredictorState(Enum):
     # we are awaiting crossing the start finish line
     INIT = 1,
@@ -158,8 +159,9 @@ class LapTimePredictor(EventHandler):
                 # all previous laps)
                 try:
                     self.current_predicted_time = self.gates[self.gate_index].predict_lap(elapsed_time)
-                    logger.info(
-                        f"predicted lap time = {self.current_predicted_time:.02f}")
+                    if self.gate_index % 10 == 0:
+                        logger.info(
+                            f"predicted lap time [gate = {self.gate_index}] = {self.current_predicted_time:.02f}")
                 except IndexError:
                     pass
                 self.gate_index += 1

@@ -43,6 +43,7 @@ if not os.path.isdir("logs"):
     os.mkdir("logs")
 
 lap_file_handler = logging.FileHandler("logs/lap-logger-{}.csv".format(today))
+lap_file_handler.setFormatter(logging.Formatter('%(asctime)s.%(msecs)03d %(message)s'))
 lap_logger = logging.getLogger("lap-logger")
 lap_logger.addHandler(lap_file_handler)
 

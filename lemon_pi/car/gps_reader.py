@@ -1,7 +1,6 @@
 from gps import *
 
 from dateutil import parser
-from datetime import datetime, timezone, timedelta
 from lemon_pi.car.display_providers import SpeedProvider, PositionProvider
 from lemon_pi.car.updaters import PositionUpdater
 from threading import Thread
@@ -39,9 +38,7 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
         self.position_listener = None
         self.log = log_to_file
         self.finished = False
-        self.part_synced = False
         self.time_synced = False
-        self.sequential_timesync_errors = 0
         EnterTrackEvent.register_handler(self)
         LeaveTrackEvent.register_handler(self)
         ExitApplicationEvent.register_handler(self)
@@ -77,46 +74,16 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
                             if gps_datetime.year < 2021:
                                 logger.debug("time wonky, ignoring")
                                 continue
-                            lag: timedelta = abs(datetime.now(tz=timezone.utc) - gps_datetime)
-
-                            if self.part_synced:
-                                # we have set the clock to the GPS a moment ago...whatever
-                                # the drift is due to the time taken to set the system clock
-                                logger.info("fine tuning clock from GPS by {}...".format(lag.seconds))
-                                epoch = int(gps_datetime.timestamp()) + lag.seconds
-                                subprocess.run(['sudo', 'date', '-u', '-s' '@{}'.format(epoch)])
-                                logger.info("time adjusted to {}".format(datetime.now()))
-                                self.part_synced = False
-                                self.time_synced = True
-                                self.sequential_timesync_errors = 0
-                                continue
-
-                            # we find there's a 1s difference between SKY and TPV messages that
-                            # come in.  We could ignore SKY, but for now we allow a 4s drift
-                            if lag.total_seconds() > 4:
-                                self.sequential_timesync_errors += 1
-                                if (lag.total_seconds() > 30 or self.sequential_timesync_errors > 30) \
-                                        and not self.time_synced:
-                                    logger.info("setting clock from GPS...")
-                                    epoch = int(gps_datetime.timestamp())
-                                    subprocess.run(['sudo', 'date', '-u', '-s' '@{}'.format(epoch)])
-                                    self.part_synced = True
-                                    logger.info("time corrected to {}".format(datetime.now()))
-                                else:
-                                    logger.warning("GPS Data time lag = {}  (skipping {}/30)".
-                                                   format(lag.total_seconds(), self.sequential_timesync_errors))
-                                    if lag.total_seconds() > 30 or self.sequential_timesync_errors > 30:
-                                        self.time_synced = False
-                                continue
-                            self.sequential_timesync_errors = 0
-                            self.time_synced = True
 
                         if session.fix.status == STATUS_NO_FIX:
                             # losing a gps fix doesn't emit a GPSDisconnected event ..
                             # we can look into whether it should or not once we have empirical information
                             logger.warning("no fix...awaiting")
+                            self.time_synced = False
                             time.sleep(0.5)
                             continue
+
+                        self.time_synced = True
 
                         if data['class'] == 'TPV':
                             # assuming its coming in m/s
@@ -140,7 +107,8 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
                                     start_time = time.time()
                                     try:
                                         self.position_listener.update_position(self.lat, self.long,
-                                                                            self.heading, time.time(), self.speed_mph)
+                                                                               self.heading, time.time(),
+                                                                               self.speed_mph)
                                     except Exception:
                                         logger.exception("issue with GPS listener.")
                                     finally:
@@ -189,7 +157,6 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
         else:
             return None
 
-
     def is_working(self) -> bool:
         return self.working
 
@@ -210,14 +177,14 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
             raise Exception("no gps device")
         session.send('?WATCH={"enable":true,"json":true}')
 
-    def set_cycle(self, delay:float):
+    def set_cycle(self, delay: float):
         if UsbDetector.detected(UsbDevice.GPS):
             gps_device = UsbDetector.get(UsbDevice.GPS)
             result = subprocess.run(["gpsctl", "-c", str(delay), gps_device],
                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             logger.info(f"result of setting GPS cycle time = {result.returncode}")
 
-    def set_baud(self, baud:int):
+    def set_baud(self, baud: int):
         if UsbDetector.detected(UsbDevice.GPS):
             gps_device = UsbDetector.get(UsbDevice.GPS)
             result = subprocess.run(["gpsctl", "-s", str(baud), gps_device],
@@ -234,20 +201,19 @@ if __name__ == "__main__":
                         datefmt='%Y-%m-%d %H:%M:%S',
                         level=logging.DEBUG)
 
+
     class FileLogger(PositionUpdater):
 
         def __init__(self):
             self.file = open("traces/trace-{}.csv".format(int(time.time())), mode="w")
 
-        def update_position(self, lat:float, long:float, heading:float, time:float, speed:int) -> None:
+        def update_position(self, lat: float, long: float, heading: float, time: float, speed: int) -> None:
             self.file.write("{},{},{},{},{}\n".format(time, lat, long, heading, speed))
             self.file.flush()
+
 
     UsbDetector.init()
     tracker = GpsReader()
     tracker.set_cycle(1.0)
     tracker.register_position_listener(FileLogger())
     tracker.run()
-
-
-
