@@ -28,8 +28,8 @@ class LapSessionStoreTest(unittest.TestCase):
     def test_write_gate_date(self):
         track = TrackLocation('name', 'code')
         LapSessionStore.init(track, dir='/tmp/test-lss')
-        gates = Gates(Target("goofy", (300, -500), (310, -800), "NW"))
-        vgate = Gate(302, -450, 10, "gate-1")
+        gates = Gates(Target("goofy", (30, -50), (31, -80), "NW"))
+        vgate = Gate(30, -45, 10, "gate-1")
         vgate.record_time_from_start(1.4)
         vgate.record_time_from_start(1.5)
         vgate.record_time_from_start(1.1)

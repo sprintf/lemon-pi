@@ -96,27 +96,13 @@ DirectionMap = {
 
 
 def calc_intersect_heading(lat_long1, lat_long2, direction):
-    a = lat_long1
-    b = lat_long2
-    lat = 0
-    lon = 1
 
-    dL = b[lon] - a[lon]
-    X = cos(b[lat]) * sin(dL)
-    Y = cos(a[lat]) * sin(b[lat]) - sin(a[lat]) * cos(b[lat]) * cos(dL)
-    line_heading = degrees(arctan2(X, Y))
-
-    # print("got line_heading = {} want {}".format(line_heading, direction))
+    line_heading = heading_between_lat_long(lat_long2, lat_long1)
 
     line_heading += 360
     choice1 = (line_heading + 90)
     choice2 = (line_heading - 90)
     suggestion = DirectionMap[direction]
-
-    # print("suggested angle is close to {}".format(suggestion))
-    # print("choices are {} or {}".format(choice1 % 360, choice2 % 360))
-
-    # print("diff 1 / 2 = {} {}".format(abs(suggestion - choice1), abs(suggestion - choice2)))
 
     if abs(suggestion - choice1 % 360)  < abs(suggestion - choice2 % 360):
         # print("choosing 1")

@@ -88,7 +88,6 @@ class MeringueComms:
                     stub.sendMessageFromPits(request=msg, timeout=10,
                                              metadata=build_auth_header(self.track_id, self.sender, self.key))
                 if isinstance(msg, ToPitMessage):
-                    logger.info("sending message to pit")
                     stub.sendMessageFromCar(request=msg, timeout=10,
                                             metadata=build_auth_header(self.track_id, self.sender, self.key))
                 logger.debug("sent message")

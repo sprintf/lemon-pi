@@ -257,9 +257,10 @@ class Gui(EventHandler):
             return
 
         # go back to the fuel display if we complete a lap and it is not showing.
-        if event == CompleteLapEvent and not self.col3.visible and not settings.OBD_DISABLED:
-            self._col_display(3)
-            return
+        # PN 7/23/22 disabling as fuel display isn't useful right now
+        # if event == CompleteLapEvent and not self.col3.visible and not settings.OBD_DISABLED:
+        #     self._col_display(3)
+        #     return
 
         if event == OBDConnectedEvent:
             self.obd_image.on()

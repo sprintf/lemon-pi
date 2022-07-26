@@ -58,6 +58,29 @@ class TestAngularDifference(unittest.TestCase):
         lt.update_position(35.4889, -119.5458, 90, now + 61, 50)
         leave_track_event.assert_called_once()
 
+    @patch("lemon_pi.car.event_defs.LeaveTrackEvent.emit")
+    def test_pit_in_detection2(self, leave_track_event):
+        bw = TrackLocation("ORP", "orp")
+        sf = Target("start-finish", (45.363790,-120.744707),(45.363816,-120.744277), "S")
+        bw.set_start_finish_target(sf)
+        pi = Target("pit-in", (45.365624, -120.744398), (45.365573, -120.744325), "SW")
+        bw.set_pit_in_target(pi)
+        lt = LapTracker(bw)
+        lt.on_track = True
+        now = time.time()
+        lt.update_position(45.365835,-120.744046667, 221, now + 60, 34)
+        lt.update_position(45.365785,-120.74411, 221, now + 61, 32)
+        lt.update_position(45.365736667,-120.744171667, 221, now + 62, 31)
+        lt.update_position(45.365691667,-120.74423, 221, now + 63, 30)
+        lt.update_position(45.365646667,-120.744285, 221, now + 64, 28)
+        lt.update_position(45.365605,-120.744338333, 221, now + 65, 27)
+        lt.update_position(45.365563333,-120.74439, 221, now + 66, 26)
+        lt.update_position(45.365523333,-120.744438333, 219, now + 67, 25)
+        lt.update_position(45.365483333,-120.744481667, 214, now + 68, 24)
+        lt.update_position(45.36544,-120.744518333, 208, now + 69, 24)
+        lt.update_position(45.365398333,-120.744546667, 203, now + 70, 23)
+        leave_track_event.assert_called_once()
+
     @patch("lemon_pi.car.event_defs.RadioSyncEvent.emit")
     def test_radio_sync_detection(self, radio_sync_event):
         bw = TrackLocation("bw", "bar")
