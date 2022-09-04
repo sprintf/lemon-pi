@@ -16,12 +16,10 @@ from lemon_pi.car.lap_tracker import LapTracker
 from lemon_pi.car.radio_interface import RadioInterface
 from lemon_pi.car.update_tracks import TrackUpdater
 from lemon_pi.car.wifi import WifiManager
-from lemon_pi_pb2 import ToCarMessage
 from lemon_pi.shared.time_provider import LocalTimeProvider
 from lemon_pi.car.track import TrackLocation, read_tracks
 from lemon_pi.car.state_machine import StateMachine
 from lemon_pi.car.movement_listener import MovementListener
-from lemon_pi.shared.radio import Radio
 from lemon_pi.shared.usb_detector import UsbDetector
 from haversine import haversine
 import logging
@@ -65,7 +63,7 @@ logging.getLogger().setLevel(logging.INFO)
 
 logger.info("Lemon-Pi : starting up")
 
-if not "SETTINGS_MODULE" in os.environ:
+if "SETTINGS_MODULE" not in os.environ:
     os.environ["SETTINGS_MODULE"] = "lemon_pi.config.local_settings_car"
 
 # main control thread
@@ -76,6 +74,7 @@ if not "SETTINGS_MODULE" in os.environ:
 #  3. fire up GPS thread
 #  4. fire up Wifi
 #  5. start talking to the server
+
 
 def retry_configuring_meringue(meringue_comms):
     while not meringue_comms.is_ready():
@@ -127,9 +126,8 @@ def init():
 
         obd = ObdReader()
         gps = GpsReader()
-        radio = Radio(settings.RADIO_DEVICE, settings.RADIO_KEY, ToCarMessage())
         meringue_comms = MeringueCommsCar(settings.RADIO_DEVICE, settings.RADIO_KEY, settings.CAR_PING_FREQUENCY)
-        radio_interface = RadioInterface(radio, meringue_comms, obd, None, obd)
+        radio_interface = RadioInterface(meringue_comms, obd, None, obd)
         meringue_comms.set_radio_interface(radio_interface)
         meringue_comms.register_gps_provider(gps)
 
@@ -144,14 +142,6 @@ def init():
             logger.warning("OBD has been disabled")
         else:
             obd.start()
-
-        # start a background thread to manage the radio function
-        if settings.RADIO_DISABLED:
-            logger.warning("Radio has been disabled")
-        else:
-            radio.start()
-        # and the radio interface maps car events to and from the radio
-        radio_interface.start()
 
         logger.info("registering GUI providers")
         gui.register_speed_provider(gps)
@@ -181,7 +171,6 @@ def init():
         gps.register_position_listener(lap_tracker)
         gui.register_lap_provider(lap_tracker)
         radio_interface.register_lap_provider(lap_tracker)
-        radio.register_gps_provider(gps)
         meringue_comms.set_track_id(closest_track.code)
         configure_meringue(meringue_comms)
         if not meringue_comms.is_ready():
