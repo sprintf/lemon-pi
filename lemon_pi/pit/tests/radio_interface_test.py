@@ -18,33 +18,27 @@ if not settings.configured:
 class RadioInterfaceTestCase(LemonPiTestCase):
 
     @patch("lemon_pi.pit.meringue_comms_pit.MeringueCommsPitsReader")
-    @patch("lemon_pi.shared.radio.Radio")
-    def test_target_time_int(self, radio, comms):
-        ri = RadioInterface(radio, comms)
-        radio.send_async = MagicMock()
+    def test_target_time_int(self, comms):
+        ri = RadioInterface(comms)
         comms.send_message_to_car = MagicMock()
         ri.handle_event(SendTargetTimeEvent, car='1', target_time=0)
         expected = ToCarMessage()
         expected.set_target.car_number = "1"
         expected.set_target.target_lap_time = 0.0
-        radio.send_async.assert_called_once_with(expected)
         comms.send_message_to_car.assert_called_once_with(expected)
 
     @patch("lemon_pi.pit.meringue_comms_pit.MeringueCommsPitsReader")
-    @patch("lemon_pi.shared.radio.Radio")
-    def test_target_time_float(self, radio, comms):
-        ri = RadioInterface(radio, comms)
-        radio.send_async = MagicMock()
+    def test_target_time_float(self, comms):
+        ri = RadioInterface(comms)
         comms.send_message_to_car = MagicMock()
         ri.handle_event(SendTargetTimeEvent, car='1', target_time=128.5)
         expected = ToCarMessage()
         expected.set_target.car_number = "1"
         expected.set_target.target_lap_time = 128.5
-        radio.send_async.assert_called_once_with(expected)
         comms.send_message_to_car.assert_called_once_with(expected)
 
     def test_ping_processing(self):
-        ri = RadioInterface(MagicMock(), MagicMock())
+        ri = RadioInterface(MagicMock())
         handler = MagicMock()
         PingEvent.register_handler(handler)
         ping = Ping()
@@ -54,7 +48,7 @@ class RadioInterfaceTestCase(LemonPiTestCase):
         handler.handle_event.assert_called_once_with(PingEvent, car=ping.sender, ts=ping.timestamp)
 
     def test_pitting_processing(self):
-        ri = RadioInterface(MagicMock(), MagicMock())
+        ri = RadioInterface(MagicMock())
         handler = MagicMock()
         PittingEvent.register_handler(handler)
         pit = EnteringPits()
@@ -63,7 +57,7 @@ class RadioInterfaceTestCase(LemonPiTestCase):
         handler.handle_event.assert_called_once_with(PittingEvent, car=pit.sender)
 
     def test_race_status_processing(self):
-        ri = RadioInterface(MagicMock(), MagicMock())
+        ri = RadioInterface(MagicMock())
         handler = MagicMock()
         RaceStatusEvent.register_handler(handler)
         status = RaceStatus()
@@ -72,7 +66,7 @@ class RadioInterfaceTestCase(LemonPiTestCase):
         handler.handle_event.assert_called_once_with(RaceStatusEvent, flag="GREEN")
 
     def test_lap_completed(self):
-        ri = RadioInterface(MagicMock(), MagicMock())
+        ri = RadioInterface(MagicMock())
         handler = MagicMock()
         LapCompletedEvent.register_handler(handler)
         status = RacePosition()
@@ -94,7 +88,7 @@ class RadioInterfaceTestCase(LemonPiTestCase):
                                                      last_lap_time=122.5)
 
     def test_telemetry_processing(self):
-        ri = RadioInterface(MagicMock(), MagicMock())
+        ri = RadioInterface(MagicMock())
         handler = MagicMock()
         TelemetryEvent.register_handler(handler)
         car = CarTelemetry()

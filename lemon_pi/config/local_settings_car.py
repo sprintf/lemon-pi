@@ -19,9 +19,6 @@ OBD_DISABLED = True
 # have it try all protocols
 OBD_PROTOCOL = None
 
-# optionally disable Radio
-RADIO_DISABLED = True
-
 # optionally disable GPS
 GPS_DISABLED = False
 
