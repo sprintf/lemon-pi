@@ -4,6 +4,8 @@ import time
 import urllib
 from queue import Queue
 from threading import Thread
+from urllib.request import Request
+from urllib.error import URLError
 
 import grpc
 from google.protobuf.empty_pb2 import Empty
