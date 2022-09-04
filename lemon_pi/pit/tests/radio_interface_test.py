@@ -14,63 +14,8 @@ from lemon_pi.shared.tests.lemon_pi_test_case import LemonPiTestCase
 if not settings.configured:
     settings.configure(my_local_settings)
 
+
 class RadioInterfaceTestCase(LemonPiTestCase):
-
-    @patch("lemon_pi.pit.meringue_comms_pit.MeringueCommsPitsReader")
-    @patch("lemon_pi.shared.radio.Radio")
-    def test_flags(self, radio, comms):
-        ri = RadioInterface(radio, comms)
-        for flag in ['Red', 'Green', 'Black', 'Yellow', '']:
-            radio.send_async = MagicMock()
-            comms.send_message_to_car = MagicMock()
-            ri.handle_event(RaceStatusEvent, flag=flag)
-            radio.send_async.assert_called_once()
-
-    @patch("lemon_pi.pit.meringue_comms_pit.MeringueCommsPitsReader")
-    @patch("lemon_pi.shared.radio.Radio")
-    def test_race_position(self, radio, comms):
-        ri = RadioInterface(radio, comms)
-        radio.send_async = MagicMock()
-        comms.send_message_to_car = MagicMock()
-        ri.handle_event(LapCompletedEvent, car='1', laps=2, position=3)
-        expected = ToCarMessage()
-        expected.race_position.car_number = "1"
-        expected.race_position.lap_count = 2
-        expected.race_position.position = 3
-        radio.send_async.assert_called_once_with(expected)
-        comms.send_message_to_car.assert_called_once_with(expected)
-
-    @patch("lemon_pi.pit.meringue_comms_pit.MeringueCommsPitsReader")
-    @patch("lemon_pi.shared.radio.Radio")
-    def test_race_position_behind(self, radio, comms):
-        ri = RadioInterface(radio, comms)
-        radio.send_async = MagicMock()
-        comms.send_message_to_car = MagicMock()
-        ri.handle_event(LapCompletedEvent, car='1', laps=2, position=3, ahead="181", gap="5 laps")
-        expected = ToCarMessage()
-        expected.race_position.car_number = "1"
-        expected.race_position.lap_count = 2
-        expected.race_position.position = 3
-        expected.race_position.car_ahead.car_number = "181"
-        expected.race_position.car_ahead.gap_text = "5 laps"
-        radio.send_async.assert_called_once_with(expected)
-        comms.send_message_to_car.assert_called_once_with(expected)
-
-    @patch("lemon_pi.pit.meringue_comms_pit.MeringueCommsPitsReader")
-    @patch("lemon_pi.shared.radio.Radio")
-    def test_race_position_with_flag(self, radio, comms):
-        ri = RadioInterface(radio, comms)
-        radio.send_async = MagicMock()
-        comms.send_message_to_car = MagicMock()
-        ri.handle_event(LapCompletedEvent, car='1', laps=2, position=3, ahead="181", flag="Green")
-        expected = ToCarMessage()
-        expected.race_position.car_number = "1"
-        expected.race_position.lap_count = 2
-        expected.race_position.position = 3
-        expected.race_position.car_ahead.car_number = "181"
-        expected.race_position.flag_status = RaceFlagStatus.GREEN
-        radio.send_async.assert_called_once_with(expected)
-        comms.send_message_to_car.assert_called_once_with(expected)
 
     @patch("lemon_pi.pit.meringue_comms_pit.MeringueCommsPitsReader")
     @patch("lemon_pi.shared.radio.Radio")
@@ -135,9 +80,9 @@ class RadioInterfaceTestCase(LemonPiTestCase):
         status.car_number = "181"
         status.position = 2
         status.position_in_class = 1
-        status.lap_count= 99
+        status.lap_count = 99
         status.last_lap_time = 122.5
-        status.car_ahead.car_number= "183"
+        status.car_ahead.car_number = "183"
         status.car_ahead.gap_text = "3 laps"
         ri.convert_to_event(status)
         handler.handle_event.assert_called_once_with(LapCompletedEvent,
@@ -166,11 +111,6 @@ class RadioInterfaceTestCase(LemonPiTestCase):
                                                      lap_count=50,
                                                      last_lap_time=67.5,
                                                      fuel_percent=25)
-
-
-
-
-
 
 if __name__ == '__main__':
     unittest.main()

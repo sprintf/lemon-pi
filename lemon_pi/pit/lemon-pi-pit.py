@@ -7,13 +7,7 @@ from threading import Thread
 from python_settings import settings
 
 from lemon_pi.pit.meringue_comms_pit import MeringueCommsPitsReader
-from lemon_pi.pit.race_position_transmitter import RacePositionTransmitter
 from lemon_pi.pit.radio_interface import RadioInterface
-from lemon_pi.pit.datasource.datasource1 import DataSource
-from lemon_pi.pit.datasource.datasource_handler import DataSourceHandler
-from lemon_pi.pit.leaderboard import RaceOrder
-from lemon_pi.pit.strategy_analyzer import StrategyAnalyzer
-from lemon_pi.shared.meringue_comms import MeringueComms
 from lemon_pi_pb2 import ToPitMessage
 from lemon_pi.shared.radio import Radio
 from lemon_pi.shared.time_provider import LocalTimeProvider
@@ -74,23 +68,6 @@ def run():
             print("ERROR : Lora radio device not detected")
             gui.shutdown()
 
-        # if we have a race specified
-        if settings.RACE_ID != "":
-            # create a leaderboard
-            leaderboard = RaceOrder()
-            # filter race updates down to updates related to our car
-            updater = DataSourceHandler(leaderboard, settings.TARGET_CARS)
-            # provide a means to send initial race position to cars
-            position_transmitter = RacePositionTransmitter(leaderboard)
-            # provide a strategy analyzer
-            sa = StrategyAnalyzer(leaderboard, settings.TARGET_CARS)
-            sa.start()
-            # start reading the race state
-            ds = DataSource(settings.RACE_ID, updater)
-            # and keep a thread going reading the race state
-            if ds.connect():
-                ds.start()
-            gui.progress(90)
         gui.progress(100)
 
     Thread(target=init, daemon=True).start()
