@@ -172,6 +172,17 @@ tracks:
      pit_out_direction: "SE"
      hidden: "true"
 
+# this is second local test track, used for testing and other things.
+  -  name: "Orangevale Test Track"
+     code: "test2"
+     start_finish_coords: "(38.681014, -121.218966),(38.681042, -121.219381)"
+     start_finish_direction: "S"
+     pit_entry_coords: "(38.680527, -121.219606),(38.680828, -121.219693)"
+     pit_entry_direction: "SW"
+     pit_out_coords: "(37.928483,-122.297005),(37.928385,-122.297129)"
+     pit_out_direction: "NE"
+     hidden: "true"
+
 
 
 
