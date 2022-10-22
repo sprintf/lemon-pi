@@ -175,7 +175,7 @@ tracks:
 # this is second local test track, used for testing and other things.
   -  name: "Orangevale Test Track"
      code: "test2"
-     start_finish_coords: "(38.68101Ω, -121.219041),(38.681013, -121.219041)"
+     start_finish_coords: "(38.681014, -121.218966),(38.681042, -121.219381)"
      start_finish_direction: "S"
      pit_entry_coords: "(38.680527, -121.219606),(38.680828, -121.219693)"
      pit_entry_direction: "SW"
