@@ -26,13 +26,7 @@ tracks:
      pit_entry_direction: "S"
      pit_out_coords: "(39.539314,-122.331434),(39.539315,-122.331290)"
      pit_out_direction: "S"
-     radio_sync_list:
-       - "west cut":
-         radio_sync_coords: "(39.539930,-122.336541),(39.539739,-122.336530)"
-         radio_sync_direction: "E"
-       - "turn 8":
-         radio_sync_coords: "(39.545072,-122.332619),(39.544949,-122.332622)"
-         radio_sync_direction: "W"
+     reversed: "true"
 
   -  name: "Thunderhill West"
      code: "thilw"

@@ -37,6 +37,7 @@ class TrackLocation:
         self.code = code
         self.targets:{TargetMetaData, Target} = {}
         self.hidden = False
+        self.reversed = False
 
     def get_display_name(self):
         # name hidden tracks with an _ at the end of their name
@@ -73,6 +74,9 @@ class TrackLocation:
     def is_radio_sync_defined(self) -> bool:
         return self.targets.get(RADIO_SYNC) is not None
 
+    def is_reversed(self) -> bool:
+        return self.reversed
+
     def get_radio_sync_targets(self) -> [Target]:
         return self.targets[RADIO_SYNC]
 
@@ -88,9 +92,17 @@ class TrackLocation:
         return self.name
 
 
+# swap the direction of a heading by 180 degrees
+def swap_direction(heading):
+    return (heading + 180) % 360
+
+
 def read_tracks() -> [TrackLocation]:
-    track_list = []
     track_file, _ = TrackUpdater.get_track_file()
+    return do_read_tracks(track_file)
+
+def do_read_tracks(track_file) -> [TrackLocation]:
+    track_list = []
     with open(track_file) as yamlfile:
         tracks = yaml.load(yamlfile, Loader=yaml.FullLoader)
         for track in tracks["tracks"]:
@@ -109,6 +121,25 @@ def read_tracks() -> [TrackLocation]:
 
             if "hidden" in track and track["hidden"]:
                 track_data.hidden = True
+
+            if "reversed" in track and track["reversed"]:
+                # switch direction of start/finish
+                track_data.reversed = True
+                track_data.targets[START_FINISH].target_heading = swap_direction(track_data.targets[START_FINISH].target_heading)
+
+                tmp = track_data.targets[PIT_ENTRY]
+                if PIT_OUT in track_data.targets.keys():
+                    track_data.targets[PIT_ENTRY] = track_data.targets[PIT_OUT]
+                    track_data.targets[PIT_ENTRY].target_heading = swap_direction(
+                        track_data.targets[PIT_ENTRY].target_heading)
+                else:
+                    track_data.targets[PIT_ENTRY] = None
+                if PIT_ENTRY in track_data.targets.keys():
+                    track_data.targets[PIT_OUT] = tmp
+                    track_data.targets[PIT_OUT].target_heading = swap_direction(
+                        track_data.targets[PIT_OUT].target_heading)
+                else:
+                    track_data.targets[PIT_OUT] = None
 
             track_list.append(track_data)
     return track_list
