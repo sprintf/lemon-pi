@@ -20,11 +20,11 @@ tracks:
 
   -  name: "Thunderhill"
      code: "thil"
-     start_finish_coords: "(39.538475,-122.331300),(39.538480,-122.331113)"
+     start_finish_coords: "(39.539323, -122.331265),(39.539321, -122.331097)"
      start_finish_direction: "S"
      pit_entry_coords: "(39.542489,-122.331372),(39.542488,-122.331315)"
      pit_entry_direction: "S"
-     pit_out_coords: "(39.539314,-122.331434),(39.539315,-122.331290)"
+     pit_out_coords: "(39.538879, -122.331373),(39.538930, -122.331242)"
      pit_out_direction: "S"
      reversed: "true"
 
