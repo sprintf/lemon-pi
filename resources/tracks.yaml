@@ -26,7 +26,6 @@ tracks:
      pit_entry_direction: "S"
      pit_out_coords: "(39.538879, -122.331373),(39.538930, -122.331242)"
      pit_out_direction: "S"
-     reversed: "true"
 
   -  name: "Thunderhill West"
      code: "thilw"
