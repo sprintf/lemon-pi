@@ -59,6 +59,7 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
 
                 self.initialization_time = time.time()
 
+                no_data_cycles = 0
                 while connection.status() == obd.OBDStatus.CAR_CONNECTED and not self.finished:
                     now = time.time()
                     keys_to_delete = []
@@ -66,16 +67,20 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
                         if now - self.last_update_time[cmd] > ObdReader.refresh_rate[cmd]:
                             r = connection.query(cmd)
                             if not r.is_null():
+                                no_data_cycles = 0
                                 self.working = True
                                 self.last_update_time[cmd] = r.time
                                 self.process_result(cmd, r)
                             else:
-                                logger.info(f"no data, for {cmd}")
+                                no_data_cycles += 1
+                                logger.info(f"no data, for {cmd} ({no_data_cycles}/5)")
                                 # keep trying for 5 minutes, then remove the setting
                                 if self.last_update_time[cmd] == 0.0 and time.time() - self.initialization_time > 300:
                                     # we never got any data for this command, remove it
                                     keys_to_delete.append(cmd)
                                 time.sleep(10)
+                                if no_data_cycles == 5:
+                                    raise Exception("forcing reconnect due to data starvation")
                     time.sleep(0.5)
                     # leaving this functionality out for now, seems fragile and harmful
                     # for dead_key in keys_to_delete:
@@ -102,7 +107,7 @@ class ObdReader(Thread, TemperatureProvider, FuelProvider):
             OBDDisconnectedEvent.emit()
             old_connection.close()
 
-        result = obd.OBD(port, protocol=settings.OBD_PROTOCOL, fast=True)
+        result = obd.OBD(port, protocol=settings.OBD_PROTOCOL, fast=settings.OBD_FAST)
         status = result.status()
         if status != obd.OBDStatus.CAR_CONNECTED:
             result.close()
