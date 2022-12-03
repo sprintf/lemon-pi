@@ -6,7 +6,7 @@
 # The pit-in coords are used to alert the pit that the car is
 # coming into the pits, and to display driver instructions to aid
 # driver swaps. The pit-in coords are also used to reset the GPS
-# back to 1 Hertz
+# back to 1 Hertz.
 
 tracks:
   -  name: "Sonoma Raceway"
