@@ -22,9 +22,9 @@ tracks:
      code: "thil"
      start_finish_coords: "(39.539323, -122.331265),(39.539321, -122.331097)"
      start_finish_direction: "S"
-     pit_entry_coords: "(39.542489,-122.331372),(39.542488,-122.331315)"
-     pit_entry_direction: "S"
-     pit_out_coords: "(39.538879, -122.331373),(39.538930, -122.331242)"
+     pit_entry_coords: "(39.543466, -122.331475),(39.543502, -122.331397)"
+     pit_entry_direction: "SW"
+     pit_out_coords: "(39.538775, -122.331361),(39.538782, -122.331244)"
      pit_out_direction: "S"
 
   -  name: "Thunderhill West"
