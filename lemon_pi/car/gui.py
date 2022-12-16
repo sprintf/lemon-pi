@@ -90,6 +90,7 @@ class Gui(EventHandler):
 
         self.start_time = 0
         self.target_time = 0
+        self.suppress_prediction_until = 0
         self.font = self.__identify_font(platform.system())
         self.root = App("Lemon-Pi",
                         bg="black",
@@ -204,10 +205,7 @@ class Gui(EventHandler):
             self._col_display(5)
             return
         if event == StateChangeSettingOffEvent or event == EnterTrackEvent:
-            if settings.OBD_DISABLED:
-                self._col_display(7)
-            else:
-                self._col_display(3)
+            self._col_display(7)
             return
 
         if event == RadioReceiveEvent:
@@ -234,6 +232,8 @@ class Gui(EventHandler):
         if event == RacePositionEvent:
             self.__update_race_position(**kwargs)
             self._col_display(7)
+            # suppress the prediected lap timer for 10s
+            self.suppress_prediction_until = time.time() + 10
             return
 
         if event == RacePersuerEvent:
@@ -256,11 +256,10 @@ class Gui(EventHandler):
             self.__update_target_time(kwargs.get("target"))
             return
 
-        # go back to the fuel display if we complete a lap and it is not showing.
-        # PN 7/23/22 disabling as fuel display isn't useful right now
-        # if event == CompleteLapEvent and not self.col3.visible and not settings.OBD_DISABLED:
-        #     self._col_display(3)
-        #     return
+        # show the race position as the lap is completed
+        if event == CompleteLapEvent:
+            self._col_display(7)
+            return
 
         if event == OBDConnectedEvent:
             self.obd_image.on()
@@ -563,7 +562,7 @@ class Gui(EventHandler):
 
         if predicted:
             # if we're on track and getting predictions then show them
-            if StateMachine.is_on_track() and not self.col6.visible:
+            if StateMachine.is_on_track() and not self.col6.visible and time.time() > self.suppress_prediction_until:
                 self._col_display(6)
             minutes = int(predicted / 60)
             seconds = int(predicted % 60)

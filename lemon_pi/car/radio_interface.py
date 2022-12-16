@@ -53,6 +53,7 @@ class RadioInterface(EventHandler):
         self.fuel_provider = fuel_provider
         RadioSyncEvent.register_handler(self)
         LeaveTrackEvent.register_handler(self)
+        EnterTrackEvent.register_handler(self)
 
     def register_lap_provider(self, lap_provider):
         self.lap_provider = lap_provider
