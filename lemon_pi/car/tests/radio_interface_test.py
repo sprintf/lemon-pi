@@ -1,13 +1,34 @@
 import unittest
 from unittest.mock import patch, Mock
 
+from lemon_pi.car.event_defs import EnterTrackEvent, LeaveTrackEvent
 from lemon_pi.car.radio_interface import RadioInterface
-from lemon_pi_pb2 import SetFuelLevel, RaceStatus, SetTargetTime, ResetFastLap
+from lemon_pi_pb2 import SetFuelLevel, RaceStatus, SetTargetTime, ResetFastLap, ToPitMessage
 from race_flag_status_pb2 import RaceFlagStatus
 from lemon_pi.shared.tests.lemon_pi_test_case import LemonPiTestCase
 
 
 class RadioInterfaceTestCase(LemonPiTestCase):
+
+    @patch("lemon_pi.shared.meringue_comms.MeringueComms.send_message_from_car")
+    def test_entering_track(self, grpc_call):
+        comms = Mock()
+        comms.send_message_from_car = grpc_call
+        ri = RadioInterface(comms, None, None, None)
+        EnterTrackEvent.emit()
+        msg = ToPitMessage()
+        msg.entering.timestamp = 1
+        grpc_call.assert_called_with(msg)
+
+    @patch("lemon_pi.shared.meringue_comms.MeringueComms.send_message_from_car")
+    def test_leaving_track(self, grpc_call):
+        comms = Mock()
+        comms.send_message_from_car = grpc_call
+        ri = RadioInterface(comms, None, None, None)
+        LeaveTrackEvent.emit()
+        msg = ToPitMessage()
+        msg.pitting.timestamp = 1
+        grpc_call.assert_called_with(msg)
 
     @patch("lemon_pi.car.event_defs.RaceFlagStatusEvent.emit")
     def test_unknown_flag(self, race_status_event):
