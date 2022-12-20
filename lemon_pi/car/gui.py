@@ -495,7 +495,7 @@ class Gui(EventHandler):
         Text(container4, "?? ", size=Gui.TEXT_MED, font=self.font, color="white", align="left")
         return result
 
-    def __update_race_position(self, pos=0, pos_in_class=0, car_ahead="0", gap="?"):
+    def __update_race_position(self, pos=0, pos_in_class=0, car_ahead="0", gap="?", gap_to_front=0.0):
         panel = self.col7.children[0]
         if pos == pos_in_class:
             panel.children[0].value = f"P{pos}"
@@ -505,8 +505,12 @@ class Gui(EventHandler):
             panel.children[0].text_size = Gui.TEXT_MED
         panel.children[2].children[1].value = car_ahead
         panel.children[3].children[1].value = gap
-        panel.children[5].children[1].value = ""
-        panel.children[6].children[1].value = ""
+        if gap_to_front > 0.0:
+            panel.children[5].children[1].value = "leader"
+            panel.children[6].children[1].value = f"GTF {gap_to_front} s"
+        else:
+            panel.children[5].children[1].value = ""
+            panel.children[6].children[1].value = ""
 
     def __update_persuer_position(self, car_behind=0, gap="?"):
         panel = self.col7.children[0]

@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 import time
 
 from lemon_pi.car.audio import Audio
-from lemon_pi.car.event_defs import ButtonPressEvent, CompleteLapEvent
+from lemon_pi.car.event_defs import ButtonPressEvent, CompleteLapEvent, RacePositionEvent
 
 
 class TestAudio(unittest.TestCase):
@@ -39,6 +39,22 @@ class TestAudio(unittest.TestCase):
         audio.run_once()
         audio.engine.say.assert_called_with("54 seconds")
         audio.engine.runAndWait.assert_called_once()
+
+    def test_race_position(self):
+        audio = Audio()
+        audio.engine.say = Mock()
+        audio.engine.runAndWait = Mock()
+        RacePositionEvent.emit(gap_to_front=0.0, pos=3)
+        self.assertEqual(1, audio.queue.qsize())
+        audio.run_once()
+        RacePositionEvent.emit(gap_to_front=60 * 31, pos=3)
+        self.assertEqual(1, audio.queue.qsize())
+        audio.run_once()
+        RacePositionEvent.emit(gap_to_front=108.5, pos=3)
+        self.assertEqual(2, audio.queue.qsize())
+        audio.run_once()
+        audio.run_once()
+        audio.engine.say.assert_called_with("Gap to front is 108 seconds")
 
     def test_number_announcement(self):
         self.assertEqual("one five six", Audio._car_number_to_audio("156"))

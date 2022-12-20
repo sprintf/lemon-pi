@@ -99,11 +99,11 @@ class Audio(Thread, EventHandler):
         # todo : play it now ... if poss
         self.announce(f"Danger! {message}")
 
-    def announce_race_position(self, pos=0, pos_in_class=0, car_ahead="", gap=""):
+    def announce_race_position(self, pos=0, pos_in_class=0, car_ahead="", gap="", gap_to_front=0.0):
         if pos == 1:
             return
 
-        if pos_in_class == pos:
+        if pos_in_class == pos or pos_in_class == 0:
             self.announce(f"You are in P {pos}")
         else:
             self.announce(f"You are P {pos_in_class} in class, P {pos} overall")
@@ -112,6 +112,10 @@ class Audio(Thread, EventHandler):
             car_number = Audio._car_number_to_audio(car_ahead)
             gap_words, extra = self._gap_to_audio(gap)
             self.announce(f"Car {car_number} is {gap_words} ahead {extra}")
+
+        if gap_to_front > 0.0 and gap_to_front < 60 * 30:
+            # while we're within 30 minutes of the front, announce our gap to the front
+            self.announce(f"Gap to front is {int(gap_to_front)} seconds")
 
     @staticmethod
     def _car_number_to_audio(car_number:str):

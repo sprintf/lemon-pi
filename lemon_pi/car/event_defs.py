@@ -83,6 +83,7 @@ AudioAlarmEvent = Event("alrm", debounce_time=60)
 # pos_in_class=
 # car_ahead=
 # gap=
+# gap_to_front=
 RacePositionEvent = Event("rpos")
 
 # an event indicating who the car behind us is
