@@ -31,8 +31,6 @@ from python_settings import settings
 
 import logging
 
-from lemon_pi.shared.radio import Radio
-
 logger = logging.getLogger(__name__)
 
 
@@ -41,15 +39,13 @@ logger = logging.getLogger(__name__)
 # not want to use the radio control thread for processing the messages. We need the radio
 # control thread to be back controlling the radio
 
-class RadioInterface(Thread, EventHandler):
+class RadioInterface(EventHandler):
 
-    def __init__(self, radio:Radio,
+    def __init__(self,
                  comms_server: MeringueComms,
                  temp_provider:TemperatureProvider,
                  lap_provider:LapProvider,
                  fuel_provider:FuelProvider):
-        Thread.__init__(self)
-        self.radio = radio
         self.comms_server = comms_server
         self.temp_provider = temp_provider
         self.lap_provider = lap_provider
@@ -57,6 +53,7 @@ class RadioInterface(Thread, EventHandler):
         self.fuel_provider = fuel_provider
         RadioSyncEvent.register_handler(self)
         LeaveTrackEvent.register_handler(self)
+        EnterTrackEvent.register_handler(self)
 
     def register_lap_provider(self, lap_provider):
         self.lap_provider = lap_provider
@@ -71,9 +68,6 @@ class RadioInterface(Thread, EventHandler):
             msg.telemetry.last_lap_time = self.lap_provider.get_last_lap_time()
             msg.telemetry.lap_count = self.lap_provider.get_lap_count()
             msg.telemetry.fuel_remaining_percent = self.fuel_provider.get_fuel_percent_remaining()
-            # we send the event asynchronously, because the radio can take multiple seconds
-            # to transmit, so there is no guarantee that this message will be sent exactly now
-            self.radio.send_async(msg)
             self.comms_server.send_message_from_car(msg)
             return
 
@@ -81,7 +75,6 @@ class RadioInterface(Thread, EventHandler):
             msg = ToPitMessage()
             # we have to set some field to let protobuf know the message type
             msg.pitting.timestamp = 1
-            self.radio.send_async(msg)
             self.comms_server.send_message_from_car(msg)
             return
 
@@ -89,19 +82,8 @@ class RadioInterface(Thread, EventHandler):
             msg = ToPitMessage()
             # we have to set some field to let protobuf know the message type
             msg.entering.timestamp = 1
-            self.radio.send_async(msg)
             self.comms_server.send_message_from_car(msg)
             return
-
-
-    def run(self):
-        while True:
-            try:
-                msg = self.radio.receive_queue.get()
-                self.process_incoming(msg)
-                self.radio.receive_queue.task_done()
-            except Exception:
-                logger.exception("got an exception in radio_interface")
 
     def process_incoming(self, msg):
         RadioReceiveEvent.emit()

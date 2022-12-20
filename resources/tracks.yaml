@@ -6,7 +6,7 @@
 # The pit-in coords are used to alert the pit that the car is
 # coming into the pits, and to display driver instructions to aid
 # driver swaps. The pit-in coords are also used to reset the GPS
-# back to 1 Hertz
+# back to 1 Hertz.
 
 tracks:
   -  name: "Sonoma Raceway"
@@ -20,19 +20,12 @@ tracks:
 
   -  name: "Thunderhill"
      code: "thil"
-     start_finish_coords: "(39.538475,-122.331300),(39.538480,-122.331113)"
+     start_finish_coords: "(39.539323, -122.331265),(39.539321, -122.331097)"
      start_finish_direction: "S"
-     pit_entry_coords: "(39.542489,-122.331372),(39.542488,-122.331315)"
-     pit_entry_direction: "S"
-     pit_out_coords: "(39.539314,-122.331434),(39.539315,-122.331290)"
+     pit_entry_coords: "(39.543466, -122.331475),(39.543502, -122.331397)"
+     pit_entry_direction: "SW"
+     pit_out_coords: "(39.538775, -122.331361),(39.538782, -122.331244)"
      pit_out_direction: "S"
-     radio_sync_list:
-       - "west cut":
-         radio_sync_coords: "(39.539930,-122.336541),(39.539739,-122.336530)"
-         radio_sync_direction: "E"
-       - "turn 8":
-         radio_sync_coords: "(39.545072,-122.332619),(39.544949,-122.332622)"
-         radio_sync_direction: "W"
 
   -  name: "Thunderhill West"
      code: "thilw"
@@ -170,6 +163,17 @@ tracks:
      radio_sync_direction: "SE"
      pit_out_coords: "(37.928483,-122.297005),(37.928385,-122.297129)"
      pit_out_direction: "SE"
+     hidden: "true"
+
+# this is second local test track, used for testing and other things.
+  -  name: "Orangevale Test Track"
+     code: "test2"
+     start_finish_coords: "(38.681014, -121.218966),(38.681042, -121.219381)"
+     start_finish_direction: "S"
+     pit_entry_coords: "(38.680527, -121.219606),(38.680828, -121.219693)"
+     pit_entry_direction: "SW"
+     pit_out_coords: "(37.928483,-122.297005),(37.928385,-122.297129)"
+     pit_out_direction: "NE"
      hidden: "true"
 
 

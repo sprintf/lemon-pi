@@ -80,7 +80,9 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
                             # we can look into whether it should or not once we have empirical information
                             logger.warning("no fix...awaiting")
                             self.time_synced = False
-                            time.sleep(0.5)
+                            # don't sleep as we want to quickly traverse these messages until we find one that is synced
+                            # do need to test battery drain without this, but it should be fine.
+                            # time.sleep(0.5)
                             continue
 
                         self.time_synced = True

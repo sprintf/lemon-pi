@@ -106,22 +106,8 @@ class UsbDetector:
             return glob.glob("/dev/ttyUSB*")
         elif os_type == "Darwin":
             return glob.glob("/dev/tty.usbserial*")
-        elif os_type == "Windows":
-            return UsbDetector.__get_windows_com_devices()
         else:
             raise Exception("unknown platform: {}".format(os_type))
-
-    @staticmethod
-    def __get_windows_com_devices():
-        connected_devices = []
-        for c in range(1, 16):
-            try:
-                device = "COM{}".format(c)
-                with serial.Serial(device, baudrate=38400, timeout=2):
-                    connected_devices.append(device)
-            except FileNotFoundError:
-                pass
-        return connected_devices
 
 
 if __name__ == "__main__":

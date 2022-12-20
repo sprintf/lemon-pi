@@ -5,7 +5,8 @@ import logging
 from queue import Queue
 from threading import Thread
 
-from lemon_pi.car.event_defs import ButtonPressEvent, CompleteLapEvent, AudioAlarmEvent, RacePositionEvent
+from lemon_pi.car.event_defs import ButtonPressEvent, CompleteLapEvent, AudioAlarmEvent, RacePositionEvent, \
+    DriverMessageEvent
 from lemon_pi.shared.events import EventHandler
 
 logger = logging.getLogger(__name__)
@@ -40,6 +41,7 @@ class Audio(Thread, EventHandler):
         CompleteLapEvent.register_handler(self)
         AudioAlarmEvent.register_handler(self)
         RacePositionEvent.register_handler(self)
+        DriverMessageEvent.register_handler(self)
 
     def handle_event(self, event, **kwargs):
         if event == ButtonPressEvent:
@@ -53,6 +55,9 @@ class Audio(Thread, EventHandler):
             return
         if event == RacePositionEvent:
             self.announce_race_position(**kwargs)
+            return
+        if event == DriverMessageEvent:
+            self.announce(kwargs["text"])
             return
 
     def run(self) -> None:
