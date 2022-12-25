@@ -44,7 +44,7 @@ class RadioInterfaceTestCase(LemonPiTestCase):
         red_flag.flag_status = RaceFlagStatus.RED
         ri.process_incoming(red_flag)
         race_status_event.assert_called_with(flag='RED')
-        driver_message_event.assert_called_with(text='Race Red Flagged', duration_secs=10)
+        driver_message_event.assert_called_with(text='Race Red Flagged', duration_secs=10, audio=True)
 
     @patch("lemon_pi.car.event_defs.RefuelEvent.emit")
     def test_refuel_message(self, refuel_event):
