@@ -4,7 +4,7 @@ import re
 from haversine import haversine, Unit
 
 from lemon_pi.car.update_tracks import TrackUpdater
-from lemon_pi.car.event_defs import LeaveTrackEvent, RadioSyncEvent, EnterTrackEvent
+from lemon_pi.car.event_defs import LeaveTrackEvent, EnterTrackEvent
 from lemon_pi.car.target import Target
 
 import logging
@@ -14,20 +14,19 @@ logger = logging.getLogger(__name__)
 
 class TargetMetaData:
 
-    def __init__(self, field_name, file_field_name, event, multiple=False):
+    def __init__(self, field_name, file_field_name, event, backwards_event):
         self.field_name = field_name
         self.file_field_name = file_field_name
         self.event = event
-        self.multiple = multiple
+        self.backwards_event = backwards_event
 
 
-START_FINISH = TargetMetaData("start_finish", "start_finish", None)
-PIT_ENTRY = TargetMetaData("pit_in", "pit_entry", LeaveTrackEvent)
-PIT_OUT = TargetMetaData("pit_out", "pit_out", EnterTrackEvent)
-RADIO_SYNC = TargetMetaData("radio_sync", "radio_sync", RadioSyncEvent, multiple=True)
+START_FINISH = TargetMetaData("start_finish", "start_finish", None, None)
+PIT_ENTRY = TargetMetaData("pit_in", "pit_entry", LeaveTrackEvent, EnterTrackEvent)
+PIT_OUT = TargetMetaData("pit_out", "pit_out", EnterTrackEvent, LeaveTrackEvent)
 
 
-TARGETS = [START_FINISH, PIT_ENTRY, PIT_OUT, RADIO_SYNC]
+TARGETS = [START_FINISH, PIT_ENTRY, PIT_OUT]
 
 
 class TrackLocation:
@@ -35,7 +34,7 @@ class TrackLocation:
     def __init__(self, name, code):
         self.name = name
         self.code = code
-        self.targets:{TargetMetaData, Target} = {}
+        self.targets: {TargetMetaData, Target} = {}
         self.hidden = False
         self.reversed = False
 
@@ -53,7 +52,7 @@ class TrackLocation:
     def get_start_finish_target(self) -> Target:
         return self.targets[START_FINISH]
 
-    def set_start_finish_target(self, t:Target):
+    def set_start_finish_target(self, t: Target):
         self.targets[START_FINISH] = t
 
     def is_pit_defined(self) -> bool:
@@ -62,7 +61,7 @@ class TrackLocation:
     def get_pit_in_target(self) -> Target:
         return self.targets[PIT_ENTRY]
 
-    def set_pit_in_target(self, t:Target):
+    def set_pit_in_target(self, t: Target):
         self.targets[PIT_ENTRY] = t
 
     def is_pit_out_defined(self) -> bool:
@@ -71,22 +70,27 @@ class TrackLocation:
     def get_pit_out_target(self) -> Target:
         return self.targets[PIT_OUT]
 
-    def is_radio_sync_defined(self) -> bool:
-        return self.targets.get(RADIO_SYNC) is not None
-
     def is_reversed(self) -> bool:
         return self.reversed
 
-    def get_radio_sync_targets(self) -> [Target]:
-        return self.targets[RADIO_SYNC]
+    def add_target(self, tmd: TargetMetaData, target: Target):
+        self.targets[tmd] = target
 
-    def add_target(self, tmd:TargetMetaData, target:Target):
-        if not tmd.multiple:
-            self.targets[tmd] = target
+    def reverse(self):
+        self.reversed = not self.reversed
+        self.targets[START_FINISH].target_heading = swap_direction(self.targets[START_FINISH].target_heading)
+
+        tmp = self.targets[PIT_ENTRY]
+        if PIT_OUT in self.targets.keys():
+            self.targets[PIT_ENTRY] = self.targets[PIT_OUT]
+            self.targets[PIT_ENTRY].target_heading = swap_direction(self.targets[PIT_ENTRY].target_heading)
         else:
-            if not self.targets.get(tmd):
-                self.targets[tmd] = []
-            self.targets[tmd].append(target)
+            self.targets[PIT_ENTRY] = None
+        if PIT_ENTRY in self.targets.keys():
+            self.targets[PIT_OUT] = tmp
+            self.targets[PIT_OUT].target_heading = swap_direction(self.targets[PIT_OUT].target_heading)
+        else:
+            self.targets[PIT_OUT] = None
 
     def __repr__(self):
         return self.name
@@ -101,6 +105,7 @@ def read_tracks() -> [TrackLocation]:
     track_file, _ = TrackUpdater.get_track_file()
     return do_read_tracks(track_file)
 
+
 def do_read_tracks(track_file) -> [TrackLocation]:
     track_list = []
     with open(track_file) as yamlfile:
@@ -111,11 +116,6 @@ def do_read_tracks(track_file) -> [TrackLocation]:
             for tmd in TARGETS:
                 _read_target(tmd, track, track_data)
 
-            radio_list = track.get("radio_sync_list")
-            if radio_list:
-                for waypoint in radio_list:
-                    _read_target(RADIO_SYNC, waypoint, track_data)
-
             # we must have a start/finish .. everything else is optional
             assert track_data.targets[START_FINISH]
 
@@ -123,23 +123,7 @@ def do_read_tracks(track_file) -> [TrackLocation]:
                 track_data.hidden = True
 
             if "reversed" in track and track["reversed"]:
-                # switch direction of start/finish
-                track_data.reversed = True
-                track_data.targets[START_FINISH].target_heading = swap_direction(track_data.targets[START_FINISH].target_heading)
-
-                tmp = track_data.targets[PIT_ENTRY]
-                if PIT_OUT in track_data.targets.keys():
-                    track_data.targets[PIT_ENTRY] = track_data.targets[PIT_OUT]
-                    track_data.targets[PIT_ENTRY].target_heading = swap_direction(
-                        track_data.targets[PIT_ENTRY].target_heading)
-                else:
-                    track_data.targets[PIT_ENTRY] = None
-                if PIT_ENTRY in track_data.targets.keys():
-                    track_data.targets[PIT_OUT] = tmp
-                    track_data.targets[PIT_OUT].target_heading = swap_direction(
-                        track_data.targets[PIT_OUT].target_heading)
-                else:
-                    track_data.targets[PIT_OUT] = None
+                track_data.reverse()
 
             track_list.append(track_data)
     return track_list

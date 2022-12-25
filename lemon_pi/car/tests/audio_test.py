@@ -1,7 +1,6 @@
 
 import unittest
-from unittest.mock import Mock, patch
-import time
+from unittest.mock import Mock
 
 from lemon_pi.car.audio import Audio
 from lemon_pi.car.event_defs import ButtonPressEvent, CompleteLapEvent, DriverMessageEvent
@@ -52,12 +51,23 @@ class TestAudio(unittest.TestCase):
 
     def test_driver_message(self):
         audio = Audio()
-        DriverMessageEvent.emit(text="pit in 3 laps")
+        DriverMessageEvent.emit(text="pit in 3 laps", audio=True)
         self.assertEqual(1, audio.queue.qsize())
         audio.engine.say = Mock()
         audio.engine.runAndWait = Mock()
         audio.run_once()
         audio.engine.say.assert_called_with("pit in 3 laps")
+
+    def test_driver_message_no_audio(self):
+        audio = Audio()
+        DriverMessageEvent.emit(text="pit in 3 laps", audio=False)
+        self.assertEqual(0, audio.queue.qsize())
+
+    def test_driver_message_no_audio_flag(self):
+        audio = Audio()
+        DriverMessageEvent.emit(text="pit in 3 laps")
+        self.assertEqual(0, audio.queue.qsize())
+
 
 
 

@@ -1,9 +1,11 @@
 
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
+from lemon_pi.car import geometry
 from lemon_pi.car.gate import Gate, ELEMENTS, Gates, GateVerifier
 from lemon_pi.car.target import Target
+from lemon_pi.shared.data_provider_interface import GpsPos
 
 
 class GateTest(unittest.TestCase):
@@ -83,7 +85,10 @@ class GatesTest(unittest.TestCase):
 
 class GateVerifierTest(unittest.TestCase):
 
-    def test_good(self):
+
+    @patch("lemon_pi.car.gate.crossed_line")
+    def test_good(self, crossed_line_mock):
+        crossed_line_mock.return_value = (True, 1.0, False)
         gates = Gates(Target("foo", (0, 0), (1, 1), "N"))
         gate_array = []
         prev = None
@@ -92,12 +97,13 @@ class GateVerifierTest(unittest.TestCase):
             prev = gate_array[i]
             gates.append(prev)
         gv = GateVerifier(gates)
-        gv.cross_detector.crossed_line = Mock(return_value=(True, 1.0))
         for i in range(0, 9):
-            gv.verify(5, 5, 180, 15)
+            gv.verify(GpsPos(5, 5, 180, 0, 15), GpsPos(5, 5, 180, 0, 15))
         self.assertTrue(gv.is_match())
 
-    def test_not_all_gates_crossed(self):
+    @patch("lemon_pi.car.gate.crossed_line")
+    def test_not_all_gates_crossed(self, crossed_line_mock):
+        crossed_line_mock.return_value = (True, 1.0, False)
         gates = Gates(Target("foo", (0, 0), (1, 1), "N"))
         gate_array = []
         prev = None
@@ -106,7 +112,6 @@ class GateVerifierTest(unittest.TestCase):
             prev = gate_array[i]
             gates.append(prev)
         gv = GateVerifier(gates)
-        gv.cross_detector.crossed_line = Mock(return_value=(True, 1.0))
         for i in range(0, 8):
-            gv.verify(5, 5, 180, 15)
+            gv.verify(GpsPos(5, 5, 180, 0, 15), GpsPos(5, 5, 180, 0, 15))
         self.assertFalse(gv.is_match())

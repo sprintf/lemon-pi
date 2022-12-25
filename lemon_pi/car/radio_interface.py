@@ -92,17 +92,17 @@ class RadioInterface(EventHandler):
             logger.info("got race status message...{}".format(msg))
             RaceFlagStatusEvent.emit(flag=RaceFlagStatus.Name(msg.flag_status))
             if msg.flag_status == RaceFlagStatus.RED:
-                DriverMessageEvent.emit(text="Race Red Flagged", duration_secs=10)
+                DriverMessageEvent.emit(text="Race Red Flagged", duration_secs=10, audio=True)
             if msg.flag_status == RaceFlagStatus.BLACK:
-                DriverMessageEvent.emit(text="Race Black Flagged", duration_secs=10)
+                DriverMessageEvent.emit(text="Race Black Flagged", duration_secs=10, audio=True)
             if msg.flag_status == RaceFlagStatus.YELLOW:
-                DriverMessageEvent.emit(text="Course Yellow", duration_secs=10)
+                DriverMessageEvent.emit(text="Course Yellow", duration_secs=10, audio=True)
         elif type(msg) == DriverMessage:
             logger.info("got race driver message...{}".format(msg))
             # for a multi-car team we only want to show the message to the car it
             # was intended for
             if msg.car_number == settings.CAR_NUMBER:
-                DriverMessageEvent.emit(text=msg.text, duration_secs=30)
+                DriverMessageEvent.emit(text=msg.text, duration_secs=30, audio=True)
         elif type(msg) == Ping:
             logger.info("got ping message...{}".format(msg))
         elif type(msg) == RacePosition:

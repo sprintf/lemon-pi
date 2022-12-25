@@ -1,4 +1,5 @@
 import bisect
+import logging
 import re
 import statistics
 import unittest
@@ -25,6 +26,11 @@ ALT_F = 11
 SPEED = 12
 HEADING = 13
 
+from python_settings import settings
+import lemon_pi.config.test_settings as my_local_settings
+
+if not settings.configured:
+    settings.configure(my_local_settings)
 
 class PredictorTest(unittest.TestCase):
 
@@ -108,6 +114,7 @@ class PredictorTest(unittest.TestCase):
 class PredictiveTimerTest(unittest.TestCase):
 
     def test_read_big_file(self):
+        logging.basicConfig(level=logging.INFO)
         sonoma = Target("sonoma", (38.161340, -122.454911), (38.161589, -122.454658), direction="NW")
         plt = LapTimePredictor(sonoma)
 

@@ -57,7 +57,8 @@ class Audio(Thread, EventHandler):
             self.announce_race_position(**kwargs)
             return
         if event == DriverMessageEvent:
-            self.announce(kwargs["text"])
+            if 'audio' in kwargs.keys() and kwargs['audio']:
+                self.announce(kwargs["text"])
             return
 
     def run(self) -> None:

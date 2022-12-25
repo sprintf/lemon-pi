@@ -17,12 +17,14 @@ import os
 import subprocess
 from python_settings import settings
 
-from lemon_pi.shared.data_provider_interface import GpsProvider
+from lemon_pi.shared.data_provider_interface import GpsProvider, GpsPos
 from lemon_pi.shared.events import EventHandler
 from lemon_pi_pb2 import GpsPosition
 from lemon_pi.shared.usb_detector import UsbDetector, UsbDevice
 
 logger = logging.getLogger(__name__)
+
+
 
 
 class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvider):
@@ -147,15 +149,9 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
         else:
             return 0.0, 0.0
 
-    def get_gps_position(self) -> GpsPosition:
+    def get_gps_position(self) -> GpsPos:
         if self.time_synced and time.time() - self.fix_timestamp < 5:
-            result = GpsPosition()
-            result.lat = self.lat
-            result.long = self.long
-            result.speed_mph = self.speed_mph
-            result.heading = int(self.heading)
-            result.gps_timestamp = round(self.fix_timestamp)
-            return result
+            return GpsPos(self.lat, self.long, int(self.heading), self.speed_mph, round(self.fix_timestamp))
         else:
             return None
 

@@ -17,10 +17,8 @@ class Target:
         else:
             self.target_heading = target_heading
         self.midpoint = self._calc_midpoint_()
-        from lemon_pi.car.line_cross_detector import LineCrossDetector
-        self.line_cross_detector = LineCrossDetector()
 
     def _calc_midpoint_(self):
         lat1, long1 = self.lat_long1
         lat2, long2 = self.lat_long2
-        return ((lat1 + lat2) / 2, (long1 + long2) / 2)
+        return (lat1 + lat2) / 2, (long1 + long2) / 2

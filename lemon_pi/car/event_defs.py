@@ -56,6 +56,7 @@ CarStoppedEvent = Event("CarStopped", suppress_logs=True, debounce_time=10)
 # emit() will contain
 #   text=
 #   duration_secs=
+#   audio=  true or false
 DriverMessageEvent = Event("driver-message")
 
 # emit() will contain
@@ -97,6 +98,10 @@ SetTargetTimeEvent = Event("target")
 # reset the fastest lap
 # no args
 ResetFastLapEvent = Event("reset-fast-lap")
+
+# the track is being entered in  reverse direction
+# no args
+ReverseTrackEvent = Event("reverse-track")
 
 
 
