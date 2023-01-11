@@ -13,6 +13,9 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.7", "3.8" ]
 
     steps:
     - uses: actions/checkout@v2
@@ -26,10 +29,10 @@ jobs:
              rm lemon_pi/shared/protos/*.proto && \
              ln -s `pwd`/protos/src/main/proto/lemon-pi.proto lemon_pi/shared/protos/lemon-pi.proto
              ln -s `pwd`/protos/src/main/proto/race-flag-status.proto lemon_pi/shared/protos/race-flag-status.proto
-    - name: Set up Python 3.7
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
-        python-version: 3.7
+        python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
         sudo apt-get update

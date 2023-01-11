@@ -76,7 +76,7 @@ class LapTimePredictor(EventHandler):
     def update_position(self, lat, long, heading, time):
         # throw out identical data, which some devices provide
         if self.last_gps is not None and lat == self.last_gps.lat and long == self.last_gps.long:
-            return False, 0
+            return False, 0, False
 
         this_gps = GpsPos(lat, long, heading, 0, time)
 
@@ -101,11 +101,11 @@ class LapTimePredictor(EventHandler):
                     # is from the epoch, so we ignore that
                     if last_lap_time < ONE_DAY_IN_SECONDS:
                         self._update_gate_time_to_finish(last_lap_time)
-                return crossed_line, crossed_time
+                return crossed_line, crossed_time, backwards
 
             # we're on an out lap
             if self.state == PredictorState.INIT:
-                return False, 0
+                return False, 0, False
 
             # we're on our first full lap laying breadcrumbs to figure out
             # where gates should be placed
@@ -119,7 +119,7 @@ class LapTimePredictor(EventHandler):
             if self.state == PredictorState.WORKING:
                 self._process_and_predict(this_gps)
 
-            return False, 0
+            return False, 0, False
 
         finally:
             self.last_gps = GpsPos(lat, long, heading, 0, time)

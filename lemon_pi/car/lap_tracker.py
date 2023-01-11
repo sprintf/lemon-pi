@@ -48,8 +48,12 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
         this_gps = GpsPos(lat, long, heading, time, speed)
         try:
             logger.debug("updating position to {} {}".format(lat, long))
-            crossed_start_finish, cross_time = self.predictive_lap_timer.update_position(lat, long, heading, time)
+            crossed_start_finish, cross_time, backwards = self.predictive_lap_timer.update_position(lat, long, heading, time)
             if crossed_start_finish:
+                if backwards:
+                    self.track.reverse()
+                    ReverseTrackEvent.emit()
+
                 # de-bounce hitting start finish line twice ... a better
                 # approach might be to ensure car travels so far away from line
                 if time - self.lap_start_time > 10:

@@ -19,12 +19,9 @@ from python_settings import settings
 
 from lemon_pi.shared.data_provider_interface import GpsProvider, GpsPos
 from lemon_pi.shared.events import EventHandler
-from lemon_pi_pb2 import GpsPosition
 from lemon_pi.shared.usb_detector import UsbDetector, UsbDevice
 
 logger = logging.getLogger(__name__)
-
-
 
 
 class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvider):
@@ -205,8 +202,8 @@ if __name__ == "__main__":
         def __init__(self):
             self.file = open("traces/trace-{}.csv".format(int(time.time())), mode="w")
 
-        def update_position(self, lat: float, long: float, heading: float, time: float, speed: int) -> None:
-            self.file.write("{},{},{},{},{}\n".format(time, lat, long, heading, speed))
+        def update_position(self, lat: float, long: float, heading: float, tstamp: float, speed: int) -> None:
+            self.file.write("{},{},{},{},{}\n".format(tstamp, lat, long, heading, speed))
             self.file.flush()
 
 
