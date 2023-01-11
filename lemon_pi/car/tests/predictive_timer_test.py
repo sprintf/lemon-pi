@@ -152,7 +152,7 @@ class PredictiveTimerTest(unittest.TestCase):
                 if row[0].startswith('#'):
                     continue
                 line_count += 1
-                crossed, cross_time = plt.update_position(float(row[LAT]),
+                crossed, cross_time, backwards = plt.update_position(float(row[LAT]),
                                                           float(row[LONG]),
                                                           round(float(row[HEADING])),
                                                           float(row[ABS_TIME]))
