@@ -4,13 +4,15 @@ import time
 from python_settings import settings
 from enum import Enum
 
-from lemon_pi.car.event_defs import DriverMessageEvent, LeaveTrackEvent
+from lemon_pi.car.event_defs import DriverMessageEvent, LeaveTrackEvent, ReverseTrackEvent
 from lemon_pi.car.gate import Gate, Gates, GateVerifier
+from lemon_pi.car.gps_geometry import crossed_line
 from lemon_pi.car.lap_session_store import LapSessionStore
-from lemon_pi.car.line_cross_detector import LineCrossDetector
 from lemon_pi.car.target import Target
 from haversine import haversine, Unit
 
+from lemon_pi.car.track import swap_direction
+from lemon_pi.shared.data_provider_interface import GpsPos
 from lemon_pi.shared.events import EventHandler
 
 logger = logging.getLogger(__name__)
@@ -30,18 +32,15 @@ class PredictorState(Enum):
 
 class LapTimePredictor(EventHandler):
 
+    last_gps: GpsPos
+
     def __init__(self, start_finish: Target):
         self.start_finish = start_finish
         self.gates: Gates = Gates(start_finish)
-        self.start_finish_detector = LineCrossDetector()
-        self.gate_detector = LineCrossDetector(degrees=40)
 
         self.state = PredictorState.INIT
 
-        self.last_heading = 0
-        self.last_lat = 0
-        self.last_long = 0
-        self.last_time = 0
+        self.last_gps = None
 
         self.lap_start_time = 0
         self.current_predicted_time = None
@@ -49,6 +48,8 @@ class LapTimePredictor(EventHandler):
         self.gate_index = -1
 
         LeaveTrackEvent.register_handler(self)
+        ReverseTrackEvent.register_handler(self)
+
         # load a set of gate verifiers for our previous sessions at this track
         self.gate_verifiers = []
         if LapSessionStore.get_instance():
@@ -66,16 +67,25 @@ class LapTimePredictor(EventHandler):
     def handle_event(self, event, **kwargs):
         if event == LeaveTrackEvent:
             LapSessionStore.get_instance().save_session(self.gates)
+            return
+        if event == ReverseTrackEvent:
+            self.state = PredictorState.INIT
+            self.start_finish.target_heading = swap_direction(self.start_finish.target_heading)
+            return
 
     def update_position(self, lat, long, heading, time):
         # throw out identical data, which some devices provide
-        if lat == self.last_lat and long == self.last_long:
-            return False, 0
+        if self.last_gps is not None and lat == self.last_gps.lat and long == self.last_gps.long:
+            return False, 0, False
+
+        this_gps = GpsPos(lat, long, heading, 0, time)
 
         try:
-            crossed_line, crossed_time = \
-                self.start_finish_detector.crossed_line(lat, long, heading, time, self.start_finish)
-            if crossed_line:
+            crossed, crossed_time, backwards = \
+                crossed_line(self.last_gps, this_gps, self.start_finish)
+            if backwards:
+                raise Exception("backwards unexpected on start-finish line cross")
+            if crossed:
                 self.gate_index = 0
                 last_lap_time = crossed_time - self.lap_start_time
                 self.lap_start_time = crossed_time
@@ -91,11 +101,11 @@ class LapTimePredictor(EventHandler):
                     # is from the epoch, so we ignore that
                     if last_lap_time < ONE_DAY_IN_SECONDS:
                         self._update_gate_time_to_finish(last_lap_time)
-                return crossed_line, crossed_time
+                return crossed_line, crossed_time, backwards
 
             # we're on an out lap
             if self.state == PredictorState.INIT:
-                return False, 0
+                return False, 0, False
 
             # we're on our first full lap laying breadcrumbs to figure out
             # where gates should be placed
@@ -104,18 +114,15 @@ class LapTimePredictor(EventHandler):
                 # also, on this lap, try to match this lap against other sessions at
                 # this track, so we can load previous data
                 for verifier in self.gate_verifiers:
-                    verifier.verify(lat, long, heading, time)
+                    verifier.verify(self.last_gps, this_gps)
 
             if self.state == PredictorState.WORKING:
-                self._process_and_predict(lat, long, heading, time)
+                self._process_and_predict(this_gps)
 
-            return False, 0
+            return False, 0, False
 
         finally:
-            self.last_heading = heading
-            self.last_lat = lat
-            self.last_long = long
-            self.last_time = time
+            self.last_gps = GpsPos(lat, long, heading, 0, time)
 
     # return the current predicted lap, or None if it cannot be predicted
     # The car needs to be 1/6th of the way around the track before the
@@ -129,7 +136,7 @@ class LapTimePredictor(EventHandler):
         return None
 
     def _lay_breadcrumb(self, lat, long, heading):
-        if abs(heading - self.last_heading) > 20:
+        if abs(heading - self.last_gps.heading) > 20:
             return
 
         if len(self.gates) == 0:
@@ -145,11 +152,12 @@ class LapTimePredictor(EventHandler):
                 self.gates.append(Gate(lat, long, heading, f"gate-{len(self.gates)}", previous=last_gate))
                 logger.info(f"added gate {len(self.gates)} dist to sf = {dist_from_sf}")
 
-    def _process_and_predict(self, lat, long, heading, time):
+    def _process_and_predict(self, this_gps: GpsPos):
         if self.gate_index < len(self.gates):
-            crossed_gate, cross_gate_time = \
-                self.gate_detector.crossed_line(lat, long, heading,
-                                                time, self.gates[self.gate_index].target)
+            crossed_gate, cross_gate_time, backwards = \
+                crossed_line(self.last_gps, this_gps, self.gates[self.gate_index].target)
+            if backwards:
+                raise Exception("backwards unexpected on gate cross")
             if crossed_gate:
                 self.gates[self.gate_index].missed = False
                 elapsed_time = cross_gate_time - self.lap_start_time
@@ -165,12 +173,12 @@ class LapTimePredictor(EventHandler):
                 except IndexError:
                     pass
                 self.gate_index += 1
-                self.gate_detector.reset()
             else:
                 # see if we're nearer the next gate, if we are then we missed a gate
+                this_pos = (this_gps.lat, this_gps.long)
                 if self.gate_index < len(self.gates) - 1:
-                    gate_dist = haversine((lat, long), self.gates[self.gate_index].target.midpoint, Unit.FEET)
-                    next_gate_dist = haversine((lat, long), self.gates[self.gate_index + 1].target.midpoint,
+                    gate_dist = haversine(this_pos, self.gates[self.gate_index].target.midpoint, Unit.FEET)
+                    next_gate_dist = haversine(this_pos, self.gates[self.gate_index + 1].target.midpoint,
                                                Unit.FEET)
                     if gate_dist > next_gate_dist:
                         logger.info(f"missed gate {self.gate_index}!!!")

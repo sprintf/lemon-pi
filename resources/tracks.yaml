@@ -159,10 +159,6 @@ tracks:
      start_finish_direction: "SE"
      pit_entry_coords: "(37.928483,-122.297005),(37.928385,-122.297129)"
      pit_entry_direction: "NW"
-     radio_sync_coords: "(37.927329,-122.296101),(37.927392,-122.295992)"
-     radio_sync_direction: "SE"
-     pit_out_coords: "(37.928483,-122.297005),(37.928385,-122.297129)"
-     pit_out_direction: "SE"
      hidden: "true"
 
 # this is second local test track, used for testing and other things.
@@ -172,8 +168,6 @@ tracks:
      start_finish_direction: "S"
      pit_entry_coords: "(38.680527, -121.219606),(38.680828, -121.219693)"
      pit_entry_direction: "SW"
-     pit_out_coords: "(37.928483,-122.297005),(37.928385,-122.297129)"
-     pit_out_direction: "NE"
      hidden: "true"
 
 

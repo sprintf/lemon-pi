@@ -3,11 +3,13 @@ import time
 from haversine import haversine, Unit
 
 from lemon_pi.car import geometry
-from lemon_pi.car.line_cross_detector import LineCrossDetector
+from lemon_pi.car.gps_geometry import crossed_line
 from lemon_pi.car.target import Target
 from statistics import mean
 import bisect
 import logging
+
+from lemon_pi.shared.data_provider_interface import GpsPos
 
 logger = logging.getLogger(__name__)
 
@@ -175,7 +177,6 @@ class GateVerifier:
 
     def __init__(self, gates: Gates):
         self.gates = gates
-        self.cross_detector = LineCrossDetector()
         self.index = 0
         self.matched = 0
 
@@ -188,22 +189,19 @@ class GateVerifier:
     def get_timestamp(self):
         return self.gates.timestamp
 
-    def verify(self, lat, long, heading, time):
-        if self.index >= len(self.gates):
+    def verify(self, last_gps: GpsPos, this_gps: GpsPos):
+        if self.index >= len(self.gates) or last_gps is None:
             return
-        crossed, crossed_time = self.cross_detector.crossed_line(lat,
-                                                                 long,
-                                                                 heading,
-                                                                 time,
-                                                                 self.gates[self.index].target)
-        if crossed:
+        crossed, crossed_time, backwards = crossed_line(
+            last_gps, this_gps, self.gates[self.index].target)
+        if crossed and not backwards:
             self.index += 1
             self.matched += 1
         else:
             # did we miss a gate?
             if self.index < len(self.gates) - 1:
-                gate_dist = haversine((lat, long), self.gates[self.index].target.midpoint, Unit.FEET)
-                next_gate_dist = haversine((lat, long), self.gates[self.index + 1].target.midpoint,
+                gate_dist = haversine((this_gps.lat, this_gps.long), self.gates[self.index].target.midpoint, Unit.FEET)
+                next_gate_dist = haversine((this_gps.lat, this_gps.long), self.gates[self.index + 1].target.midpoint,
                                            Unit.FEET)
                 if gate_dist > next_gate_dist:
                     self.index += 1

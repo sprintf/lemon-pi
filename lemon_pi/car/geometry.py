@@ -1,6 +1,10 @@
+import logging
+
 from numpy import *
 from haversine import haversine
 import math
+
+logger = logging.getLogger(__name__)
 
 
 def angular_difference(h1, h2):
@@ -53,6 +57,7 @@ def seg_intersect_xy(a1, a2, b1, b2):
     num = dot(dap, dp)
     return (num / denom.astype(float))*db + b1
 
+
 # is a point p1 between lat/long points a1 and a2
 def is_between(a1, a2, p1):
     xy1 = (a1[1], a1[0])
@@ -63,6 +68,7 @@ def is_between(a1, a2, p1):
     maxxy = (max(xy1[0], xy2[0]), max(xy1[1], xy2[1]))
     return pxy[0] >= minxy[0] and pxy[0] <= maxxy[0] \
             and pxy[1] >= minxy[1] and pxy[1] <= maxxy[1]
+
 
 # get a point on the given heading
 #  point is a (lat, long) tuple
@@ -104,7 +110,7 @@ def calc_intersect_heading(lat_long1, lat_long2, direction):
     choice2 = (line_heading - 90)
     suggestion = DirectionMap[direction]
 
-    if abs(suggestion - choice1 % 360)  < abs(suggestion - choice2 % 360):
+    if abs(suggestion - choice1 % 360) < abs(suggestion - choice2 % 360):
         # print("choosing 1")
         return choice1 % 360
     else:

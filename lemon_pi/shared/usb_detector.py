@@ -63,6 +63,7 @@ class UsbDetector:
             session = None
             try:
                 session = gps()
+                logger.info("gpsd is running")
                 session.read()  # needed to get past version info
                 session.send('?DEVICES;')
                 code = session.read()
@@ -72,8 +73,8 @@ class UsbDetector:
                         self.usb_map[UsbDevice.GPS] = device_path
                         self.device_map[device_path] = UsbDevice.GPS
                         logger.info("associated {} with GPS".format(device_path))
-            except Exception:
-                logger.info("didn't find connected GPS device")
+            except Exception as e:
+                logger.error("didn't find connected GPS device", e)
             finally:
                 if session:
                     session.close()
@@ -84,11 +85,12 @@ class UsbDetector:
             if self.device_map.get(device):
                 # it's been identified
                 continue
+            logger.info("trying to identify {}".format(device))
             with serial.Serial(device, baudrate=38400, timeout=2) as ser:
                 try:
                     ser.write("atz\r\r".encode("UTF-8"))
                     time.sleep(0.5)
-                    resp_bytes = ser.readline()
+                    resp_bytes = ser.readline(10)
                     logger.info(resp_bytes)
                     if "ELM327" in str(resp_bytes):
                         self.usb_map[UsbDevice.OBD] = device
@@ -96,6 +98,7 @@ class UsbDetector:
                         logger.info("associated {} with OBD".format(device))
                 except serial.SerialException:
                     pass
+        logger.info("finished USB scan")
 
         self.last_scan_time = time.time()
 

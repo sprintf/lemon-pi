@@ -9,7 +9,7 @@ from lemon_pi.car.radio_interface import RadioInterface
 from lemon_pi.shared.data_provider_interface import GpsProvider
 from lemon_pi.shared.events import EventHandler
 from lemon_pi.shared.meringue_comms import MeringueComms, build_auth_header
-from lemon_pi_pb2 import CarNumber, ToCarMessage, ToPitMessage
+from lemon_pi_pb2 import CarNumber, ToCarMessage, ToPitMessage, GpsPosition
 from lemon_pi_pb2_grpc import CommsServiceStub
 
 logger = logging.getLogger(__name__)
@@ -42,7 +42,13 @@ class MeringueCommsCar(Thread, MeringueComms, EventHandler):
                 msg = ToPitMessage()
                 position = self.gps_provider.get_gps_position()
                 if position:
-                    msg.ping.gps.CopyFrom(position)
+                    rpcGps = GpsPosition()
+                    rpcGps.lat = position.lat
+                    rpcGps.long = position.long
+                    rpcGps.speed_mph = position.speed
+                    rpcGps.heading = position.heading
+                    rpcGps.gps_timestamp = position.timestamp
+                    msg.ping.gps.CopyFrom(rpcGps)
                 # do not emit these if wifi is not connected
                 if self.wifi_working:
                     self.send_message_from_car(msg)

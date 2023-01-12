@@ -1,12 +1,13 @@
+from lemon_pi.car.gps_geometry import crossed_line
 from lemon_pi.car.predictor import LapTimePredictor
 from lemon_pi.car.track import TrackLocation, START_FINISH
-from lemon_pi.car.updaters import PositionUpdater, LapUpdater
+from lemon_pi.car.updaters import PositionUpdater
 from lemon_pi.car.display_providers import LapProvider
 from lemon_pi.car.event_defs import (
     LeaveTrackEvent,
     CompleteLapEvent,
     RadioSyncEvent,
-    LapInfoEvent, EnterTrackEvent, ResetFastLapEvent
+    LapInfoEvent, EnterTrackEvent, ResetFastLapEvent, ReverseTrackEvent
 )
 
 import time
@@ -14,6 +15,7 @@ from datetime import datetime
 import logging
 from python_settings import settings
 
+from lemon_pi.shared.data_provider_interface import GpsPos
 from lemon_pi.shared.events import EventHandler
 
 logger = logging.getLogger(__name__)
@@ -27,8 +29,7 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
         self.track = track
         self.on_track = False
         self.lap_start_time = time.time()
-        self.last_pos = (0, 0)
-        self.last_pos_time = 0.0
+        self.last_gps = None
         self.lap_count = 999
         self.last_lap_time = 0
         self.best_lap_time = None
@@ -41,51 +42,61 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
         ResetFastLapEvent.register_handler(self)
 
     def update_position(self, lat: float, long: float, heading: float, time: float, speed: int) -> None:
-        if (lat, long) == self.last_pos:
+        if self.last_gps and (lat, long) == (self.last_gps.lat, self.last_gps.long):
             return
 
-        logger.debug("updating position to {} {}".format(lat, long))
-        self.last_pos = (lat, long)
-        crossed_line, cross_time = self.predictive_lap_timer.update_position(lat, long, heading, time)
-        if crossed_line:
-            # de-bounce hitting start finish line twice ... a better
-            # approach might be to ensure car travels so far away from line
-            if time - self.lap_start_time > 10:
-                lap_time = cross_time - self.lap_start_time
-                CompleteLapEvent.emit(lap_count=self.lap_count + 1, lap_time=lap_time)
-                if not self.on_track:
-                    logger.info("entering track")
-                    # this isn't true for a multi-driver day, but we'll keep each
-                    # drivers view as their own
-                    self.lap_count = 0
-                    self.on_track = True
-                else:
-                    logger.info("completed lap!")
-                    self.lap_count += 1
-                    self.last_lap_time = lap_time
-                    if self.best_lap_time is None or lap_time < self.best_lap_time:
-                        self.best_lap_time = lap_time
-                    lap_logger.info(f"{self.lap_count},{self.last_lap_time:.1f}")
-                self.lap_start_time = cross_time
+        this_gps = GpsPos(lat, long, heading, time, speed)
+        try:
+            logger.debug("updating position to {} {}".format(lat, long))
+            crossed_start_finish, cross_time, backwards = self.predictive_lap_timer.update_position(lat, long, heading, time)
+            if crossed_start_finish:
+                if backwards:
+                    self.track.reverse()
+                    ReverseTrackEvent.emit()
 
-                RadioSyncEvent.emit(ts=cross_time)
-        else:
-            for target_metadata in self.track.targets.keys():
-                if not target_metadata.multiple:
-                    targets = [self.track.targets[target_metadata]]
-                else:
-                    targets = self.track.targets[target_metadata]
-                if target_metadata != START_FINISH:
-                    for target in targets:
-                        crossed_target, cross_time = \
-                            target.line_cross_detector.crossed_line(lat, long, heading, time, target)
-                        if crossed_target:
-                            target_metadata.event.emit(ts=cross_time)
-        # log gps
-        if settings.LOG_GPS:
-            dt = datetime.fromtimestamp(time)
-            gps_logger.info(
-                f"{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d}.{int(dt.microsecond * 1000):03d},{time},{self.lap_count},{lat},{long},{speed},{heading}")
+                # de-bounce hitting start finish line twice ... a better
+                # approach might be to ensure car travels so far away from line
+                if time - self.lap_start_time > 10:
+                    lap_time = cross_time - self.lap_start_time
+                    CompleteLapEvent.emit(lap_count=self.lap_count + 1, lap_time=lap_time)
+                    if not self.on_track:
+                        logger.info("entering track")
+                        # this isn't true for a multi-driver day, but we'll keep each
+                        # drivers view as their own
+                        self.lap_count = 0
+                        self.on_track = True
+                    else:
+                        logger.info("completed lap!")
+                        self.lap_count += 1
+                        self.last_lap_time = lap_time
+                        if self.best_lap_time is None or lap_time < self.best_lap_time:
+                            self.best_lap_time = lap_time
+                        lap_logger.info(f"{self.lap_count},{self.last_lap_time:.1f}")
+                    self.lap_start_time = cross_time
+
+                    RadioSyncEvent.emit(ts=cross_time)
+            else:
+                for target_metadata in self.track.targets.keys():
+                    target = self.track.targets[target_metadata]
+                    if target:
+                        if target_metadata != START_FINISH:
+                            crossed_target, cross_time, backwards = \
+                                crossed_line(self.last_gps, this_gps, target)
+                            if crossed_target:
+                                if backwards:
+                                    target_metadata.backwards_event.emit(ts=cross_time)
+                                    self.track.reverse()
+                                    ReverseTrackEvent.emit()
+                                else:
+                                    target_metadata.event.emit(ts=cross_time)
+                                break
+            # log gps
+            if settings.LOG_GPS:
+                dt = datetime.fromtimestamp(time)
+                gps_logger.info(
+                    f"{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d}.{int(dt.microsecond * 1000):03d},{time},{self.lap_count},{lat},{long},{speed},{heading}")
+        finally:
+            self.last_gps = this_gps
 
     def handle_event(self, event, lap_count=0, ts=0):
         if event == LapInfoEvent:
