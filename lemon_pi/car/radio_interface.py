@@ -1,5 +1,4 @@
 import subprocess
-from threading import Thread
 
 from lemon_pi.car.display_providers import (
     TemperatureProvider,

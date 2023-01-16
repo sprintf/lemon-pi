@@ -114,7 +114,10 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
             self.on_track = False
         if event == EnterTrackEvent:
             self.on_track = True
-            self.lap_start_time = ts
+            if ts == 0.0:
+                self.lap_start_time = time.time()
+            else:
+                self.lap_start_time = ts
             if self.lap_count == 999:
                 self.lap_count = 0
         if event == ResetFastLapEvent:

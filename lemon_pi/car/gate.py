@@ -46,10 +46,9 @@ class Gates:
         total_distance_feet += haversine(last_lat_long, self.start_finish.midpoint, Unit.FEET)
         return int(total_distance_feet)
 
-    def stamp_time(self):
-        self.timestamp = time.time()
-
     def lap_count(self):
+        if len(self.gates) == 0:
+            return 0
         return len(self.gates[0].times_from_start)
 
 

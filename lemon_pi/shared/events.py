@@ -63,8 +63,8 @@ class Event:
             for handler in self.handlers:
                 try:
                     handler.handle_event(self, **kwargs)
-                except Exception as e:
-                    logger.exception("exception handling event", e)
+                except Exception:
+                    logger.exception("exception handling event")
 
     @classmethod
     def instance_iterator(cls):

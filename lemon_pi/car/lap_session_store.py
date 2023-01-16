@@ -1,7 +1,6 @@
 import os
 import pickle
 import logging
-from pathlib import Path
 
 from lemon_pi.car.gate import Gates
 from lemon_pi.car.track import TrackLocation
@@ -47,7 +46,7 @@ class LapSessionStore:
         file = os.path.join(self.basedir, filename)
         logger.info(f"saving session data in {file}")
         if gates.lap_count() > 3:
-            gates.stamp_time()
             with open(file, "wb") as f:
                 pickle.dump(gates, f)
-        logger.info(f"data written, file is {Path(file).stat().st_size} bytes")
+                f.flush()
+            logger.info(f"data written, file created {file}")

@@ -1,5 +1,4 @@
 import logging
-import time
 
 from python_settings import settings
 from enum import Enum
@@ -11,7 +10,6 @@ from lemon_pi.car.lap_session_store import LapSessionStore
 from lemon_pi.car.target import Target
 from haversine import haversine, Unit
 
-from lemon_pi.car.track import swap_direction
 from lemon_pi.shared.data_provider_interface import GpsPos
 from lemon_pi.shared.events import EventHandler
 
@@ -53,16 +51,7 @@ class LapTimePredictor(EventHandler):
         # load a set of gate verifiers for our previous sessions at this track
         self.gate_verifiers = []
         if LapSessionStore.get_instance():
-            gate_verifiers = [GateVerifier(f) for f in LapSessionStore.get_instance().load_sessions()]
-            # if we have a set of gates from here that is less than two days old then default to it
-            # also, we do not issue a "Learning Track" message
-            if gate_verifiers and time.time() - gate_verifiers[0].get_timestamp() < TWO_DAYS_IN_SECONDS:
-                self.gates = gate_verifiers[0].gates
-                self.state = PredictorState.WORKING
-                DriverMessageEvent.emit(text="Loaded track data", duration_secs=60)
-            else:
-                # we load all the candidate sessions, and we will pick the match after the first lap
-                self.gate_verifiers = gate_verifiers
+            self.gate_verifiers = [GateVerifier(f) for f in LapSessionStore.get_instance().load_sessions()]
 
     def handle_event(self, event, **kwargs):
         if event == LeaveTrackEvent:
@@ -70,7 +59,8 @@ class LapTimePredictor(EventHandler):
             return
         if event == ReverseTrackEvent:
             self.state = PredictorState.INIT
-            self.start_finish.target_heading = swap_direction(self.start_finish.target_heading)
+            self.gates: Gates = Gates(self.start_finish)
+            self.gate_index = -1
             return
 
     def update_position(self, lat, long, heading, time):
@@ -83,8 +73,6 @@ class LapTimePredictor(EventHandler):
         try:
             crossed, crossed_time, backwards = \
                 crossed_line(self.last_gps, this_gps, self.start_finish)
-            if backwards:
-                raise Exception("backwards unexpected on start-finish line cross")
             if crossed:
                 self.gate_index = 0
                 last_lap_time = crossed_time - self.lap_start_time
@@ -189,7 +177,8 @@ class LapTimePredictor(EventHandler):
         mins = int(last_lap_time / 60)
         secs = int(last_lap_time % 60)
         logger.debug(f"lap completed in {mins:02d}:{secs:02d} ... updating gates")
-        if last_lap_time > 210:
+        if last_lap_time > len(self.gates) * 10 + 30:
+            logger.warning(f"lap discarded as it's too slow")
             return
         for g in self.gates:
             g.record_lap_time(last_lap_time)
