@@ -76,5 +76,7 @@ WIFI_PASSWORD = None
 
 # don't make audio announcements (mac-only disablement)
 AUDIO_DISABLED = False
+# don't annouce the gap to the front
+AUDIO_ANNOUNCE_GAP_TO_FRONT = False
 
 

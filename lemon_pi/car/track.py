@@ -83,14 +83,13 @@ class TrackLocation:
         tmp = self.targets[PIT_ENTRY]
         if PIT_OUT in self.targets.keys():
             self.targets[PIT_ENTRY] = self.targets[PIT_OUT]
-            self.targets[PIT_ENTRY].target_heading = swap_direction(self.targets[PIT_ENTRY].target_heading)
+            if self.targets[PIT_ENTRY] is not None:
+                self.targets[PIT_ENTRY].target_heading = swap_direction(self.targets[PIT_ENTRY].target_heading)
         else:
             self.targets[PIT_ENTRY] = None
-        if PIT_ENTRY in self.targets.keys():
-            self.targets[PIT_OUT] = tmp
+        self.targets[PIT_OUT] = tmp
+        if self.targets[PIT_OUT] is not None:
             self.targets[PIT_OUT].target_heading = swap_direction(self.targets[PIT_OUT].target_heading)
-        else:
-            self.targets[PIT_OUT] = None
 
     def __repr__(self):
         return self.name

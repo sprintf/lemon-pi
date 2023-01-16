@@ -5,6 +5,11 @@ from unittest.mock import Mock
 from lemon_pi.car.audio import Audio
 from lemon_pi.car.event_defs import ButtonPressEvent, CompleteLapEvent, RacePositionEvent, DriverMessageEvent
 
+from python_settings import settings
+import lemon_pi.config.test_settings as my_local_settings
+
+if not settings.configured:
+    settings.configure(my_local_settings)
 
 class TestAudio(unittest.TestCase):
 

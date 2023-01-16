@@ -9,6 +9,9 @@ from lemon_pi.car.event_defs import ButtonPressEvent, CompleteLapEvent, AudioAla
     DriverMessageEvent
 from lemon_pi.shared.events import EventHandler
 
+from python_settings import settings
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -119,9 +122,10 @@ class Audio(Thread, EventHandler):
             gap_words, extra = self._gap_to_audio(gap)
             self.announce(f"Car {car_number} is {gap_words} ahead {extra}")
 
-        if gap_to_front > 0.0 and gap_to_front < 60 * 30:
-            # while we're within 30 minutes of the front, announce our gap to the front
-            self.announce(f"Gap to front is {int(gap_to_front)} seconds")
+        if settings.AUDIO_ANNOUNCE_GAP_TO_FRONT:
+            if gap_to_front > 0.0 and gap_to_front < 60 * 30:
+                # while we're within 30 minutes of the front, announce our gap to the front
+                self.announce(f"Gap to front is {int(gap_to_front)} seconds")
 
     @staticmethod
     def _car_number_to_audio(car_number:str):

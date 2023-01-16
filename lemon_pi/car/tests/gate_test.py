@@ -2,7 +2,6 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from lemon_pi.car import geometry
 from lemon_pi.car.gate import Gate, ELEMENTS, Gates, GateVerifier
 from lemon_pi.car.target import Target
 from lemon_pi.shared.data_provider_interface import GpsPos
