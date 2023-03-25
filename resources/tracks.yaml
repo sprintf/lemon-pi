@@ -65,10 +65,12 @@ tracks:
 
   -  name: "The Ridge"
      code: "rdg"
-     start_finish_coords: "(47.254785,-123.192485),(47.254622,-123.192489)"
+     start_finish_coords: "(47.254763, -123.193320),(47.254658, -123.193318)"
      start_finish_direction: "E"
      pit_entry_coords: "(47.254623,-123.197713),(47.254509,-123.197639)"
      pit_entry_direction: "NE"
+     pit_out_coords: "(47.254646, -123.192476),(47.254539, -123.192458)"
+     pit_out_direction: "E"
 
   -  name: "Willow Springs"
      code: "wlws"
