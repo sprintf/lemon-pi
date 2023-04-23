@@ -92,7 +92,7 @@ class UsbDetector:
                     time.sleep(0.5)
                     resp_bytes = ser.readline(10)
                     logger.info(resp_bytes)
-                    if "ELM327" in str(resp_bytes):
+                    if "ELM" in str(resp_bytes):
                         self.usb_map[UsbDevice.OBD] = device
                         self.device_map[device] = UsbDevice.OBD
                         logger.info("associated {} with OBD".format(device))
