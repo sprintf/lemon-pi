@@ -36,7 +36,11 @@ class LapSessionStore:
         for file in os.listdir(self.basedir):
             if file.endswith("-v1.dat"):
                 with open(os.path.join(self.basedir, file), "rb") as f:
-                    result.append(pickle.load(f))
+                    try:
+                        result.append(pickle.load(f))
+                    except ModuleNotFoundError:
+                        # ignore unloadable old content, this happens due to pickle failure
+                        pass
         logger.info(f"loaded {len(result)} track configurations with previous data")
         result.sort(key=lambda a: a.timestamp, reverse=True)
         return result
