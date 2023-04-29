@@ -110,7 +110,7 @@ class Gui(EventHandler):
         self.app = Box(self.root, width=Gui.WIDTH, height=Gui.HEIGHT, visible=False)
 
         # this is our upper text area
-        self.upper_row = Box(self.app, align="top", width=Gui.WIDTH, height=Gui.MESSAGE_ROW_HEIGHT - 16)
+        self.upper_row = Box(self.app, align="top", width=Gui.WIDTH, height=Gui.MESSAGE_ROW_HEIGHT - 12)
         # useful to uncomment this to debug layout
         # self.upper_row.set_border(2, color="red")
         self.msg_area = Text(self.upper_row, "", align="left", size=48, font=self.font, color="white", bg="purple")
@@ -506,7 +506,9 @@ class Gui(EventHandler):
         panel.children[3].children[1].value = gap
         if gap_to_front > 0.0:
             panel.children[5].children[1].value = "leader"
-            panel.children[6].children[1].value = f"GTF {gap_to_front} s"
+            panel.children[5].children[1].text_size = Gui.TEXT_SMALL
+            panel.children[6].children[0].value = "GTF "
+            Gui.__display_time(gap_to_front, panel.children[6].children[1])
         else:
             panel.children[5].children[1].value = ""
             panel.children[6].children[1].value = ""
@@ -514,6 +516,8 @@ class Gui(EventHandler):
     def __update_persuer_position(self, car_behind=0, gap="?"):
         panel = self.col7.children[0]
         panel.children[5].children[1].value = car_behind
+        panel.children[5].children[1].text_size = Gui.TEXT_MED
+        panel.children[6].children[0].value = "By: "
         panel.children[6].children[1].value = gap
 
     def __update_temp(self, provider: TemperatureProvider):

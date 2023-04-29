@@ -58,6 +58,10 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                 # approach might be to ensure car travels so far away from line
                 if time - self.lap_start_time > 10:
                     lap_time = cross_time - self.lap_start_time
+                    # something is creating weird vals in here
+                    if lap_time < 0 or lap_time > 1000000:
+                        logger.warning(f"got a stupid lap time {cross_time} - {self.lap_count}")
+                        lap_time = 0
                     CompleteLapEvent.emit(lap_count=self.lap_count + 1, lap_time=lap_time)
                     if not self.on_track:
                         logger.info("entering track")
