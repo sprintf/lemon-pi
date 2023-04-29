@@ -1,4 +1,5 @@
 import subprocess
+import time
 
 import pyttsx3
 import logging
@@ -40,6 +41,7 @@ class Audio(Thread, EventHandler):
         # self.engine.startLoop()
         self.queue = Queue()
         self.click_sound = 'resources/sounds/click.wav'
+        self.last_race_announcement_time = 0
         ButtonPressEvent.register_handler(self)
         CompleteLapEvent.register_handler(self)
         AudioAlarmEvent.register_handler(self)
@@ -57,7 +59,11 @@ class Audio(Thread, EventHandler):
             self.announce_alarm(**kwargs)
             return
         if event == RacePositionEvent:
+            # upon reconnect we can get a slew of these, we'll avoid the annoyance
+            if time.time() - self.last_race_announcement_time < 60:
+                return
             self.announce_race_position(**kwargs)
+            self.last_race_announcement_time = time.time()
             return
         if event == DriverMessageEvent:
             if 'audio' in kwargs.keys() and kwargs['audio']:
