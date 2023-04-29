@@ -48,12 +48,15 @@ class TestAudio(unittest.TestCase):
         audio = Audio()
         audio.engine.say = Mock()
         audio.engine.runAndWait = Mock()
+        audio.last_race_announcement_time = 0
         RacePositionEvent.emit(gap_to_front=0.0, pos=3)
         self.assertEqual(1, audio.queue.qsize())
         audio.run_once()
+        audio.last_race_announcement_time = 0
         RacePositionEvent.emit(gap_to_front=60 * 31, pos=3)
         self.assertEqual(1, audio.queue.qsize())
         audio.run_once()
+        audio.last_race_announcement_time = 0
         RacePositionEvent.emit(gap_to_front=108.5, pos=3)
         self.assertEqual(2, audio.queue.qsize())
         audio.run_once()
