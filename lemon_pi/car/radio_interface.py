@@ -112,7 +112,9 @@ class RadioInterface(EventHandler):
                                        pos_in_class=msg.position_in_class,
                                        car_ahead=msg.car_ahead.car_number,
                                        gap=msg.car_ahead.gap_text,
-                                       gap_to_front=msg.gap_to_front)
+                                       gap_to_front=msg.gap_to_front,
+                                       gap_to_front_delta=msg.gap_to_front_delta,
+                                       lap_count=msg.lap_count)
                 LapInfoEvent.emit(lap_count=msg.lap_count, ts=msg.timestamp)
             else:
                 # this might be the following car behind us ... it might also be for a different car in our team

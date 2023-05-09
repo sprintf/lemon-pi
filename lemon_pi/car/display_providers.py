@@ -34,6 +34,10 @@ class LapProvider:
     def get_lap_count(self) -> int:
         pass
 
+    # get the number of laps in this stint
+    def get_stint_lap_count(self) -> int:
+        pass
+
     # return seconds since start of lap
     def get_lap_timer(self) -> int:
         pass

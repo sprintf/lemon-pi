@@ -63,6 +63,17 @@ class TestAudio(unittest.TestCase):
         audio.run_once()
         audio.engine.say.assert_called_with("Gap to front is 108 seconds")
 
+    def test_gap_to_front_delta(self):
+        audio = Audio()
+        audio.engine.say = Mock()
+        audio.engine.runAndWait = Mock()
+        audio.last_race_announcement_time = 0
+        RacePositionEvent.emit(gap_to_front=15.5, gap_to_front_delta=-1.5, pos=3)
+        self.assertEqual(2, audio.queue.qsize())
+        audio.run_once()
+        audio.run_once()
+        audio.engine.say.assert_called_with("Gap to front decreased by 1 seconds")
+
     def test_number_announcement(self):
         self.assertEqual("one five six", Audio._car_number_to_audio("156"))
         self.assertEqual("nine nine", Audio._car_number_to_audio("99"))
