@@ -494,7 +494,8 @@ class Gui(EventHandler):
         Text(container4, "?? ", size=Gui.TEXT_MED, font=self.font, color="white", align="left")
         return result
 
-    def __update_race_position(self, pos=0, pos_in_class=0, car_ahead="0", gap="?", gap_to_front=0.0):
+    def __update_race_position(self, pos=0, pos_in_class=0, car_ahead="0", gap="?",
+                               gap_to_front=0.0, gap_to_front_delta=0.0, lap_count=0):
         panel = self.col7.children[0]
         if pos == pos_in_class:
             panel.children[0].value = f"P{pos}"
@@ -504,20 +505,34 @@ class Gui(EventHandler):
             panel.children[0].text_size = Gui.TEXT_MED
         panel.children[2].children[1].value = car_ahead
         panel.children[3].children[1].value = gap
-        if gap_to_front > 0.0:
+        if gap_to_front_delta or gap_to_front:
             panel.children[5].children[1].value = "leader"
             panel.children[5].children[1].text_size = Gui.TEXT_SMALL
             panel.children[6].children[0].value = "GTF "
-            Gui.__display_time(gap_to_front, panel.children[6].children[1])
+            # every other lap show the absolute diff, then the delta
+            if gap_to_front_delta and lap_count % 2 == 0:
+                if gap_to_front_delta < 0:
+                    panel.children[6].children[1].value = f"-{int(gap_to_front_delta)}"
+                    panel.children[6].children[0].text_color = "green"
+                else:
+                    panel.children[6].children[1].value = f"+{int(gap_to_front_delta)}"
+                    panel.children[6].children[0].text_color = "red"
+            else:
+                if gap_to_front > 0.0:
+                    panel.children[6].children[1].text_color = "white"
+                    Gui.__display_time(gap_to_front, panel.children[6].children[1])
+
         else:
             panel.children[5].children[1].value = ""
             panel.children[6].children[1].value = ""
+            panel.children[6].children[0].text_color = "white"
 
     def __update_persuer_position(self, car_behind=0, gap="?"):
         panel = self.col7.children[0]
         panel.children[5].children[1].value = car_behind
         panel.children[5].children[1].text_size = Gui.TEXT_MED
         panel.children[6].children[0].value = "By: "
+        panel.children[6].children[0].text_color = "white"
         panel.children[6].children[1].value = gap
 
     def __update_temp(self, provider: TemperatureProvider):
@@ -540,7 +555,7 @@ class Gui(EventHandler):
         # self.speed_heading_widget.children[2].value = str(provider.get_heading())
 
     def __update_lap(self, provider: LapProvider):
-        self.lap_display.children[0].children[1].value = provider.get_lap_count()
+        self.lap_display.children[0].children[1].value = self.__format_lap_count(provider)
         if provider.get_lap_count() != 999:
             minutes = int(provider.get_lap_timer() / 60)
             seconds = int(provider.get_lap_timer()) % 60
@@ -551,6 +566,15 @@ class Gui(EventHandler):
             seconds = int(ll) % 60
             tenths = int((ll - int(ll)) * 10)
             self.lap_display.children[4].value = "{:02d}:{:02d}.{:01d}".format(minutes, seconds, tenths)
+
+    def __format_lap_count(self, provider: LapProvider):
+        if provider.get_lap_count() == provider.get_stint_lap_count():
+            return f"{provider.get_lap_count()}"
+        else:
+            if provider.get_stint_lap_count() > 0:
+                return f"{provider.get_stint_lap_count()}({provider.get_lap_count()})"
+            else:
+                return f"{provider.get_lap_count()}"
 
     def __update_target_time(self, target_time: float):
         self.target_time = target_time
@@ -636,6 +660,9 @@ class RandomLapTimeProvider(LapProvider):
 
     def get_lap_count(self) -> int:
         return 145
+
+    def get_stint_lap_count(self) -> int:
+        return 18
 
     def get_best_lap_time(self) -> float:
         return 200 + random.randint(-2000, 2000) / 1000

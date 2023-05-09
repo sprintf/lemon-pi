@@ -31,6 +31,7 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
         self.lap_start_time = time.time()
         self.last_gps = None
         self.lap_count = 999
+        self.stint_lap_count = 0
         self.last_lap_time = 0
         self.best_lap_time = None
         self.last_timestamp = 0
@@ -68,10 +69,12 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                         # this isn't true for a multi-driver day, but we'll keep each
                         # drivers view as their own
                         self.lap_count = 0
+                        self.stint_lap_count = 0
                         self.on_track = True
                     else:
                         logger.info("completed lap!")
                         self.lap_count += 1
+                        self.stint_lap_count += 1
                         self.last_lap_time = lap_time
                         if self.best_lap_time is None or lap_time < self.best_lap_time:
                             self.best_lap_time = lap_time
@@ -124,11 +127,15 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                 self.lap_start_time = ts
             if self.lap_count == 999:
                 self.lap_count = 0
+            self.stint_lap_count = 0
         if event == ResetFastLapEvent:
             self.best_lap_time = None
 
     def get_lap_count(self) -> int:
         return self.lap_count
+
+    def get_stint_lap_count(self) -> int:
+        return self.stint_lap_count
 
     def get_lap_timer(self) -> int:
         return int(time.time() - self.lap_start_time)
