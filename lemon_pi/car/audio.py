@@ -114,7 +114,8 @@ class Audio(Thread, EventHandler):
         # todo : play it now ... if poss
         self.announce(f"Danger! {message}")
 
-    def announce_race_position(self, pos=0, pos_in_class=0, car_ahead="", gap="", gap_to_front=0.0, gap_to_front_delta=0.0):
+    def announce_race_position(self, pos=0, pos_in_class=0, car_ahead="", gap="",
+                               gap_to_front=0.0, gap_to_front_delta=0.0, lap_count=0):
         if pos == 1:
             return
 
