@@ -6,7 +6,8 @@
 
 A Raspberry-Pi based dashboard display for endurance car racers.
 
-<img width="138" alt="image" src="https://github.com/sprintf/lemon-pi/assets/1510428/6e947d3c-ba20-4fdb-93ec-d1b09f2867f6">
+<img width="1265" alt="image" src="https://github.com/sprintf/lemon-pi/assets/1510428/e26b2d51-86ea-4863-b7a4-b0c6619ea299">
+
 
 Under active hackery, but the basic premise is to solve the following issues
 1. provide a display of the current time
