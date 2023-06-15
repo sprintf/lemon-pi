@@ -16,6 +16,7 @@ sudo apt-get install git gpsd gpsd-clients
 
 ```sh
 git clone https://github.com/sprintf/lemon-pi.git
+git clone https://github.com/sprintf/lemon-pi-protos.git
 ```
 
 4. cd into the lemon-pi directory
@@ -24,19 +25,12 @@ git clone https://github.com/sprintf/lemon-pi.git
 cd lemon-pi
 ```
 
-5. [optional, depending on your obd device]
-
-```sh
-git clone https://github.com/sprintf/python-obd.git
-```
-
-6. setup venv
+5. setup venv
 
 ```sh
 python3 -m venv venv
 . venv/bin/activate
-pip3 install -e ./python-obd/
-pip3 install -r requirements-pi.txt
+pip3 install -r requirements.txt
 ```
 
 7. fix up numpy dependency to work on rpi
@@ -56,7 +50,7 @@ sudo apt-get install protobuf-compiler
 8. launch the lemon-pi application
 
 ```sh
-./start-car.sh
+./bin/start-car.sh
 ```
 
 ## Autostarting 
@@ -71,6 +65,6 @@ Type=Application
 Name=Lemon-Pi
 Comment=Start Lemon-Pi OBD GPS display
 NoDisplay=False
-Exec=/usr/bin/lxterminal -e /home/pi/lemon-pi/start.sh
+Exec=/usr/bin/lxterminal -e /home/pi/lemon-pi/bin/start-car.sh
 NotShowIn=GNOME;KDE;XFCE;
 ```
