@@ -1,4 +1,8 @@
-## Developing on Raspberry Pi
+## Developing/Running on Raspberry Pi
+
+Start with Raspberry Pi OS Debian Bullseye with Pi Desktop.
+You can install this with Raspberry Pi Imager onto a SD card.
+Fire up the Raspberry Pi, apply OS updates, and then bring up a terminal and follow the instructions below
 
 1. install python3.8
 
@@ -67,3 +71,9 @@ NoDisplay=False
 Exec=/usr/bin/lxterminal -e /home/pi/lemon-pi/bin/start-car.sh
 NotShowIn=GNOME;KDE;XFCE;
 ```
+
+## Setting the screen size and preventing screen saving
+If using the recommended HDMI display follow (these instructions)[http://wiki.sunfounder.cc/index.php?title=Raspberry_Pi_7%22_HD_1024*600_TFT_LCD_Screen_Display_Settings]
+
+## Bumping up the volume
+Run `alsamixer` select the headphones output and set it at 100% if you plan on using the audio out
