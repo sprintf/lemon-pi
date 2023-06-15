@@ -1,21 +1,27 @@
-## Developing on Raspberry Pi
+## Developing/Running on Raspberry Pi
 
-1. install python3
+Start with Raspberry Pi OS Debian Bullseye with Pi Desktop.
+You can install this with Raspberry Pi Imager onto a SD card.
+Fire up the Raspberry Pi, apply OS updates, and then bring up a terminal and follow the instructions below
+
+1. install python3.8
 
 ```sh
-sudo apt-get install python3
+Follow instructions at (rpi-pyenv)[https://www.samwestby.com/tutorials/rpi-pyenv]
+pyenv global 3.8.17
 ```
 
 2. install gpsd, git etc
 
 ```sh
-sudo apt-get install git gpsd gpsd-clients
+sudo apt-get install git gpsd gpsd-clients espeak
 ```
 
 3. fetch the git repo
 
 ```sh
 git clone https://github.com/sprintf/lemon-pi.git
+git clone https://github.com/sprintf/lemon-pi-protos.git
 ```
 
 4. cd into the lemon-pi directory
@@ -24,22 +30,19 @@ git clone https://github.com/sprintf/lemon-pi.git
 cd lemon-pi
 ```
 
-5. [optional, depending on your obd device]
-
-```sh
-git clone https://github.com/sprintf/python-obd.git
-```
-
-6. setup venv
+5. setup venv
 
 ```sh
 python3 -m venv venv
 . venv/bin/activate
-pip3 install -e ./python-obd/
-pip3 install -r requirements-pi.txt
+python -m pip install --upgrade pip
+pip install --upgrade setuptools
+pip install -r requirements.txt
 ```
+If you get a failure with Pillow, then delete it from requirements.txt ... it's a test/util dependency and not needed at runtime on the RPi.
+After deleting it, run `pip install -r requirements.txt` again and it will succeed
 
-7. fix up numpy dependency to work on rpi
+7. fix up numpy dependency to work on rpi (not sure if this is still needed)
 
 ```sh
 
@@ -47,16 +50,10 @@ sudo apt-get install libatlas-base-dev
 
 ```
 
-8. Install protobuf 
-
-```sh
-sudo apt-get install protobuf-compiler
-```
-
 8. launch the lemon-pi application
 
 ```sh
-./start-car.sh
+./bin/start-car.sh
 ```
 
 ## Autostarting 
@@ -71,6 +68,12 @@ Type=Application
 Name=Lemon-Pi
 Comment=Start Lemon-Pi OBD GPS display
 NoDisplay=False
-Exec=/usr/bin/lxterminal -e /home/pi/lemon-pi/start.sh
+Exec=/usr/bin/lxterminal -e /home/pi/lemon-pi/bin/start-car.sh
 NotShowIn=GNOME;KDE;XFCE;
 ```
+
+## Setting the screen size and preventing screen saving
+If using the recommended HDMI display follow (these instructions)[http://wiki.sunfounder.cc/index.php?title=Raspberry_Pi_7%22_HD_1024*600_TFT_LCD_Screen_Display_Settings]
+
+## Bumping up the volume
+Run `alsamixer` select the headphones output and set it at 100% if you plan on using the audio out
