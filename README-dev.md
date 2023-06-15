@@ -3,7 +3,7 @@
 
 ## Tech Stack
 
- Python 3.7 (runs best on Raspian)
+ Python 3.8 (runs best on Raspian)
 
 ## Code Organization
 
@@ -69,23 +69,3 @@ The car automatically selects the closest track when the raspberry pi in-car app
 The full set of track maps that are supported is [here](README-tracks.md)
 When you make changes to the tracks.yaml file the new track map is automatically created and the readme page is updated.
 
-
-## Technical Road Map
-
-  [x] We hope to put this system to the test in April 2021 at Sonoma Raceway at the 24 hours of lemons Sears Pointless race. We will see how ready we are, and how COVID affected the race is. But it gives us a deadline to get things operating.
-> Note : it was run at Sonoma; and at Thunderhill. Next it will be run at Buttonwillow in Sept '21
-  
-  [x] Support for multiple cars within a team is very possible.
-> This is now supported.
-  
-  [ ] We hope to improve the GPS timing .. it's accurate to around 1s now, but more accuracy than that is obviously possible. The GPS hardware we chose, at $11, may not be the very best, so going higher end may help.
-> Despite trying several different GPS chips, we've been unable to get anything running and talking to Python faster than 1Hz
-  
-  [ ] If we find the fuel consumption data is accurate (BIG IF) then we will develop more forecasting functionality into the pit display so that the number of laps possible in the stint and the expected pit time are shown. 
-> The fuel consumption data is not accurate enough to be of much use. We'll try it again, but it's less compelling than was hoped.
-
-  [x] The driver instruction text should move into configuration, because it's quite team specific
-> The driver instruction text can remind the driver of the pit lane speed, the sequence of stopping and disconnecting things before getting out
-
-  [ ] We will be using an optional button in the car to allow the driver to acknowledge messages, this functionality needs to be built
-> We have a button. And RPi can read it and even play a nice noise when it is clicked.  
