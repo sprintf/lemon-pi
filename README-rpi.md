@@ -4,10 +4,9 @@ Start with Raspberry Pi OS Debian Bullseye with Pi Desktop.
 You can install this with Raspberry Pi Imager onto a SD card.
 Fire up the Raspberry Pi, apply OS updates, and then bring up a terminal and follow the instructions below
 
-1. install python3.8
-
-```sh
+1. install python 3.8
 Follow instructions at (rpi-pyenv)[https://www.samwestby.com/tutorials/rpi-pyenv]
+```sh
 pyenv global 3.8.17
 ```
 
@@ -17,7 +16,7 @@ pyenv global 3.8.17
 sudo apt-get install git gpsd gpsd-clients espeak
 ```
 
-3. fetch the git repo
+3. fetch the git repos
 
 ```sh
 git clone https://github.com/sprintf/lemon-pi.git
@@ -42,12 +41,12 @@ pip install -r requirements.txt
 If you get a failure with Pillow, then delete it from requirements.txt ... it's a test/util dependency and not needed at runtime on the RPi.
 After deleting it, run `pip install -r requirements.txt` again and it will succeed
 
-7. fix up numpy dependency to work on rpi (not sure if this is still needed)
+7. create some logging/state directories
 
 ```sh
 
-sudo apt-get install libatlas-base-dev
-
+sudo mkdir /var/lib/lemon-pi
+sudo chmod a+w /var/lib/lemon-pi
 ```
 
 8. launch the lemon-pi application
