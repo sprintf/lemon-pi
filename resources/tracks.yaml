@@ -172,6 +172,17 @@ tracks:
      pit_entry_direction: "SW"
      hidden: "true"
 
+# this is a test track, for the donut pass me team.
+  -  name: "Donut Test Track"
+     code: "test3"
+     start_finish_coords: "(34.218313, -118.617136),(34.218311, -118.617011)"
+     start_finish_direction: "N"
+     pit_entry_coords: "(34.217886, -118.616913),(34.217790, -118.616915)"
+     pit_entry_direction: "E"
+     pit_out_coords: "(34.218654, -118.616968), (34.218584, -118.616954)"
+     pit_out_direction: "W"
+     hidden: "true"
+
 
 
 
