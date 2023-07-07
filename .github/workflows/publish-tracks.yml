@@ -52,8 +52,8 @@ jobs:
         name: Generating thumbnails
         if: steps.generate.outcome == 'success'
         run: |
-          echo "installing pyppeteer"
-          pip install pyppeteer
+          echo "installing playwright browsers"
+          playwright install
           echo "generating thumbnails"
           python lemon_pi/utils/html_to_image.py `ls tracks/*.html`
           for x in tracks/*.html ; do

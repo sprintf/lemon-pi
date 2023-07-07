@@ -1,2 +1,3 @@
 -r requirements.txt
+playwright>=1.35.0
 RPi.GPIO-def>=0.2
