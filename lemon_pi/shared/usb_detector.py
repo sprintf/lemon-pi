@@ -101,7 +101,8 @@ class UsbDetector:
                     pass
             best_guess_obd_device = device
         logger.info("finished USB scan")
-        if UsbDevice.OBD not in self.usb_map and best_guess_obd_device is not None:
+        # if we've found GPS, but not found OBD but have a leftover USB device, try selecting it
+        if UsbDevice.OBD not in self.usb_map and best_guess_obd_device is not None and UsbDevice.GPS in self.usb_map:
             logger.info(f"best guess is to use {best_guess_obd_device} as OBD device")
             self.usb_map[UsbDevice.OBD] = best_guess_obd_device
             self.device_map[best_guess_obd_device] = UsbDevice.OBD
