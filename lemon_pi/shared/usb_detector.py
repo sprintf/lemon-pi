@@ -81,11 +81,12 @@ class UsbDetector:
 
         # step 2 ..
         logger.info("detecting OBD devices")
+        best_guess_obd_device = None
         for device in devices:
             if self.device_map.get(device):
                 # it's been identified
                 continue
-            logger.info("trying to identify {}".format(device))
+            logger.info(f"trying to identify {device}")
             with serial.Serial(device, baudrate=38400, timeout=2) as ser:
                 try:
                     ser.write("atz\r\r".encode("UTF-8"))
@@ -95,10 +96,16 @@ class UsbDetector:
                     if "ELM" in str(resp_bytes):
                         self.usb_map[UsbDevice.OBD] = device
                         self.device_map[device] = UsbDevice.OBD
-                        logger.info("associated {} with OBD".format(device))
+                        logger.info("associated {device} with OBD")
                 except serial.SerialException:
                     pass
+            best_guess_obd_device = device
         logger.info("finished USB scan")
+        # if we've found GPS, but not found OBD but have a leftover USB device, try selecting it
+        if UsbDevice.OBD not in self.usb_map and best_guess_obd_device is not None and UsbDevice.GPS in self.usb_map:
+            logger.info(f"best guess is to use {best_guess_obd_device} as OBD device")
+            self.usb_map[UsbDevice.OBD] = best_guess_obd_device
+            self.device_map[best_guess_obd_device] = UsbDevice.OBD
 
         self.last_scan_time = time.time()
 

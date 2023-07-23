@@ -5,6 +5,8 @@ import logging
 import urllib.request
 import urllib.error
 
+import yaml
+
 logger = logging.getLogger(__name__)
 
 
@@ -21,9 +23,12 @@ class TrackUpdater:
         try:
             logger.info("checking for updated track info...")
             resp = urllib.request.urlopen(r)
-            with open("tmp/tracks.yaml", "w") as f:
+            with open("tmp/tmp-tracks.yaml", "w") as f:
                 f.write(resp.read().decode("UTF-8"))
-            logger.info("track file updated in tmp/tracks.yaml")
+            logger.info("track file updated in tmp/tmp-tracks.yaml")
+            if self.valid_yaml("tmp/tmp-tracks.yaml"):
+                os.rename("tmp/tmp-tracks.yaml", "tmp/tracks.yaml")
+                logger.info("local track cache updated")
         except urllib.error.HTTPError as e:
             # we expect a HTTP 304 error if the file is no newer than
             # the passed up date
@@ -48,6 +53,14 @@ class TrackUpdater:
         if not os.path.isdir("tmp"):
             logger.info("creating tmp/ dir for updated tracks")
             os.mkdir("tmp")
+
+    def valid_yaml(self, file):
+        try:
+            with open(file) as yamlfile:
+                tracks = yaml.load(yamlfile, Loader=yaml.FullLoader)
+                return "tracks" in tracks
+        except Exception:
+            return False
 
 
 # used for manual testing
