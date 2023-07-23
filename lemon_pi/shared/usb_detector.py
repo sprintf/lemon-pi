@@ -50,12 +50,12 @@ class UsbDetector:
 
     def __scan__(self):
         devices = self.get_connected_serial_devices()
-        logger.info("found usb serial devices : {}".format(devices))
+        logger.info(f"found usb serial devices : {devices}")
 
         # step 0 ... throw out already classified
         for device in devices:
             if os.path.getctime(device) < self.last_scan_time:
-                logger.info("already mapped : {}".format(device))
+                logger.info(f"already mapped : {device}")
                 devices.remove(device)
 
         # step 1 ... throw out the gps
@@ -72,7 +72,7 @@ class UsbDetector:
                         device_path = gps_device['path']
                         self.usb_map[UsbDevice.GPS] = device_path
                         self.device_map[device_path] = UsbDevice.GPS
-                        logger.info("associated {} with GPS".format(device_path))
+                        logger.info(f"associated {device_path} with GPS")
             except Exception as e:
                 logger.error("didn't find connected GPS device", e)
             finally:
@@ -96,7 +96,7 @@ class UsbDetector:
                     if "ELM" in str(resp_bytes):
                         self.usb_map[UsbDevice.OBD] = device
                         self.device_map[device] = UsbDevice.OBD
-                        logger.info("associated {device} with OBD")
+                        logger.info(f"associated {device} with OBD")
                 except serial.SerialException:
                     pass
             best_guess_obd_device = device
