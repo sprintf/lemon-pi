@@ -42,8 +42,12 @@ class MeringueComms:
     def configure(self, override_url):
         logger.info("preparing configuration")
         if override_url:
-            self.channel = grpc.insecure_channel(override_url)
-            logger.info(f"override insecure gRPC channel configured to {override_url}")
+            if override_url.endswith(".app"):
+                credentials = grpc.ssl_channel_credentials()
+                self.channel = grpc.secure_channel(f"{override_url}:443", credentials)
+            else:
+                self.channel = grpc.insecure_channel(override_url)
+            logger.info(f"override gRPC channel configured to {override_url}")
         else:
             url = self._lookup_service_url()
             logger.info(f"connecting to secure gRPC channel at {url}")

@@ -3,11 +3,15 @@
 needs_building=0
 
 package_dir="./"
+proto_dir="./lemon_pi/protos"
 
 if [ ! -d ${package_dir} ] ; then
   mkdir ${package_dir}
   needs_building=1
 fi
+
+# force ... temporary fix
+rm ${package_dir}/*pb2*.py
 
 if [ ! -f ${package_dir}/lemon_pi_pb2.py ] ; then
   needs_building=1
@@ -17,11 +21,11 @@ if [ ! -f ${package_dir}/lemon_pi_pb2_grpc.py ] ; then
   needs_building=1
 fi
 
-if [ ${package_dir}/lemon_pi_pb2.py -ot ${package_dir}/lemon-pi.proto ] ; then
+if [ ${package_dir}/lemon_pi_pb2.py -ot ${proto_dir}/lemon-pi.proto ] ; then
   needs_building=1
 fi
 
-if [ ${package_dir}/lemon_pi_pb2_grpc.py -ot ${package_dir}/lemon-pi.proto ] ; then
+if [ ${package_dir}/lemon_pi_pb2_grpc.py -ot ${proto_dir}/lemon-pi.proto ] ; then
   needs_building=1
 fi
 
