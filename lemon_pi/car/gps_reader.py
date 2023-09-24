@@ -9,7 +9,7 @@ from lemon_pi.car.event_defs import (
     NotMovingEvent,
     MovingEvent,
     GPSConnectedEvent,
-    GPSDisconnectedEvent, EnterTrackEvent, LeaveTrackEvent
+    GPSDisconnectedEvent
 )
 import logging
 import time
@@ -38,19 +38,11 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
         self.log = log_to_file
         self.finished = False
         self.time_synced = False
-        EnterTrackEvent.register_handler(self)
-        LeaveTrackEvent.register_handler(self)
         ExitApplicationEvent.register_handler(self)
 
     def handle_event(self, event, **kwargs):
         if event == ExitApplicationEvent:
             self.finished = True
-        if event == EnterTrackEvent:
-            if settings.GPS_CYCLE != 1.0:
-                self.set_cycle(settings.GPS_CYCLE)
-        if event == LeaveTrackEvent:
-            if settings.GPS_CYCLE != 1.0:
-                self.set_cycle(1.0)
 
     def run(self) -> None:
         while not self.finished:
@@ -58,6 +50,7 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
                 logger.info("connecting to GPS...")
                 session = gps()
                 self.init_gps_connection(session)
+                self.call_gpsctl()
 
                 while not self.finished:
                     try:
@@ -172,19 +165,18 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
             raise Exception("no gps device")
         session.send('?WATCH={"enable":true,"json":true}')
 
-    def set_cycle(self, delay: float):
+    def call_gpsctl(self):
+        if not settings.GPSCTL_ARGS:
+            return
+        args = settings.GPSCTL_ARGS.split(" ")
         if UsbDetector.detected(UsbDevice.GPS):
             gps_device = UsbDetector.get(UsbDevice.GPS)
-            result = subprocess.run(["gpsctl", "-c", str(delay), gps_device],
+            logger.info(f"calling gpsctl with {['gpsctl', *args, gps_device]}")
+            result = subprocess.run(["gpsctl", *args, gps_device],
                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            logger.info(f"result of setting GPS cycle time = {result.returncode}")
-
-    def set_baud(self, baud: int):
-        if UsbDetector.detected(UsbDevice.GPS):
-            gps_device = UsbDetector.get(UsbDevice.GPS)
-            result = subprocess.run(["gpsctl", "-s", str(baud), gps_device],
-                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            logger.info(f"result of setting GPS baud rate = {result.returncode}")
+            logger.info(f"result of gpsctl = {result.returncode}")
+            logger.info(result.stdout.decode("UTF-8").strip())
+            logger.info(result.stderr.decode("UTF-8").strip())
 
 
 if __name__ == "__main__":
@@ -209,6 +201,6 @@ if __name__ == "__main__":
 
     UsbDetector.init()
     tracker = GpsReader()
-    tracker.set_cycle(1.0)
+    tracker.call_gpsctl()
     tracker.register_position_listener(FileLogger())
     tracker.run()

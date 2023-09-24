@@ -61,8 +61,11 @@ Gloves? HANS?
 # should gps be logged?
 LOG_GPS = False
 
-# update rate for GPS  (change to between 0.1 amd 1.0)
-GPS_CYCLE = 1.0
+# set gpsctl arguments to something specific
+# for some GPS chips force nmea with "-n"
+# for faster cycle time do "-c 0.5"
+# for both try "-n -c 0.5"
+GPSCTL_ARGS = ""
 
 # distance between virtual gates on the track
 VGATE_SEPARATION_FEET = 200
