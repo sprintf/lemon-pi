@@ -1,7 +1,8 @@
+import platform
 import subprocess
 import time
 
-import pyttsx3
+import pyttsx4
 import logging
 from queue import Queue
 from threading import Thread
@@ -14,6 +15,16 @@ from python_settings import settings
 
 
 logger = logging.getLogger(__name__)
+
+
+def get_speech_driver():
+    os_type = platform.system()
+    if os_type == 'Linux':
+        return 'espeak'
+    elif os_type == 'Darwin':
+        return 'dummy'
+    else:
+        raise Exception("unknown platform: {}".format(os_type))
 
 
 class Audio(Thread, EventHandler):
@@ -33,7 +44,7 @@ class Audio(Thread, EventHandler):
 
     def __init__(self):
         Thread.__init__(self, daemon=True)
-        self.engine = pyttsx3.init()
+        self.engine = pyttsx4.init(get_speech_driver())
         self.engine.setProperty('volume', 1.0)
         # set 150 words per minute as the rate
         self.engine.setProperty('rate', 150)
