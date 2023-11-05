@@ -1,13 +1,14 @@
 ## Developing/Running on Raspberry Pi
 
-Start with Raspberry Pi OS Debian Bullseye with Pi Desktop.
+Start with Raspberry Pi OS Bookworm OS with Pi Desktop.
 You can install this with Raspberry Pi Imager onto a SD card.
 Fire up the Raspberry Pi, apply OS updates, and then bring up a terminal and follow the instructions below
 
-1. install python 3.8
-Follow instructions at (rpi-pyenv)[https://www.samwestby.com/tutorials/rpi-pyenv]
+1. check you have python 3.11
+Run `python --version` and if you have 3.11 then move to step 2
+Otherwise, follow instructions at (rpi-pyenv)[https://www.samwestby.com/tutorials/rpi-pyenv]
 ```sh
-pyenv global 3.8.17
+pyenv global 3.11
 ```
 
 2. install gpsd, git etc
@@ -38,8 +39,6 @@ python -m pip install --upgrade pip
 pip install --upgrade setuptools
 pip install -r requirements.txt
 ```
-If you get a failure with Pillow, then delete it from requirements.txt ... it's a test/util dependency and not needed at runtime on the RPi.
-After deleting it, run `pip install -r requirements.txt` again and it will succeed
 
 7. create some logging/state directories
 
@@ -71,7 +70,7 @@ Exec=/usr/bin/lxterminal -e /home/pi/lemon-pi/bin/start-car.sh
 NotShowIn=GNOME;KDE;XFCE;
 ```
 
-## Setting the screen size and preventing screen saving
+## Setting the screen size and preventing screen saving (Only on RPI 3 ... not on RPI 4)
 If using the recommended HDMI display follow (these instructions)[http://wiki.sunfounder.cc/index.php?title=Raspberry_Pi_7%22_HD_1024*600_TFT_LCD_Screen_Display_Settings]
 
 ## Bumping up the volume
