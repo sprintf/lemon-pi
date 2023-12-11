@@ -39,12 +39,24 @@
 <a href="https://storage.googleapis.com/perplexus/public/tracks/oregon-raceway-park.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/oregon-raceway-park.jpg"></a>
 
 
+# Pacific Raceway
+<a href="https://storage.googleapis.com/perplexus/public/tracks/pacific-raceway.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/pacific-raceway.jpg"></a>
+
+
 # Pittsburg International Race Complex
 <a href="https://storage.googleapis.com/perplexus/public/tracks/pittsburg-international-race-complex.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/pittsburg-international-race-complex.jpg"></a>
 
 
+# Road America
+<a href="https://storage.googleapis.com/perplexus/public/tracks/road-america.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/road-america.jpg"></a>
+
+
 # Road Atlanta
 <a href="https://storage.googleapis.com/perplexus/public/tracks/road-atlanta.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/road-atlanta.jpg"></a>
+
+
+# Sebring
+<a href="https://storage.googleapis.com/perplexus/public/tracks/sebring.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/sebring.jpg"></a>
 
 
 # Sonoma Raceway
@@ -53,6 +65,10 @@
 
 # The Ridge
 <a href="https://storage.googleapis.com/perplexus/public/tracks/the-ridge.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/the-ridge.jpg"></a>
+
+
+# Thomson Motorspeedway
+<a href="https://storage.googleapis.com/perplexus/public/tracks/thomson-motorspeedway.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/thomson-motorspeedway.jpg"></a>
 
 
 # Thunderhill West
