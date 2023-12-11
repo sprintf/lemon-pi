@@ -187,7 +187,7 @@ tracks:
     start_finish_direction: "NW"
     pit_entry_coords: "(41.979540, -71.826143),(41.979458, -71.826203)"
     pit_entry_direction: "NW"
-    pit_out_coords: "(41.980433, -71.828194),(41.980317, -71.828167)"
+    pit_out_coords: "(41.980412, -71.828208),(41.980336, -71.828249)"
     pit_out_direction: "W"
 
 # this is a local test track, used for testing and other things.
