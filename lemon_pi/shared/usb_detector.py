@@ -68,7 +68,7 @@ class UsbDetector:
                 session.send('?DEVICES;')
                 code = session.read()
                 if code == 0:
-                    for gps_device in session.data["devices"]:
+                    for gps_device in session.response['devices']:
                         device_path = gps_device['path']
                         self.usb_map[UsbDevice.GPS] = device_path
                         self.device_map[device_path] = UsbDevice.GPS
@@ -113,7 +113,7 @@ class UsbDetector:
     def get_connected_serial_devices():
         os_type = platform.system()
         if os_type == "Linux":
-            return glob.glob("/dev/ttyUSB*")
+            return glob.glob("/dev/ttyUSB*") + glob.glob("/dev/ttyACM*")
         elif os_type == "Darwin":
             return glob.glob("/dev/tty.usbserial*")
         else:
