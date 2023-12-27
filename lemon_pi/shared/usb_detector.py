@@ -68,7 +68,7 @@ class UsbDetector:
                 session.send('?DEVICES;')
                 code = session.read()
                 if code == 0:
-                    for gps_device in session.response['devices']:
+                    for gps_device in session.data['devices']:
                         device_path = gps_device['path']
                         self.usb_map[UsbDevice.GPS] = device_path
                         self.device_map[device_path] = UsbDevice.GPS
