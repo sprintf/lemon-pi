@@ -1,7 +1,8 @@
+from typing import Optional
 
 
 class GpsPos:
-    def __init__(self, lat, long, heading, speed, timestamp):
+    def __init__(self, lat: float, long: float, heading: int, speed: float, timestamp: float):
         self.lat = lat
         self.long = long
         self.heading = heading
@@ -12,5 +13,5 @@ class GpsPos:
 class GpsProvider:
 
     # returns None if there's nothing up to date
-    def get_gps_position(self) -> GpsPos:
+    def get_gps_position(self) -> Optional[GpsPos]:
         pass

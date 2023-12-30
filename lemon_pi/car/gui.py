@@ -361,6 +361,9 @@ class Gui(EventHandler):
     def register_speed_provider(self, provider: SpeedProvider):
         self.speed_heading_widget.repeat(200, self.__update_speed, args=[provider])
 
+    def register_gforce_provider(self, provider: GForceProvider):
+        self.speed_heading_widget.repeat(200, self.__update_g_forces, args=[provider])
+
     def register_fuel_provider(self, provider: FuelProvider):
         self.fuel_display.repeat(1000, self.__update_fuel, args=[provider])
 
@@ -405,8 +408,13 @@ class Gui(EventHandler):
     def create_speed_widget(self, parent):
         result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(100 * Gui.SCALE_FACTOR))
         result.set_border(4, "darkgreen")
-        Text(result, "???", size=Gui.TEXT_XL, font=self.font, color="white", align="left")
-        Text(result, "mph", size=Gui.TEXT_TINY, color="white", font=self.font, align="left")
+        speed_box = Box(result)
+        Text(speed_box, "???", size=Gui.TEXT_XL, font=self.font, color="white", align="left")
+        Text(speed_box, "mph", size=Gui.TEXT_TINY, color="white", font=self.font, align="left")
+        Box(result, width=200, height=4)
+        Text(result, "<-G", size=Gui.TEXT_TINY, color="white", font=self.font, align="left")
+        Text(result, "accel", size=Gui.TEXT_TINY, color="white", font=self.font, align="left")
+        Text(result, "G->", size=Gui.TEXT_TINY, color="white", font=self.font, align="left")
         return result
 
     def create_lap_widget(self, parent):
@@ -551,8 +559,25 @@ class Gui(EventHandler):
             beat.text_color = "white"
 
     def __update_speed(self, provider: SpeedProvider):
-        self.speed_heading_widget.children[0].value = "{:02d}".format(provider.get_speed())
+        self.speed_heading_widget.children[0].children[0].value = "{:02d}".format(provider.get_speed())
         # self.speed_heading_widget.children[2].value = str(provider.get_heading())
+
+    def __update_g_forces(self, provider: GForceProvider):
+        accel_decel = provider.get_linear_g()
+        #children[2] is the left G
+        #children[3] is the accel / decel
+        #children[4] is the right G
+        self.speed_heading_widget.children[3].value = f"{provider.get_linear_g():02f}"
+        lateral_g = provider.get_lateral_g()
+        if lateral_g < -0.2:
+            self.speed_heading_widget.children[2].value = f"{provider.get_lateral_g():02f}"
+            self.speed_heading_widget.children[4].value = "   "
+        elif lateral_g > 0.2:
+            self.speed_heading_widget.children[2].value = "   "
+            self.speed_heading_widget.children[4].value = f"{provider.get_lateral_g():02f}"
+        else:
+            self.speed_heading_widget.children[2].value = "   "
+            self.speed_heading_widget.children[4].value = "   "
 
     def __update_lap(self, provider: LapProvider):
         self.lap_display.children[0].children[1].value = self.__format_lap_count(provider)

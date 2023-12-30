@@ -42,7 +42,8 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
         EnterTrackEvent.register_handler(self)
         ResetFastLapEvent.register_handler(self)
 
-    def update_position(self, lat: float, long: float, heading: float, time: float, speed: int) -> None:
+    def update_position(self, lat: float, long: float, heading: float, time: float,
+                        speed: int, linear_g: float, lateral_g: float) -> None:
         if self.last_gps and (lat, long) == (self.last_gps.lat, self.last_gps.long):
             return
 

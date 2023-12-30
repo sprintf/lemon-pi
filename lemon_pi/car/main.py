@@ -145,6 +145,7 @@ def init():
 
         logger.info("registering GUI providers")
         gui.register_speed_provider(gps)
+        gui.register_gforce_provider(gps)
         gui.register_time_provider(LocalTimeProvider())
         gui.register_temp_provider(obd)
         gui.register_fuel_provider(obd)

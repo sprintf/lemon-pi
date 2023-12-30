@@ -4,6 +4,7 @@
 # estimated time that the car crossed the line, and a flag indicating if the car is going in the
 # wrong direction
 import logging
+from typing import Optional
 
 from haversine import haversine, Unit
 
@@ -14,7 +15,7 @@ from lemon_pi.shared.data_provider_interface import GpsPos
 logger = logging.getLogger(__name__)
 
 
-def crossed_line(last_pos: GpsPos, this_pos: GpsPos, target: Target) -> (bool, float, bool):
+def crossed_line(last_pos: Optional[GpsPos], this_pos: GpsPos, target: Target) -> (bool, float, bool):
     if last_pos is None:
         return False, 0, False
 

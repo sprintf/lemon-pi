@@ -1,7 +1,9 @@
+from typing import Optional
+
 from gps import *
 
 from dateutil import parser
-from lemon_pi.car.display_providers import SpeedProvider, PositionProvider
+from lemon_pi.car.display_providers import SpeedProvider, PositionProvider, GForceProvider
 from lemon_pi.car.updaters import PositionUpdater
 from threading import Thread
 from lemon_pi.car.event_defs import (
@@ -24,12 +26,13 @@ from lemon_pi.shared.usb_detector import UsbDetector, UsbDevice
 logger = logging.getLogger(__name__)
 
 
-class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvider):
+class GpsReader(Thread, SpeedProvider, PositionProvider, GForceProvider, EventHandler, GpsProvider):
 
     def __init__(self, log_to_file=False):
         Thread.__init__(self, daemon=True)
         self.fix_timestamp = 0
         self.speed_mph = 999
+        self.speed_mps = 0
         self.heading = 0
         self.working = False
         self.lat = 0.0
@@ -38,6 +41,9 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
         self.log = log_to_file
         self.finished = False
         self.time_synced = False
+        self.last_gps_pos: Optional[GpsPos] = None
+        self.last_linear_g: float = 0.0
+        self.last_lateral_g: float = 0.0
         ExitApplicationEvent.register_handler(self)
 
     def handle_event(self, event, **kwargs):
@@ -48,22 +54,19 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
         while not self.finished:
             try:
                 logger.info("connecting to GPS...")
+                self.call_gpsctl()
                 session = gps()
                 self.init_gps_connection(session)
-                self.call_gpsctl()
 
                 while not self.finished:
                     try:
                         data = session.next()
 
                         if session.fix.time and str(session.fix.time) != "nan":
-                            logger.debug("{} {} {} {}".
-                                         format(session.fix.time,
-                                                data['class'],
-                                                session.fix.latitude,
-                                                session.fix.longitude))
+                            logger.debug(f"{session.fix.time} {data['class']} "
+                                         f"{session.fix.latitude} {session.fix.longitude}")
                             gps_datetime = parser.isoparse(session.fix.time).astimezone()
-                            if gps_datetime.year < 2021:
+                            if gps_datetime.year < 2023:
                                 logger.debug("time wonky, ignoring")
                                 continue
 
@@ -82,6 +85,7 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
                         if data['class'] == 'TPV':
                             # assuming its coming in m/s
                             if not math.isnan(session.fix.speed):
+                                self.speed_mps = session.fix.speed
                                 self.speed_mph = int(session.fix.speed * 2.237)
                                 if self.speed_mph < 3:
                                     NotMovingEvent.emit(speed=self.speed_mph,
@@ -100,9 +104,19 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
                                 if self.position_listener:
                                     start_time = time.time()
                                     try:
+                                        if self.speed_mph > 1 and self.last_gps_pos:
+                                            self.last_linear_g = (self.speed_mps - self.last_gps_pos.speed) /\
+                                                                 (gps_datetime.timestamp() - self.last_gps_pos.timestamp)
+                                            self.last_lateral_g = self.calc_lateral_g(gps_datetime)
+                                        else:
+                                            self.last_linear_g = 0.0
+                                            self.last_lateral_g = 0.0
                                         self.position_listener.update_position(self.lat, self.long,
                                                                                self.heading, time.time(),
-                                                                               self.speed_mph)
+                                                                               self.speed_mph,
+                                                                               self.last_linear_g, self.last_lateral_g)
+                                        self.last_gps_pos = GpsPos(self.lat, self.long, self.heading,
+                                                                   self.speed_mps, gps_datetime.timestamp())
                                     except Exception:
                                         logger.exception("issue with GPS listener.")
                                     finally:
@@ -120,6 +134,15 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
                 self.working = False
                 GPSDisconnectedEvent.emit()
                 time.sleep(30)
+
+    def calc_lateral_g(self, gps_datetime):
+        delta_heading = (self.heading - self.last_gps_pos.heading)
+        if delta_heading > 180:
+            delta_heading -= 360
+        if delta_heading < -180:
+            delta_heading += 360
+        radian_delta = delta_heading * math.pi / 180
+        return self.speed_mps * radian_delta / (gps_datetime.timestamp() - self.last_gps_pos.timestamp)
 
     def get_speed(self) -> int:
         if self.time_synced and time.time() - self.fix_timestamp < 5:
@@ -139,11 +162,21 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
         else:
             return 0.0, 0.0
 
-    def get_gps_position(self) -> GpsPos:
+    def get_gps_position(self) -> Optional[GpsPos]:
         if self.time_synced and time.time() - self.fix_timestamp < 5:
             return GpsPos(self.lat, self.long, int(self.heading), self.speed_mph, round(self.fix_timestamp))
         else:
             return None
+
+    def get_linear_g(self) -> float:
+        if self.time_synced and time.time() - self.fix_timestamp < 5:
+            return self.last_linear_g
+        return 0.0
+
+    def get_lateral_g(self) -> float:
+        if self.time_synced and time.time() - self.fix_timestamp < 5:
+            return self.last_lateral_g
+        return 0.0
 
     def is_working(self) -> bool:
         return self.working
@@ -194,8 +227,9 @@ if __name__ == "__main__":
         def __init__(self):
             self.file = open("traces/trace-{}.csv".format(int(time.time())), mode="w")
 
-        def update_position(self, lat: float, long: float, heading: float, tstamp: float, speed: int) -> None:
-            self.file.write("{},{},{},{},{}\n".format(tstamp, lat, long, heading, speed))
+        def update_position(self, lat: float, long: float, heading: float, tstamp: float,
+                            speed: int, linear_g: float, lateral_g: float) -> None:
+            self.file.write("{},{},{},{},{},{},{}\n".format(tstamp, lat, long, heading, speed, linear_g, lateral_g))
             self.file.flush()
 
 

@@ -22,6 +22,15 @@ class SpeedProvider(UnreliableProviderMixin):
         pass
 
 
+class GForceProvider(UnreliableProviderMixin):
+
+    def get_linear_g(self) -> float:
+        pass
+
+    def get_lateral_g(self) -> float:
+        pass
+
+
 class PositionProvider(UnreliableProviderMixin):
 
     def get_lat_long(self) -> (float, float):
