@@ -73,6 +73,10 @@ class UsbDetector:
                         self.usb_map[UsbDevice.GPS] = device_path
                         self.device_map[device_path] = UsbDevice.GPS
                         logger.info(f"associated {device_path} with GPS")
+                        # MacOS maps two devices to the same thing
+                        if device_path.startswith('/dev/tty.usbmodem'):
+                            alt_name = '/dev/cu.' + device_path[9:]
+                            self.device_map[alt_name] = UsbDevice.GPS
             except Exception as e:
                 logger.error("didn't find connected GPS device", e)
             finally:

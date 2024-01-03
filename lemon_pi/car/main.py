@@ -6,6 +6,7 @@ from threading import Thread
 from grpc._channel import _InactiveRpcError
 
 from lemon_pi.car.audio import Audio
+from lemon_pi.car.drs_controller import DrsController, DrsDataLoader, DrsPositionTracker
 from lemon_pi.car.event_defs import ExitApplicationEvent, WifiConnectedEvent, WifiDisconnectedEvent
 from lemon_pi.car.gui import Gui
 from lemon_pi.car.gps_reader import GpsReader
@@ -168,6 +169,20 @@ def init():
         # data from this track
         LapSessionStore.init(closest_track)
         lap_tracker = LapTracker(closest_track)
+
+        # DRS support allows Lemon-Pi to talk to an arduino
+        # with 'up' and 'down' commands which can control
+        # active aerodynamics on the car
+        drs_loader = DrsDataLoader()
+        drs_file, _ = TrackUpdater.get_drs_file()
+        drs_loader.read_file(drs_file)
+        drs_zones = drs_loader.get_drs_activation_zones(closest_track.code)
+        if drs_zones:
+            drs_controller = DrsController()
+            gui.register_drs_provider(drs_controller)
+            lap_tracker.add_position_handler(DrsPositionTracker(drs_zones))
+            drs_controller.start()
+
         gps.register_position_listener(lap_tracker)
         gui.register_lap_provider(lap_tracker)
         radio_interface.register_lap_provider(lap_tracker)

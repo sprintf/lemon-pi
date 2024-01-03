@@ -106,6 +106,13 @@ ResetFastLapEvent = Event("reset-fast-lap")
 # no args
 ReverseTrackEvent = Event("reverse-track")
 
+# we are approaching the start or end of a drs zone
+# delay ... time in seconds (float) as to when we reach it
+# activated ... true or false if we're heading to an enablement section
+# gate ... the gate (not set on pit entry, so not always there)
+DRSApproachEvent = Event("drs-approaching")
+
+
 
 
 

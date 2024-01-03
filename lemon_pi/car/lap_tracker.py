@@ -37,19 +37,31 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
         self.last_timestamp = 0
         self.last_dist_to_line = 0
         self.predictive_lap_timer = LapTimePredictor(track.get_start_finish_target())
+        self.extra_handlers: [PositionUpdater] = []
         LapInfoEvent.register_handler(self)
         LeaveTrackEvent.register_handler(self)
         EnterTrackEvent.register_handler(self)
         ResetFastLapEvent.register_handler(self)
 
-    def update_position(self, lat: float, long: float, heading: float, time: float, speed: int) -> None:
+    def add_position_handler(self, p: PositionUpdater):
+        self.extra_handlers.append(p)
+
+    def update_position(self, lat: float, long: float, heading: float, tstamp: float, speed: int) -> None:
         if self.last_gps and (lat, long) == (self.last_gps.lat, self.last_gps.long):
             return
+        self.process_position(lat, long, heading, tstamp, speed)
+        for handler in self.extra_handlers:
+            try:
+                handler.update_position(lat, long, heading, tstamp, speed)
+            except Exception:
+                logger.exception("problem updating position")
 
+    def process_position(self, lat: float, long: float, heading: float, tstamp: float, speed: int) -> None:
         this_gps = GpsPos(lat, long, heading, time, speed)
         try:
             logger.debug("updating position to {} {}".format(lat, long))
-            crossed_start_finish, cross_time, backwards = self.predictive_lap_timer.update_position(lat, long, heading, time)
+            crossed_start_finish, cross_time, backwards = \
+                self.predictive_lap_timer.update_position(lat, long, heading, tstamp)
             if crossed_start_finish:
                 if backwards:
                     self.track.reverse()
@@ -57,7 +69,7 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
 
                 # de-bounce hitting start finish line twice ... a better
                 # approach might be to ensure car travels so far away from line
-                if time - self.lap_start_time > 10:
+                if tstamp - self.lap_start_time > 10:
                     lap_time = cross_time - self.lap_start_time
                     # something is creating weird vals in here
                     if lap_time < 0 or lap_time > 1000000:
@@ -99,9 +111,10 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                                 break
             # log gps
             if settings.LOG_GPS:
-                dt = datetime.fromtimestamp(time)
+                dt = datetime.fromtimestamp(tstamp)
                 gps_logger.info(
-                    f"{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d}.{int(dt.microsecond * 1000):03d},{time},{self.lap_count},{lat},{long},{speed},{heading}")
+                    f"{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d}.{int(dt.microsecond * 1000):03d},{time},"
+                    f"{self.lap_count},{lat},{long},{speed},{heading}")
         finally:
             self.last_gps = this_gps
 

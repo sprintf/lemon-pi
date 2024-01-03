@@ -60,3 +60,14 @@ class FuelProvider:
 
     def get_fuel_percent_remaining(self) -> int:
         pass
+
+
+class DRSProvider:
+
+    # is there a drs system on this car
+    def is_drs_available(self) -> bool:
+        pass
+
+    # is the drs activated or not
+    def is_drs_activated(self) -> bool:
+        pass

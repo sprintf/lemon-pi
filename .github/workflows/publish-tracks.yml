@@ -32,12 +32,20 @@ jobs:
           export PYTHONPATH='.'
           python lemon_pi/utils/plot_tracks.py
 
-      - id: upload-file
+      - id: upload-track-file
         if: steps.generate.outcome == 'success'
         uses: google-github-actions/upload-cloud-storage@v0
         with:
           credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
           path: resources/tracks.yaml
+          destination: perplexus/public
+
+      - id: upload-drs-file
+        if: steps.generate.outcome == 'success'
+        uses: google-github-actions/upload-cloud-storage@v0
+        with:
+          credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+          path: resources/drs_zones.json
           destination: perplexus/public
 
       - id: upload-html
