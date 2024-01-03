@@ -36,6 +36,7 @@ class DrsController(DRSProvider):
         if UsbDetector.detected(UsbDevice.ARDUINO):
             self.enabled = True
             # register for events ..
+            LeaveTrackEvent.register_handler(self)
             DRSApproachEvent.register_handler(self)
             self.receive_thread = threading.Thread(target=self.receive_loop, daemon=True)
 
@@ -60,6 +61,8 @@ class DrsController(DRSProvider):
                 self.future_activation.cancel()
             self.future_activation = threading.Timer(delay, self.activate_drs, args=[kwargs['activated']])
             self.future_activation.start()
+        if event == LeaveTrackEvent:
+            self.activate_drs(True)
 
     def activate_drs(self, activate: bool):
         self.activated = activate
@@ -143,14 +146,10 @@ class DrsPositionTracker(PositionUpdater, EventHandler):
         self.gates = gates
         self.gate_index = 0
         CompleteLapEvent.register_handler(self)
-        LeaveTrackEvent.register_handler(self)
 
     def handle_event(self, event, **kwargs):
         if event == CompleteLapEvent:
             self.gate_index = 0
-        if event == LeaveTrackEvent:
-            DRSApproachEvent.emit(delay=0.1,
-                                  activated=True)
 
     def update_position(self, lat: float, long: float, heading: float, tstamp: float, speed: int) -> None:
         here = GpsPos(lat, long, heading, speed, tstamp)
