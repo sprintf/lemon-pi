@@ -68,7 +68,7 @@ def run():
             for gate in drs_zones:
                 message = "on" if gate.activation else "off"
                 drs_gate_lat_longs = zip(*[gate.target.lat_long1, gate.target.lat_long2])
-                gmap.polygon(*drs_gate_lat_longs, color='yellow', edge_width=10)
+                gmap.polygon(*drs_gate_lat_longs, color='yellow', edge_width=6)
                 gmap.text(gate.target.lat_long1[0], gate.target.lat_long1[1], f'DRS {message}')
 
         gmap.draw("tracks/{}.html".format(track.name.lower().replace(' ', '-')))
