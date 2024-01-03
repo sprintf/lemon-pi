@@ -91,10 +91,21 @@ if __name__ == "__main__":
     except HTTPError:
         pass
 
+    drs_zones = open("resources/drs_zones.json")
+    drs_check = zlib.crc32(drs_zones.read().encode("utf-8"))
+
+    drs_check2 = 0
+    url = "https://storage.googleapis.com/perplexus/public/drs_zones.json"
+    try:
+        file = urllib.request.urlopen(url)
+        drs_check2 = zlib.crc32(file.read())
+    except HTTPError:
+        pass
+
     force = len(sys.argv) == 2 and sys.argv[1] == '-f'
 
     # don't do anything if the files are the same
-    if check == check2 and not force:
+    if check == check2 and drs_check == drs_check2 and not force:
         print("no update needed")
         sys.exit(1)
 
