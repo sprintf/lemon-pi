@@ -109,7 +109,9 @@ class DrsDataLoader:
         self.trackDrsZones: {str, [DrsGate]} = {}
 
     def get_drs_activation_zones(self, track_code: str):
-        return self.trackDrsZones[track_code]
+        if track_code in self.trackDrsZones:
+            return self.trackDrsZones[track_code]
+        return None
 
     def read_file(self, filename: str):
         with open(filename) as f:
