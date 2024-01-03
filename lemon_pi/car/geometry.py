@@ -55,6 +55,8 @@ def seg_intersect_xy(a1, a2, b1, b2):
     dap = __perp_xy(da)
     denom = dot(dap, db)
     num = dot(dap, dp)
+    if denom == 0.0:
+        return (0, 0)
     return (num / denom.astype(float))*db + b1
 
 

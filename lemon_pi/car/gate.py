@@ -1,4 +1,5 @@
 import time
+from typing import Optional
 
 from haversine import haversine, Unit
 
@@ -188,7 +189,7 @@ class GateVerifier:
     def get_timestamp(self):
         return self.gates.timestamp
 
-    def verify(self, last_gps: GpsPos, this_gps: GpsPos):
+    def verify(self, last_gps: Optional[GpsPos], this_gps: GpsPos):
         if self.index >= len(self.gates) or last_gps is None:
             return
         crossed, crossed_time, backwards = crossed_line(

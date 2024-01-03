@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from python_settings import settings
 from enum import Enum
@@ -30,7 +31,7 @@ class PredictorState(Enum):
 
 class LapTimePredictor(EventHandler):
 
-    last_gps: GpsPos
+    last_gps: Optional[GpsPos]
 
     def __init__(self, start_finish: Target):
         self.start_finish = start_finish

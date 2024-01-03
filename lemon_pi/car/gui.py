@@ -37,6 +37,12 @@ class ToggleImage(Picture):
     def off(self):
         self.image = self.off_image
 
+    def toggle(self):
+        if self.image == self.on_image:
+            self.image = self.off_image
+        else:
+            self.image = self.on_image
+
 
 class AlertLight(Drawing):
 
@@ -144,6 +150,8 @@ class Gui(EventHandler):
 
         # adding obd + gps images
         (self.gps_image, self.radio_signal, self.obd_image, self.wifi_image) = self.create_gps_obd_images(self.col2)
+        # add a DRS box under the icons
+        self.drs_image = self.create_drs_images(self.col2)
         # add a quit button
         if settings.EXIT_BUTTON_ENABLED:
             PushButton(self.col2, image="resources/images/exitbutton.gif", command=self.quit)
@@ -305,13 +313,9 @@ class Gui(EventHandler):
         if event_data.key == 'r':
             self._col_display(7)
         if event_data.key == 'g':
-            self.gps_image.on()
-        if event_data.key == 'G':
-            self.gps_image.off()
+            self.gps_image.toggle()
         if event_data.key == 'o':
-            self.obd_image.on()
-        if event_data.key == 'O':
-            self.obd_image.off()
+            self.obd_image.toggle()
         if event_data.key == 'l':
             self.__update_lap(randomLapTimeProvider)
             self.__update_predicted_lap(randomLapTimeProvider)
@@ -323,6 +327,8 @@ class Gui(EventHandler):
             CompleteLapEvent.emit(lap_time=randomLapTimeProvider.get_last_lap_time(), lap_count=1)
         if event_data.key == 'd':
             DriverMessageEvent.emit(text="plonker, PLONKER!", duration_secs=10)
+        if event_data.key == 'D':
+            self.drs_image.toggle()
         if event_data.key == 't':
             if self.target_time == 0:
                 self.__update_target_time(67.43)
@@ -363,6 +369,18 @@ class Gui(EventHandler):
 
     def register_fuel_provider(self, provider: FuelProvider):
         self.fuel_display.repeat(1000, self.__update_fuel, args=[provider])
+
+    def register_drs_provider(self, provider: DRSProvider):
+        if not provider.is_drs_available():
+            self.drs_image.visible = False
+        else:
+            self.drs_image.repeat(200, self.__update_drs_status, args=[provider])
+
+    def create_drs_images(self, parent):
+        result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(48 * Gui.SCALE_FACTOR))
+        return ToggleImage(result,
+                          "resources/images/drs_on.gif",
+                          "resources/images/drs_off.gif")
 
     def create_gps_obd_images(self, parent):
         result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(48 * Gui.SCALE_FACTOR))
@@ -542,6 +560,12 @@ class Gui(EventHandler):
     def __update_time(self, provider: TimeProvider):
         self.time_widget.children[1].value = "{:02d}".format(provider.get_hours())
         self.time_widget.children[3].value = "{:02d}".format(provider.get_minutes())
+
+    def __update_drs_status(self, provider: DRSProvider):
+        if provider.is_drs_activated():
+            self.drs_image.on()
+        else:
+            self.drs_image.off()
 
     def __update_time_beat(self):
         beat : Text = self.time_widget.children[2]

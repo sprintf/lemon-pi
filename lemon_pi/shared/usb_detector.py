@@ -15,6 +15,7 @@ class UsbDevice(Enum):
     OBD = 1
     LORA = 2  # unused
     GPS = 3
+    ARDUINO = 4
 
 
 # it's hard to tell which device is plugged into the computer ... either on
@@ -73,11 +74,33 @@ class UsbDetector:
                         self.usb_map[UsbDevice.GPS] = device_path
                         self.device_map[device_path] = UsbDevice.GPS
                         logger.info(f"associated {device_path} with GPS")
+                        # MacOS maps two devices to the same thing
+                        if device_path.startswith('/dev/tty.usbmodem'):
+                            alt_name = '/dev/cu.' + device_path[9:]
+                            self.device_map[alt_name] = UsbDevice.GPS
             except Exception as e:
-                logger.error("didn't find connected GPS device", e)
+                logger.exception("didn't find connected GPS device")
             finally:
                 if session:
                     session.close()
+
+        logger.info("detecting Arduino")
+        for device in devices:
+            if self.device_map.get(device):
+                # it's been identified
+                continue
+            logger.info(f"trying to identify {device}")
+            with serial.Serial(device, baudrate=115200, timeout=2) as ser:
+                try:
+                    time.sleep(0.5)
+                    resp_bytes = ser.readline(50)
+                    logger.info(resp_bytes)
+                    if "setup complete" in str(resp_bytes) or "looping" in str(resp_bytes):
+                        self.usb_map[UsbDevice.ARDUINO] = device
+                        self.device_map[device] = UsbDevice.ARDUINO
+                        logger.info(f"associated {device} with ARDUINO")
+                except serial.SerialException:
+                    pass
 
         # step 2 ..
         logger.info("detecting OBD devices")
@@ -115,7 +138,7 @@ class UsbDetector:
         if os_type == "Linux":
             return glob.glob("/dev/ttyUSB*") + glob.glob("/dev/ttyACM*")
         elif os_type == "Darwin":
-            return glob.glob("/dev/tty.usbserial*")
+            return glob.glob("/dev/tty.usbserial*") + glob.glob("/dev/cu.usbmodem*")
         else:
             raise Exception("unknown platform: {}".format(os_type))
 
