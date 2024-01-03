@@ -32,8 +32,6 @@ class EventHelper(EventHandler):
             self.gates_hit.add(gate.target.name)
 
 
-
-
 class DrsReplayTest(unittest.TestCase):
 
     def test_processing_sonoma(self):
@@ -46,7 +44,7 @@ class DrsReplayTest(unittest.TestCase):
 
         tracker = DrsPositionTracker(snma_drs_zones)
 
-        with open("gps-2022-03-12.csv") as csvfile:
+        with open("resources/test/gps-2022-03-12.csv") as csvfile:
             rows = csv.reader(csvfile)
             current_lap = 0
             for row in rows:
@@ -82,7 +80,7 @@ class DrsReplayTest(unittest.TestCase):
 
         tracker = DrsPositionTracker(thil_drs_zones)
 
-        with open("gps-2023-05-27.csv") as csvfile:
+        with open("resources/test/gps-2023-05-27.csv") as csvfile:
             rows = csv.reader(csvfile)
             current_lap = 0
             for row in rows:
@@ -93,9 +91,9 @@ class DrsReplayTest(unittest.TestCase):
                 speed = int(row[5])
                 heading = int(row[6])
 
-                # if lap < 91 or lap == 999:
-                #     current_lap = lap
-                #     continue
+                if lap < 91 or lap == 999:
+                    current_lap = lap
+                    continue
 
                 if lap != current_lap:
                     event_handler.lap_completed()
