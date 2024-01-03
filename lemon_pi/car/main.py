@@ -177,9 +177,9 @@ def init():
         drs_file, _ = TrackUpdater.get_drs_file()
         drs_loader.read_file(drs_file)
         drs_zones = drs_loader.get_drs_activation_zones(closest_track.code)
+        drs_controller = DrsController()
+        gui.register_drs_provider(drs_controller)
         if drs_zones:
-            drs_controller = DrsController()
-            gui.register_drs_provider(drs_controller)
             lap_tracker.add_position_handler(DrsPositionTracker(drs_zones))
             drs_controller.start()
 

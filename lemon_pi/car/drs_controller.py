@@ -174,7 +174,6 @@ class DrsPositionTracker(PositionUpdater, EventHandler):
                 logger.info(
                     f"missed gate {target.name} !!! distance to it is {gate_dist} ft "
                     f"but next gate is {next_gate_dist} ft")
-                print(f"missed gate {target.name} !!")
                 self.gate_index = next_gate
 
 

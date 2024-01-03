@@ -199,19 +199,3 @@ class LapTimePredictor(EventHandler):
             self.gates = close[0].gates
         # reclaim the memory
         self.gate_verifiers = None
-
-class DrsApproachPredictor(EventHandler):
-
-    last_gps: Optional[GpsPos]
-
-    def __init__(self, drs_gates: Gates):
-        # might want to subclass gates or targets for this
-        self.gates: Gates = drs_gates
-
-    def update_position(self, lat, long, heading, time):
-        # update the stored position
-        # if about to cross a DRS line then emit an event predicting the cross
-        # we will need to know from a gate whether it is a down or up gate (or store speed data so we know its faster or slower)
-        # or just receive accel decel data and you know
-        pass
-

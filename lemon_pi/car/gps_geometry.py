@@ -66,12 +66,12 @@ def crossed_line(last_pos: Optional[GpsPos], this_pos: GpsPos, target: Target) -
 
 # will we cross the line associated with the given target in the next second or so?
 def will_cross_line(this_pos: GpsPos, target: Target) -> (bool, float, bool):
-    # how far away will we be in 1.25 second if we carry on this heading?
-    # why 1.25s ? well gps pulses at 1s, but under acceleration we cover more
+    # how far away will we be in 1.8 seconds if we carry on this heading?
+    # why 1.8s ? well gps pulses at 1s, but under acceleration we cover more
     # distance than we'd expect in a second creating gaps that cause us to miss gates
     miles_per_sec = this_pos.speed / 3600
-    miles_per_2s = miles_per_sec * 1.8
-    next_lat_long = get_point_on_heading((this_pos.lat, this_pos.long), this_pos.heading, miles_per_2s)
+    miles_per_nearly2s = miles_per_sec * 1.8
+    next_lat_long = get_point_on_heading((this_pos.lat, this_pos.long), this_pos.heading, miles_per_nearly2s)
     next_gps_point = GpsPos(next_lat_long[0], next_lat_long[1],
                             this_pos.heading, this_pos.speed, this_pos.timestamp + 1.8)
     if this_pos.speed > 10:
