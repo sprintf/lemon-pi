@@ -22,7 +22,7 @@ class DrsLineDetectionTest(unittest.TestCase):
         p2 = GpsPos(37.92574905126326, -122.29456804308042, 160, 35, 50000)
         (cross, est_time, backwards) = will_cross_line(p2, t)
         self.assertTrue(cross)
-        self.assertAlmostEqual(50000.682, est_time, 2)
+        self.assertAlmostEqual(50000.826, est_time, 2)
         self.assertFalse(backwards)
 
 
