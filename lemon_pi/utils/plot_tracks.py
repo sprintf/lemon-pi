@@ -5,6 +5,8 @@ import os
 import sys
 import zlib
 import urllib
+
+from lemon_pi.car.drs_controller import DrsDataLoader, DrsGate
 from lemon_pi.car.track import read_tracks, TrackLocation
 
 
@@ -24,6 +26,8 @@ def _calc_mid(track:TrackLocation):
 
 def run():
     tracks = read_tracks()
+    loader = DrsDataLoader()
+    loader.read_file("resources/drs_zones.json")
 
     for track in tracks:
         if track.hidden:
@@ -58,6 +62,14 @@ def run():
             ])
             gmap.polygon(*pit_out, color='blue', edge_width=20)
             gmap.text(*po.lat_long1, '   pit out')
+
+        drs_zones: [DrsGate] = loader.get_drs_activation_zones(track.code)
+        if drs_zones:
+            for gate in drs_zones:
+                message = "on" if gate.activation else "off"
+                drs_gate_lat_longs = zip(*[gate.target.lat_long1, gate.target.lat_long2])
+                gmap.polygon(*drs_gate_lat_longs, color='yellow', edge_width=6)
+                gmap.text(gate.target.lat_long1[0], gate.target.lat_long1[1], f'DRS {message}')
 
         gmap.draw("tracks/{}.html".format(track.name.lower().replace(' ', '-')))
 
