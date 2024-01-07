@@ -74,12 +74,14 @@ def will_cross_line(this_pos: GpsPos, target: Target) -> (bool, float, bool):
     next_lat_long = get_point_on_heading((this_pos.lat, this_pos.long), this_pos.heading, miles_per_nearly2s)
     next_gps_point = GpsPos(next_lat_long[0], next_lat_long[1],
                             this_pos.heading, this_pos.speed, this_pos.timestamp + 1.8)
-    if this_pos.speed > 10:
-        logger.info(f"this gps point = {this_pos.lat},{this_pos.long} travelling at {miles_per_sec} mps")
-        logger.info(f"next gps point = {next_lat_long[0]},{next_lat_long[1]}")
-        dist1 = haversine((this_pos.lat, this_pos.long), target.midpoint, Unit.FEET)
-        dist2 = haversine(next_lat_long, target.midpoint, Unit.FEET)
-        logger.info(f"dist to this = {dist1}    dist to next = {dist2}")
+
+    # once useful for debugging
+    # if this_pos.speed > 10:
+    #     logger.debug(f"this gps point = {this_pos.lat},{this_pos.long} travelling at {miles_per_sec} mps")
+    #     logger.debug(f"next gps point = {next_lat_long[0]},{next_lat_long[1]}")
+    #     dist1 = haversine((this_pos.lat, this_pos.long), target.midpoint, Unit.FEET)
+    #     dist2 = haversine(next_lat_long, target.midpoint, Unit.FEET)
+    #     logger.debug(f"dist to this = {dist1}    dist to next = {dist2}")
 
     (crossed, cross_time, backwards) = crossed_line(this_pos, next_gps_point, target)
     if target.target_heading < 0:

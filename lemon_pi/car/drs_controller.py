@@ -53,7 +53,7 @@ class DrsController(DRSProvider):
         if event == DRSApproachEvent:
             delay = kwargs['delay']
             if delay < 0:
-                return
+                delay = 0
             logger.info(f"calling with {delay} {kwargs['activated']}")
             # do we have a timer set?
             # if yes then cancel it, and set again based on time until we cross now
@@ -97,10 +97,10 @@ class DrsController(DRSProvider):
 
 class DrsGate:
     
-    def __init__(self, lat1, long1, lat2, long2, name, activation):
+    def __init__(self, lat1, long1, lat2, long2, name, activation, time_adjustment: float = 0.0):
         self.target: Target = Target(name, (lat1, long1), (lat2, long2), target_heading=-1)
         self.activation: bool = activation
-        self.time_adjust: float = 0.0
+        self.time_adjust: float = time_adjustment
     
 
 class DrsDataLoader:
@@ -138,7 +138,7 @@ class DrsDataLoader:
             wider_point_2 = get_point_on_heading((p[1][0], p[1][1]), heading, d=0.01)
             result.append(DrsGate(wider_point_1[0], wider_point_1[1],
                                   wider_point_2[0], wider_point_2[1],
-                                  name, activation))
+                                  name, activation, g['timeAdjustment']))
         return result
 
 
@@ -164,8 +164,7 @@ class DrsPositionTracker(PositionUpdater, EventHandler):
         if cross:
             logger.info(f"will cross line {target.name} at {est_time}")
             self.gate_index = next_gate
-            # todo : take the timeadjustment into account if there is one
-            DRSApproachEvent.emit(delay=(est_time - tstamp),
+            DRSApproachEvent.emit(delay=(est_time - tstamp + gate.time_adjust),
                                   activated=gate.activation,
                                   gate=gate)
         else:
