@@ -193,6 +193,7 @@ if __name__ == "__main__":
     drsZones.read_file("resources/drs_zones.json")
     test_gates = drsZones.trackDrsZones["test1"]
 
+    drs_tracker = DrsPositionTracker(test_gates)
 
     tracker = GpsReader()
     tracker.call_gpsctl()
