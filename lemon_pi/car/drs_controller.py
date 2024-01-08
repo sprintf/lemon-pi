@@ -68,10 +68,10 @@ class DrsController(DRSProvider):
         self.activated = activate
         self.connect_arduino()
         if activate:
-            self.serial_connection.write("up".encode("utf-8"))
+            self.serial_connection.write("up\n".encode("utf-8"))
             logger.info("DRS activated on Arduino")
         else:
-            self.serial_connection.write("down".encode("utf-8"))
+            self.serial_connection.write("down\n".encode("utf-8"))
             logger.info("DRS deactivated on Arduino")
 
     def connect_arduino(self):
@@ -193,7 +193,6 @@ if __name__ == "__main__":
     drsZones.read_file("resources/drs_zones.json")
     test_gates = drsZones.trackDrsZones["test1"]
 
-    drs_tracker = DrsPositionTracker(test_gates)
 
     tracker = GpsReader()
     tracker.call_gpsctl()
