@@ -33,6 +33,7 @@ class DrsController(DRSProvider):
     serial_connection = None
 
     def __init__(self):
+        self.receive_thread: Optional[threading.Thread] = None
         if UsbDetector.detected(UsbDevice.ARDUINO):
             self.enabled = True
             # register for events ..
@@ -41,7 +42,8 @@ class DrsController(DRSProvider):
             self.receive_thread = threading.Thread(target=self.receive_loop, daemon=True)
 
     def start(self):
-        self.receive_thread.start()
+        if self.receive_thread:
+            self.receive_thread.start()
 
     def is_drs_available(self) -> bool:
         return self.enabled
