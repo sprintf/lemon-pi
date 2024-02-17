@@ -66,6 +66,9 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
                             if gps_datetime.year < 2021:
                                 logger.debug("time wonky, ignoring")
                                 continue
+                            gps_tstamp = gps_datetime.timestamp()
+                        else:
+                            gps_tstamp = time.time()
 
                         if session.fix.status == STATUS_NO_FIX:
                             # losing a gps fix doesn't emit a GPSDisconnected event ..
@@ -101,7 +104,7 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
                                     start_time = time.time()
                                     try:
                                         self.position_listener.update_position(self.lat, self.long,
-                                                                               self.heading, time.time(),
+                                                                               self.heading, gps_tstamp,
                                                                                self.speed_mph)
                                     except Exception:
                                         logger.exception("issue with GPS listener.")
@@ -172,11 +175,16 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
         if UsbDetector.detected(UsbDevice.GPS):
             gps_device = UsbDetector.get(UsbDevice.GPS)
             logger.info(f"calling gpsctl with {['gpsctl', *args, gps_device]}")
-            result = subprocess.run(["gpsctl", *args, gps_device],
-                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            logger.info(f"result of gpsctl = {result.returncode}")
-            logger.info(result.stdout.decode("UTF-8").strip())
-            logger.info(result.stderr.decode("UTF-8").strip())
+            returncode = -1
+            tries = 0
+            while returncode != 0 and tries < 5:
+                result = subprocess.run(["gpsctl", *args, gps_device],
+                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                logger.info(f"result of gpsctl = {result.returncode}")
+                logger.info(result.stdout.decode("UTF-8").strip())
+                logger.info(result.stderr.decode("UTF-8").strip())
+                returncode = result.returncode
+                tries += 1
 
 
 if __name__ == "__main__":
@@ -195,8 +203,10 @@ if __name__ == "__main__":
             self.file = open("traces/trace-{}.csv".format(int(time.time())), mode="w")
 
         def update_position(self, lat: float, long: float, heading: float, tstamp: float, speed: int) -> None:
-            self.file.write("{},{},{},{},{}\n".format(tstamp, lat, long, heading, speed))
-            self.file.flush()
+            diff = int((time.time() - tstamp) * 1000)
+            print(f"diff between now and gps time = {diff}ms")
+            #self.file.write("{},{},{},{},{}\n".format(tstamp, lat, long, heading, speed))
+            #self.file.flush()
 
 
     UsbDetector.init()
