@@ -49,8 +49,8 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
             try:
                 logger.info("connecting to GPS...")
                 session = gps()
-                self.init_gps_connection(session)
                 self.call_gpsctl()
+                self.init_gps_connection(session)
 
                 while not self.finished:
                     try:
@@ -122,7 +122,7 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
                 logger.exception("issue with GPS, reconnecting.")
                 self.working = False
                 GPSDisconnectedEvent.emit()
-                time.sleep(30)
+                time.sleep(10)
 
     def get_speed(self) -> int:
         if self.time_synced and time.time() - self.fix_timestamp < 5:
@@ -160,12 +160,14 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
         session.read()
         session.send('?DEVICES;')
         code = session.read()
-        logger.debug("got code {}".format(code))
+        logger.debug(f"got code {code}")
         response = session.data
-        logger.debug("got response {}".format(response))
+        logger.debug(f"got response {response}")
         devices = response['devices']
-        if len(devices) == 0:
-            raise Exception("no gps device")
+        if len(devices) == 0 or "'native': 1" in str(response):
+            session.close()
+            logger.warning(f"response = {response}")
+            raise Exception("no gps device or it's in the wrong mode")
         session.send('?WATCH={"enable":true,"json":true}')
 
     def call_gpsctl(self):
