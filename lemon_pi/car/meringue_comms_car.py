@@ -50,8 +50,8 @@ class MeringueCommsCar(Thread, MeringueComms, EventHandler):
                     rpcGps.gps_timestamp = position.timestamp
                     msg.ping.gps.CopyFrom(rpcGps)
                 # do not emit these if wifi is not connected
-                if self.wifi_working:
-                    self.send_message_from_car(msg)
+                    if self.wifi_working:
+                        self.send_message_from_car(msg)
             except grpc.RpcError:
                 pass
             sleep(self.ping_frequency)
