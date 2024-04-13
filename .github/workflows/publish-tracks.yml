@@ -32,27 +32,31 @@ jobs:
           export PYTHONPATH='.'
           python lemon_pi/utils/plot_tracks.py
 
+      - id: auth-gcp
+        if: steps.generate.outcome == 'success'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          project_id: 'perplexus-gps'
+          credentials_json: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+
       - id: upload-track-file
         if: steps.generate.outcome == 'success'
-        uses: google-github-actions/upload-cloud-storage@v0
+        uses: google-github-actions/upload-cloud-storage@v2
         with:
-          credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
           path: resources/tracks.yaml
           destination: perplexus/public
 
       - id: upload-drs-file
         if: steps.generate.outcome == 'success'
-        uses: google-github-actions/upload-cloud-storage@v0
+        uses: google-github-actions/upload-cloud-storage@v2
         with:
-          credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
           path: resources/drs_zones.json
           destination: perplexus/public
 
       - id: upload-html
         if: steps.generate.outcome == 'success'
-        uses: google-github-actions/upload-cloud-storage@v0
+        uses: google-github-actions/upload-cloud-storage@v2
         with:
-          credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
           path: tracks
           destination: perplexus/public
 
@@ -78,9 +82,8 @@ jobs:
 
       - id: upload-images
         if: steps.generate.outcome == 'success'
-        uses: google-github-actions/upload-cloud-storage@v0
+        uses: google-github-actions/upload-cloud-storage@v2
         with:
-          credentials: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
           path: tracks/thumbnails
           destination: perplexus/public
 
