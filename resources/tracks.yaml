@@ -67,8 +67,8 @@ tracks:
      code: "rdg"
      start_finish_coords: "(47.254763, -123.193320),(47.254658, -123.193318)"
      start_finish_direction: "E"
-     pit_entry_coords: "(47.254623,-123.197713),(47.254509,-123.197639)"
-     pit_entry_direction: "NE"
+     pit_entry_coords: "(47.254345, -123.198403),(47.254231, -123.198372)"
+     pit_entry_direction: "E"
      pit_out_coords: "(47.254646, -123.192476),(47.254539, -123.192458)"
      pit_out_direction: "E"
 
