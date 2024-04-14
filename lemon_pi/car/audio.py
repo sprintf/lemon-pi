@@ -30,16 +30,16 @@ def get_speech_driver():
 class Audio(Thread, EventHandler):
 
     number_to_text = {
-        '0' : "O.",
-        '1' : "one",
-        '2' : "two",
-        '3' : "three",
-        '4' : "four",
-        '5' : "five",
-        '6' : "six",
-        '7' : "seven",
-        '8' : "eight",
-        '9' : "nine"
+        '0': "O.",
+        '1': "one",
+        '2': "two",
+        '3': "three",
+        '4': "four",
+        '5': "five",
+        '6': "six",
+        '7': "seven",
+        '8': "eight",
+        '9': "nine"
     }
 
     def __init__(self):
@@ -96,7 +96,7 @@ class Audio(Thread, EventHandler):
         self.engine.runAndWait()
         self.queue.task_done()
 
-    def announce(self, message:str):
+    def announce(self, message: str):
         # queue up the announcement
         self.queue.put(message)
 
@@ -125,7 +125,6 @@ class Audio(Thread, EventHandler):
         # todo : play it now ... if poss
         self.announce(f"Danger! {message}")
 
-
     def announce_race_position(self, pos=0, pos_in_class=0, car_ahead="", gap="",
                                gap_to_front=0.0, gap_to_front_delta=0.0, lap_count=0):
         if pos == 1:
@@ -153,7 +152,7 @@ class Audio(Thread, EventHandler):
                     self.announce(f"Gap to front is {int(gap_to_front)} seconds")
 
     @staticmethod
-    def _car_number_to_audio(car_number:str):
+    def _car_number_to_audio(car_number: str):
         # car number that are tens and hundreds should be pronounced as-is
         if car_number.endswith("0"):
             return car_number
@@ -171,7 +170,7 @@ class Audio(Thread, EventHandler):
             return car_number
 
     @staticmethod
-    def _gap_to_audio(gap:str) -> (str, str):
+    def _gap_to_audio(gap: str) -> (str, str):
         if gap == "-":
             return "", ""
 
@@ -186,4 +185,3 @@ class Audio(Thread, EventHandler):
             return f"{gap}econds", ""
 
         return gap, ""
-

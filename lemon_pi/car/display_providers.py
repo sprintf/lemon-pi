@@ -1,6 +1,9 @@
 
 # a mixin for things that are flaky ...
 # particularly GPS
+from typing import Optional
+
+
 class UnreliableProviderMixin:
 
     def is_working(self) -> bool:
@@ -48,11 +51,11 @@ class LapProvider:
 
     # return predicted lap time, or None if there's no
     # current prediction
-    def get_predicted_lap_time(self) -> float:
+    def get_predicted_lap_time(self) -> Optional[float]:
         pass
 
     # return best lap time, or None if none has yet been set
-    def get_best_lap_time(self) -> float:
+    def get_best_lap_time(self) -> Optional[float]:
         pass
 
 

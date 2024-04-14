@@ -1,3 +1,6 @@
+import platform
+from typing import Optional
+
 from lemon_pi.car.gps_geometry import crossed_line
 from lemon_pi.car.predictor import LapTimePredictor
 from lemon_pi.car.track import TrackLocation, START_FINISH
@@ -33,7 +36,7 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
         self.lap_count = 999
         self.stint_lap_count = 0
         self.last_lap_time = 0
-        self.best_lap_time = None
+        self.best_lap_time: Optional[float] = None
         self.last_timestamp = 0
         self.last_dist_to_line = 0
         self.predictive_lap_timer = LapTimePredictor(track.get_start_finish_target())
@@ -73,7 +76,7 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                     lap_time = cross_time - self.lap_start_time
                     # something is creating weird vals in here
                     if lap_time < 0 or lap_time > 1000000:
-                        logger.warning(f"got a stupid lap time {cross_time} - {self.lap_count}")
+                        logger.warning(f"got a stupid lap time {cross_time} - {self.lap_start_time}")
                         lap_time = 0
                     CompleteLapEvent.emit(lap_count=self.lap_count + 1, lap_time=lap_time)
                     if not self.on_track:
@@ -88,7 +91,7 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                         self.lap_count += 1
                         self.stint_lap_count += 1
                         self.last_lap_time = lap_time
-                        if self.best_lap_time is None or lap_time < self.best_lap_time:
+                        if lap_time > 0 and (self.best_lap_time is None or lap_time < self.best_lap_time):
                             self.best_lap_time = lap_time
                         lap_logger.info(f"{self.lap_count},{self.last_lap_time:.1f}")
                     self.lap_start_time = cross_time
@@ -127,7 +130,7 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
             # this only gets hit in simulation mode when the car is not
             # actually running. It lets us see some lap time data when
             # testing out a pre-recorded feed
-            if not self.on_track:
+            if not self.on_track and platform.system() == "Darwin" :
                 self.last_lap_time = ts - self.lap_start_time
                 self.lap_start_time = ts
         if event == LeaveTrackEvent:
@@ -156,10 +159,10 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
     def get_last_lap_time(self) -> float:
         return self.last_lap_time
 
-    def get_predicted_lap_time(self) -> float:
+    def get_predicted_lap_time(self) -> Optional[float]:
         return self.predictive_lap_timer.predict_lap()
 
-    def get_best_lap_time(self) -> float:
+    def get_best_lap_time(self) -> Optional[float]:
         return self.best_lap_time
 
 

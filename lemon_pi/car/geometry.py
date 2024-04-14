@@ -1,6 +1,6 @@
 import logging
 
-from numpy import *
+from numpy import empty_like, degrees, array, dot
 from haversine import haversine
 import math
 
@@ -57,7 +57,7 @@ def seg_intersect_xy(a1, a2, b1, b2):
     num = dot(dap, dp)
     if denom == 0.0:
         return (0, 0)
-    return (num / denom.astype(float))*db + b1
+    return (num / denom.astype(float)) * db + b1
 
 
 # is a point p1 between lat/long points a1 and a2
@@ -69,13 +69,13 @@ def is_between(a1, a2, p1):
     minxy = (min(xy1[0], xy2[0]), min(xy1[1], xy2[1]))
     maxxy = (max(xy1[0], xy2[0]), max(xy1[1], xy2[1]))
     return pxy[0] >= minxy[0] and pxy[0] <= maxxy[0] \
-            and pxy[1] >= minxy[1] and pxy[1] <= maxxy[1]
+           and pxy[1] >= minxy[1] and pxy[1] <= maxxy[1]
 
 
 # get a point on the given heading
 #  point is a (lat, long) tuple
 # return a (lat, long) tuple
-def get_point_on_heading(point, heading:float, d=0.05):
+def get_point_on_heading(point, heading: float, d=0.05):
     a1 = array([point[1], point[0]])
     R = 6378.1  # radius of earth
     brg = math.radians(heading)
@@ -83,10 +83,10 @@ def get_point_on_heading(point, heading:float, d=0.05):
     lat1 = math.radians(a1[1])  # its the y axis
     lon1 = math.radians(a1[0])  # its the x axis
 
-    lat2 = math.asin(math.sin(lat1) * math.cos(d/R) + \
-              math.cos(lat1) * math.sin(d/R) * math.cos(brg))
-    lon2 = lon1 + math.atan2(math.sin(brg) * math.sin(d/R) * math.cos(lat1),
-                             math.cos(d/R) - math.sin(lat1) * math.sin(lat2))
+    lat2 = math.asin(math.sin(lat1) * math.cos(d / R) +
+                     math.cos(lat1) * math.sin(d / R) * math.cos(brg))
+    lon2 = lon1 + math.atan2(math.sin(brg) * math.sin(d / R) * math.cos(lat1),
+                             math.cos(d / R) - math.sin(lat1) * math.sin(lat2))
 
     return math.degrees(lat2), math.degrees(lon2)
 
@@ -104,7 +104,6 @@ DirectionMap = {
 
 
 def calc_intersect_heading(lat_long1, lat_long2, direction):
-
     line_heading = heading_between_lat_long(lat_long2, lat_long1)
 
     line_heading += 360
@@ -150,7 +149,6 @@ if __name__ == "__main__":
     gmap.marker(a2[0], a2[1])
     gmap.marker(b1[0], b1[1])
 
-
     for x in range(200, 210, 2):
         print(x)
 
@@ -166,5 +164,3 @@ if __name__ == "__main__":
         print(is_between(a1, a2, result))
 
     gmap.draw("mymap.html")
-
-

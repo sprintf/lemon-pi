@@ -179,7 +179,7 @@ class LapTimePredictor(EventHandler):
         secs = int(last_lap_time % 60)
         logger.debug(f"lap completed in {mins:02d}:{secs:02d} ... updating gates")
         if last_lap_time > len(self.gates) * 10 + 30:
-            logger.warning(f"lap discarded as it's too slow")
+            logger.warning("lap discarded as it's too slow")
             return
         for g in self.gates:
             g.record_lap_time(last_lap_time)

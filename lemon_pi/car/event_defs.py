@@ -24,7 +24,7 @@ ExitApplicationEvent = Event("ExitApplication")
 # the car should transmit status on radio
 RadioSyncEvent = Event("RadioSync", debounce_time=30)
 
-### State Change Events
+# State Change Events
 
 # the car is setting off from pits
 StateChangeSettingOffEvent = Event("StateChangeSettingOff", debounce_time=10)
@@ -32,26 +32,26 @@ StateChangeSettingOffEvent = Event("StateChangeSettingOff", debounce_time=10)
 # the car is parked in the pits
 StateChangePittedEvent = Event("StateChangePitted")
 
-### OBD Events
+# OBD Events
 OBDConnectedEvent = Event("OBD-Connected")
 OBDDisconnectedEvent = Event("OBD-Disconnected")
 
-### GPS Events
+# GPS Events
 GPSConnectedEvent = Event("GPS-Connected")
 GPSDisconnectedEvent = Event("GPS-Disconnected")
 
-### Wifi Connected
+# Wifi Connected
 WifiConnectedEvent = Event("Wifi-Connected")
 WifiDisconnectedEvent = Event("Wifi-Disconnected")
 
-### Refuel event
+# Refuel event
 # percent_full=
 RefuelEvent = Event("Refuel")
 
-### Car has come to a halt
+# Car has come to a halt
 CarStoppedEvent = Event("CarStopped", suppress_logs=True, debounce_time=10)
 
-########## Incoming Radio Events
+# Incoming Radio Events
 
 # emit() will contain
 #   text=
@@ -111,8 +111,3 @@ ReverseTrackEvent = Event("reverse-track")
 # activated ... true or false if we're heading to an enablement section
 # gate ... the gate (not set on pit entry, so not always there)
 DRSApproachEvent = Event("drs-approaching")
-
-
-
-
-

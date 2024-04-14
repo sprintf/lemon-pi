@@ -98,12 +98,12 @@ class DrsController(DRSProvider):
 
 
 class DrsGate:
-    
+
     def __init__(self, lat1, long1, lat2, long2, name, activation, time_adjustment: float = 0.0):
         self.target: Target = Target(name, (lat1, long1), (lat2, long2), target_heading=-1)
         self.activation: bool = activation
         self.time_adjust: float = time_adjustment
-    
+
 
 class DrsDataLoader:
 
