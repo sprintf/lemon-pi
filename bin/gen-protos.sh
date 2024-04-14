@@ -11,7 +11,7 @@ if [ ! -d ${package_dir} ] ; then
 fi
 
 # force ... temporary fix
-rm ${package_dir}/*pb2*.py
+# rm ${package_dir}/*pb2*.py
 
 if [ ! -f ${package_dir}/lemon_pi_pb2.py ] ; then
   needs_building=1
