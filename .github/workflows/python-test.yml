@@ -26,7 +26,7 @@ jobs:
         path: 'lemon-pi-protos'
     - name: Relink protos
       run: |
-        rm lemon_pi/shared/protos/*.proto && \
+        rm -f lemon_pi*.py race_flag_status*.py
         ln -s `pwd`/lemon-pi-protos/generated/lemon_pi_pb2.py
         ln -s `pwd`/lemon-pi-protos/generated/lemon_pi_pb2_grpc.py
         ln -s `pwd`/lemon-pi-protos/generated/race_flag_status_pb2.py
