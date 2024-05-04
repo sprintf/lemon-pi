@@ -23,12 +23,14 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: sprintf/lemon-pi-protos
-        path: './protos'
+        path: 'lemon-pi-protos'
     - name: Relink protos
       run: |
-             rm lemon_pi/shared/protos/*.proto && \
-             ln -s `pwd`/protos/src/main/proto/lemon-pi.proto lemon_pi/shared/protos/lemon-pi.proto
-             ln -s `pwd`/protos/src/main/proto/race-flag-status.proto lemon_pi/shared/protos/race-flag-status.proto
+        rm -f lemon_pi*.py race_flag_status*.py
+        ln -s `pwd`/lemon-pi-protos/generated/lemon_pi_pb2.py
+        ln -s `pwd`/lemon-pi-protos/generated/lemon_pi_pb2_grpc.py
+        ln -s `pwd`/lemon-pi-protos/generated/race_flag_status_pb2.py
+        ln -s `pwd`/lemon-pi-protos/generated/race_flag_status_pb2_grpc.py
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
@@ -41,9 +43,6 @@ jobs:
         pip install --upgrade setuptools
         pip install flake8
         if [ -f requirements-linux.txt ]; then pip install -r requirements-linux.txt; fi
-    - name: Generate protobufs
-      run: |
-        bin/gen-protos.sh
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
