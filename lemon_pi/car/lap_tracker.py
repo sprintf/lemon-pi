@@ -35,6 +35,7 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
         self.last_gps = None
         self.lap_count = 999
         self.stint_lap_count = 0
+        self.last_log_time = 0
         self.last_lap_time = 0
         self.best_lap_time: Optional[float] = None
         self.last_timestamp = 0
@@ -60,7 +61,7 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                 logger.exception("problem updating position")
 
     def process_position(self, lat: float, long: float, heading: float, tstamp: float, speed: int) -> None:
-        this_gps = GpsPos(lat, long, heading, time, speed)
+        this_gps = GpsPos(lat, long, heading, speed, tstamp)
         try:
             logger.debug("updating position to {} {}".format(lat, long))
             crossed_start_finish, cross_time, backwards = \
@@ -114,10 +115,14 @@ class LapTracker(PositionUpdater, LapProvider, EventHandler):
                                 break
             # log gps
             if settings.LOG_GPS:
+                # defend against high speed logging here
+                if tstamp - self.last_log_time < 1:
+                    return
                 dt = datetime.fromtimestamp(tstamp)
                 gps_logger.info(
-                    f"{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d}.{int(dt.microsecond * 1000):03d},{time},"
+                    f"{dt.hour:02d}:{dt.minute:02d}:{dt.second:02d}.{int(dt.microsecond * 1000):03d},{tstamp},"
                     f"{self.lap_count},{lat},{long},{speed},{heading}")
+                self.last_log_time = tstamp
         finally:
             self.last_gps = this_gps
 
