@@ -47,7 +47,7 @@ class MeringueCommsCar(Thread, MeringueComms, EventHandler):
                     rpcGps.long = position.long
                     rpcGps.speed_mph = position.speed
                     rpcGps.heading = position.heading
-                    rpcGps.gps_timestamp = position.timestamp
+                    rpcGps.gps_timestamp = int(position.timestamp)
                     msg.ping.gps.CopyFrom(rpcGps)
                 # do not emit these if wifi is not connected
                     if self.wifi_working:

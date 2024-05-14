@@ -24,10 +24,10 @@ class Event:
                 raise Exception(f"redefinition of event {name}")
         Event.instances.append(self)
         # some events emit all the time so we suppress logging them consecutively
-        self.suppress_logs = suppress_logs
+        self.suppress_logs: bool = suppress_logs
         # some events prevent re-issue of the same event in a short space ot time
         self.debounce_time = debounce_time
-        self.last_event_time = 0
+        self.last_event_time: float = 0.0
         self.handlers = []
 
     def register_handler(self, handler: EventHandler):
@@ -51,12 +51,13 @@ class Event:
             Event.last_event_count += 1
         else:
             if Event.last_event_count > 0:
-                logger.info("suppressed ({}) {}".format(Event.last_event_count, Event.last_event.name))
-            logger.info("emitting {}".format(self.name))
+                logger.info(f"suppressed ({Event.last_event_count}) {Event.last_event.name}")
+            logger.info(f"emitting {self.name}")
             Event.last_event_count = 0
         # prevent repeat emitting events if they have just happened
         now = time.time()
         if now - self.last_event_time > self.debounce_time:
+            # safest to leave these here to prevent re-entrant code
             self.last_event_time = now
             Event.last_event = self
             # call all the registered handlers
@@ -65,6 +66,9 @@ class Event:
                     handler.handle_event(self, **kwargs)
                 except Exception:
                     logger.exception("exception handling event")
+        else:
+            self.last_event_time = now
+            Event.last_event = self
 
     @classmethod
     def instance_iterator(cls):

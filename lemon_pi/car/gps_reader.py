@@ -160,7 +160,7 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
         session.send('?DEVICES;')
         code = session.read()
         logger.debug(f"got code {code}")
-        response = session.response
+        response = session.data
         logger.debug(f"got response {response}")
         devices = response['devices']
         if len(devices) == 0 or "'native': 1" in str(response):
