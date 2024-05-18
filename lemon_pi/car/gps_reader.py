@@ -16,10 +16,12 @@ from lemon_pi.car.event_defs import (
 import logging
 import time
 import os
+import subprocess
+from python_settings import settings
 
 from lemon_pi.shared.data_provider_interface import GpsProvider, GpsPos
 from lemon_pi.shared.events import EventHandler
-from lemon_pi.shared.usb_detector import UsbDetector
+from lemon_pi.shared.usb_detector import UsbDetector, UsbDevice
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +50,7 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
         while not self.finished:
             try:
                 logger.info("connecting to GPS...")
+                self.call_gpsctl()
                 session = gps()
                 self.init_gps_connection(session)
 
@@ -168,6 +171,24 @@ class GpsReader(Thread, SpeedProvider, PositionProvider, EventHandler, GpsProvid
             logger.warning(f"response = {response}")
             raise Exception("no gps device or it's in the wrong mode")
         session.send('?WATCH={"enable":true,"json":true}')
+
+    def call_gpsctl(self):
+        if not settings.GPSCTL_ARGS:
+            return
+        args = settings.GPSCTL_ARGS.split(" ")
+        if UsbDetector.detected(UsbDevice.GPS):
+            gps_device = UsbDetector.get(UsbDevice.GPS)
+            logger.info(f"calling gpsctl with {['gpsctl', *args, gps_device]}")
+            returncode = -1
+            tries = 0
+            while returncode != 0 and tries < 5:
+                result = subprocess.run(["gpsctl", *args, gps_device],
+                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                logger.info(f"result of gpsctl = {result.returncode}")
+                logger.info(result.stdout.decode("UTF-8").strip())
+                logger.info(result.stderr.decode("UTF-8").strip())
+                returncode = result.returncode
+                tries += 1
 
 
 if __name__ == "__main__":
