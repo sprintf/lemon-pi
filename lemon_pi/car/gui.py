@@ -66,14 +66,13 @@ class AlertLight(Drawing):
 
 
 class Gui(EventHandler):
-
     # these are not really constants, as they get overridden first thing based on
     # settings, but it's ok to think of them ac constants
     WIDTH = 800
     HEIGHT = 480
     COL_WIDTH = 266
     SCALE_FACTOR = 1
-    
+
     TEXT_TINY = 16
     TEXT_SMALL = 24
     TEXT_MED = 32
@@ -86,7 +85,7 @@ class Gui(EventHandler):
         Gui.COL_WIDTH = int(width / 3)
         Gui.MESSAGE_ROW_HEIGHT = int(Gui.HEIGHT / 7)
         Gui.SCALE_FACTOR = Gui.WIDTH / 800
-        
+
         if width > 1000:
             Gui.TEXT_TINY = 24
             Gui.TEXT_SMALL = 32
@@ -158,9 +157,9 @@ class Gui(EventHandler):
             Box(self.col2, height=24, width=int(Gui.COL_WIDTH * 0.8))
 
         # this uses high cpu just being invisible : its still growing and shrinking
-        #a = AlertLight(self.col2, color="cyan")
-        #a.color = "yellow"
-        #a.visible = False
+        # a = AlertLight(self.col2, color="cyan")
+        # a.color = "yellow"
+        # a.visible = False
 
         self.stint_ending_display = self.create_instructions(self.col4)
         self.stint_starting_display = self.create_instructions(self.col5)
@@ -240,7 +239,7 @@ class Gui(EventHandler):
         if event == RacePositionEvent:
             self.__update_race_position(**kwargs)
             self._col_display(7)
-            # suppress the prediected lap timer for 10s
+            # suppress the predicted lap timer for 10s
             self.suppress_prediction_until = time.time() + 10
             return
 
@@ -376,13 +375,15 @@ class Gui(EventHandler):
         else:
             self.drs_image.repeat(200, self.__update_drs_status, args=[provider])
 
-    def create_drs_images(self, parent):
+    @staticmethod
+    def create_drs_images(parent):
         result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(48 * Gui.SCALE_FACTOR))
         return ToggleImage(result,
-                          "resources/images/drs_on.gif",
-                          "resources/images/drs_off.gif")
+                           "resources/images/drs_on.gif",
+                           "resources/images/drs_off.gif")
 
-    def create_gps_obd_images(self, parent):
+    @staticmethod
+    def create_gps_obd_images(parent):
         result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(48 * Gui.SCALE_FACTOR))
         gps = ToggleImage(result,
                           "resources/images/gps_ok.gif",
@@ -390,9 +391,9 @@ class Gui(EventHandler):
                           align="left")
         Box(result, width=28, height=32, align="left")
         wifi = ToggleImage(result,
-                          "resources/images/wifi_ok.gif",
-                          "resources/images/wifi_off.gif",
-                          align="left")
+                           "resources/images/wifi_ok.gif",
+                           "resources/images/wifi_off.gif",
+                           align="left")
         Box(result, width=28, height=32, align="left")
         radio = FadingBox(result, width=32, height=32, align="left")
         obd = ToggleImage(result,
@@ -417,7 +418,8 @@ class Gui(EventHandler):
         Text(result, "hh", size=Gui.TEXT_XL, font=self.font, color="white", align="left")
         Text(result, ":", size=Gui.TEXT_MED, font=self.font, color="white", align="left")
         Text(result, "mm", size=Gui.TEXT_XL, font=self.font, color="white", align="left")
-        # Text(result, "ss", size=Gui.TEXT_XL, font=self.font, color="grey", align="left")
+        Box(result, width=20, height=20, align="left")
+        Text(result, "ss", size=Gui.TEXT_MED, font=self.font, color="grey", align="left")
         return result
 
     def create_speed_widget(self, parent):
@@ -560,6 +562,7 @@ class Gui(EventHandler):
     def __update_time(self, provider: TimeProvider):
         self.time_widget.children[1].value = "{:02d}".format(provider.get_hours())
         self.time_widget.children[3].value = "{:02d}".format(provider.get_minutes())
+        self.time_widget.children[5].value = "{:02d}".format(provider.get_seconds())
 
     def __update_drs_status(self, provider: DRSProvider):
         if provider.is_drs_activated():
@@ -568,7 +571,7 @@ class Gui(EventHandler):
             self.drs_image.off()
 
     def __update_time_beat(self):
-        beat : Text = self.time_widget.children[2]
+        beat: Text = self.time_widget.children[2]
         if beat.text_color == "white":
             beat.text_color = self.app.bg
         else:
@@ -591,7 +594,8 @@ class Gui(EventHandler):
             tenths = int((ll - int(ll)) * 10)
             self.lap_display.children[4].value = "{:02d}:{:02d}.{:01d}".format(minutes, seconds, tenths)
 
-    def __format_lap_count(self, provider: LapProvider):
+    @staticmethod
+    def __format_lap_count(provider: LapProvider):
         if provider.get_lap_count() == provider.get_stint_lap_count():
             return f"{provider.get_lap_count()}"
         else:
@@ -648,17 +652,18 @@ class Gui(EventHandler):
             self.__display_time(target_lap, outer_box.children[7])
 
     @staticmethod
-    def __display_time(seconds:float, text_box:Text):
+    def __display_time(seconds: float, text_box: Text):
         minutes = int(seconds / 60)
         seconds = int(seconds % 60)
         text_box.value = "{:02d}:{:02d}".format(minutes, seconds)
 
     def __update_fuel(self, provider: FuelProvider):
         # children offsets:
-        remaining_box : Box = self.fuel_display.children[1]
+        remaining_box: Box = self.fuel_display.children[1]
         remaining_box.children[1].value = "{:02d}".format(provider.get_fuel_percent_remaining())
 
-    def __identify_font(self, platform):
+    @staticmethod
+    def __identify_font(platform):
         if platform == "Darwin":
             return "arial"
         elif platform == "Linux":
@@ -691,5 +696,5 @@ class RandomLapTimeProvider(LapProvider):
     def get_best_lap_time(self) -> float:
         return 200 + random.randint(-2000, 2000) / 1000
 
-randomLapTimeProvider = RandomLapTimeProvider()
 
+randomLapTimeProvider = RandomLapTimeProvider()
