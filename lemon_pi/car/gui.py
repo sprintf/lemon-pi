@@ -415,11 +415,11 @@ class Gui(EventHandler):
         result = Box(parent, width=int(Gui.COL_WIDTH * 0.8), height=int(112 * Gui.SCALE_FACTOR))
         result.set_border(4, "darkgreen")
         Text(result, "TIME", size=Gui.TEXT_SMALL, font=self.font, color="white")
-        Text(result, "hh", size=Gui.TEXT_XL, font=self.font, color="white", align="left")
+        Text(result, "hh", size=Gui.TEXT_LARGE, font=self.font, color="white", align="left")
         Text(result, ":", size=Gui.TEXT_MED, font=self.font, color="white", align="left")
-        Text(result, "mm", size=Gui.TEXT_XL, font=self.font, color="white", align="left")
-        Box(result, width=20, height=20, align="left")
-        Text(result, "ss", size=Gui.TEXT_MED, font=self.font, color="grey", align="left")
+        Text(result, "mm", size=Gui.TEXT_LARGE, font=self.font, color="white", align="left")
+        Box(result, width=4, height=16, align="left")
+        Text(result, "ss", size=Gui.TEXT_SMALL, font=self.font, color="grey", align="left")
         return result
 
     def create_speed_widget(self, parent):
