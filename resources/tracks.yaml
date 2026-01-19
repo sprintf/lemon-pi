@@ -244,6 +244,15 @@ tracks:
     pit_out_coords: "(39.236498, -77.968830),(39.236540, -77.968609)"
     pit_out_direction: "S"
 
+  - name: "New Jersey Motorsports Park"
+    code: "njmp"
+    start_finish_coords: "(39.3607072, -75.073652),(39.3609379, -75.0734798)"
+    start_finish_direction: "NW"
+    pit_entry_coords: "(39.359429, -75.069972),(39.359363, -75.069941)"
+    pit_entry_direction: "W"
+    pit_out_coords: "(39.362958, -75.077191),(39.362943, -75.077116)"
+    pit_out_direction: "N"
+
 # this is a local test track, used for testing and other things.
   -  name: "Arlington Test Track"
      code: "test1"
