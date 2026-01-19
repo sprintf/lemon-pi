@@ -230,9 +230,9 @@ tracks:
     code: "nell"
     start_finish_coords: "(41.307092, -81.014144),(41.307089, -81.014031)"
     start_finish_direction: "S"
-    pit_entry_coords: "(41.3086175, -81.014239),(41.3085847, -81.0141534)"
+    pit_entry_coords: "(41.3086175, -81.014239),(41.308584, -81.014153)"
     pit_entry_direction: "S"
-    pit_out_coords: "(41.3060064, -81.01419977),(41.3060184, -81.014125233)"
+    pit_out_coords: "(41.3060064, -81.0141997),(41.3060184, -81.014125)"
     pit_out_direction: "S"
 
   - name: "Summit Point Motorsports Park"
@@ -241,7 +241,7 @@ tracks:
     start_finish_direction: "S"
     pit_entry_coords: "(39.239244, -77.968272),(39.239287, -77.968186)"
     pit_entry_direction: "SE"
-    pit_out_coords: "(39.2364986, -77.968830),(39.236540, -77.968609)"
+    pit_out_coords: "(39.236498, -77.968830),(39.236540, -77.968609)"
     pit_out_direction: "S"
 
 # this is a local test track, used for testing and other things.
