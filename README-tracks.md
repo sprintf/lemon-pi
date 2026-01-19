@@ -51,6 +51,10 @@
 <a href="https://storage.googleapis.com/perplexus/public/tracks/new-hampshire-motor-speedway.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/new-hampshire-motor-speedway.jpg"></a>
 
 
+# New Jersey Motorsports Park
+<a href="https://storage.googleapis.com/perplexus/public/tracks/new-jersey-motorsports-park.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/new-jersey-motorsports-park.jpg"></a>
+
+
 # Nola Motorsports Park
 <a href="https://storage.googleapis.com/perplexus/public/tracks/nola-motorsports-park.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/nola-motorsports-park.jpg"></a>
 
