@@ -15,10 +15,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
       - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.11
+        run: |
+          uv python install 3.11
+          uv venv --python 3.11
+          uv pip install -r requirements-linux.txt
 
       - name: generate some things
         id: generate
@@ -26,11 +30,8 @@ jobs:
           GMAP_APIKEY : ${{ secrets.GMAP_APIKEY }}
         continue-on-error: true
         run: |
-          pip install --upgrade pip
-          pip install --upgrade setuptools
-          pip install -r requirements-linux.txt
           export PYTHONPATH='.'
-          python lemon_pi/utils/plot_tracks.py
+          uv run python lemon_pi/utils/plot_tracks.py
 
       - id: auth-gcp
         if: steps.generate.outcome == 'success'
@@ -65,13 +66,13 @@ jobs:
         if: steps.generate.outcome == 'success'
         run: |
           echo "installing playwright browsers"
-          playwright install
+          uv run playwright install
           echo "generating thumbnails"
-          python lemon_pi/utils/html_to_image.py `ls tracks/*.html`
+          uv run python lemon_pi/utils/html_to_image.py `ls tracks/*.html`
           for x in tracks/*.html ; do
             echo "cropping $x"
             image=`echo $x | sed 's/\.html/\.jpg/'`
-            python lemon_pi/utils/image_crop.py $image
+            uv run python lemon_pi/utils/image_crop.py $image
           done
           echo "moving thumbnails"
           mkdir tracks/thumbnails

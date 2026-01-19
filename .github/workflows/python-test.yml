@@ -31,24 +31,25 @@ jobs:
         ln -s `pwd`/lemon-pi-protos/generated/lemon_pi_pb2_grpc.py
         ln -s `pwd`/lemon-pi-protos/generated/race_flag_status_pb2.py
         ln -s `pwd`/lemon-pi-protos/generated/race_flag_status_pb2_grpc.py
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+      run: uv python install ${{ matrix.python-version }}
+    - name: Install system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install wget espeak
-        python -m pip install --upgrade pip
-        pip install --upgrade setuptools
-        pip install flake8
-        if [ -f requirements-linux.txt ]; then pip install -r requirements-linux.txt; fi
+    - name: Install Python dependencies
+      run: |
+        uv venv --python ${{ matrix.python-version }}
+        uv pip install flake8
+        if [ -f requirements-linux.txt ]; then uv pip install -r requirements-linux.txt; fi
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 lemon_pi --count --select=E9,F63,F7,F82 --show-source --statistics
+        uv run flake8 lemon_pi --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 lemon_pi --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        uv run flake8 lemon_pi --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Run the unittests
       run: |
-        python -m unittest lemon_pi/car/tests/*.py lemon_pi/pit/tests/*.py lemon_pi/shared/tests/*.py
+        uv run python -m unittest lemon_pi/car/tests/*.py lemon_pi/pit/tests/*.py lemon_pi/shared/tests/*.py
