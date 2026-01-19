@@ -3,12 +3,24 @@
 <a href="https://storage.googleapis.com/perplexus/public/tracks/autobahn-country-club-joliet.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/autobahn-country-club-joliet.jpg"></a>
 
 
+# Barber Motorsports Park
+<a href="https://storage.googleapis.com/perplexus/public/tracks/barber-motorsports-park.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/barber-motorsports-park.jpg"></a>
+
+
 # Buttonwillow
 <a href="https://storage.googleapis.com/perplexus/public/tracks/buttonwillow.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/buttonwillow.jpg"></a>
 
 
+# Carolina Motorsports Park
+<a href="https://storage.googleapis.com/perplexus/public/tracks/carolina-motorsports-park.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/carolina-motorsports-park.jpg"></a>
+
+
 # Gingerman Raceway
 <a href="https://storage.googleapis.com/perplexus/public/tracks/gingerman-raceway.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/gingerman-raceway.jpg"></a>
+
+
+# Hallett Motor Racing Circuit
+<a href="https://storage.googleapis.com/perplexus/public/tracks/hallett-motor-racing-circuit.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/hallett-motor-racing-circuit.jpg"></a>
 
 
 # High Plains Raceway
@@ -19,12 +31,20 @@
 <a href="https://storage.googleapis.com/perplexus/public/tracks/laguna-seca.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/laguna-seca.jpg"></a>
 
 
+# Mid Ohio Sports Car Course
+<a href="https://storage.googleapis.com/perplexus/public/tracks/mid-ohio-sports-car-course.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/mid-ohio-sports-car-course.jpg"></a>
+
+
 # MSR Houston
 <a href="https://storage.googleapis.com/perplexus/public/tracks/msr-houston.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/msr-houston.jpg"></a>
 
 
 # NCM Motorsports Park
 <a href="https://storage.googleapis.com/perplexus/public/tracks/ncm-motorsports-park.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/ncm-motorsports-park.jpg"></a>
+
+
+# Nelson Ledges Race Course
+<a href="https://storage.googleapis.com/perplexus/public/tracks/nelson-ledges-race-course.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/nelson-ledges-race-course.jpg"></a>
 
 
 # New Hampshire Motor Speedway
@@ -61,6 +81,10 @@
 
 # Sonoma Raceway
 <a href="https://storage.googleapis.com/perplexus/public/tracks/sonoma-raceway.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/sonoma-raceway.jpg"></a>
+
+
+# Summit Point Motorsports Park
+<a href="https://storage.googleapis.com/perplexus/public/tracks/summit-point-motorsports-park.html"><img src="https://storage.googleapis.com/perplexus/public/thumbnails/summit-point-motorsports-park.jpg"></a>
 
 
 # The Ridge
