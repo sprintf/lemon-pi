@@ -31,18 +31,16 @@ jobs:
         ln -s `pwd`/lemon-pi-protos/generated/lemon_pi_pb2_grpc.py
         ln -s `pwd`/lemon-pi-protos/generated/race_flag_status_pb2.py
         ln -s `pwd`/lemon-pi-protos/generated/race_flag_status_pb2_grpc.py
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
+      run: uv python install ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install wget espeak
-        python -m pip install --upgrade pip
-        pip install --upgrade setuptools
-        pip install flake8
-        if [ -f requirements-linux.txt ]; then pip install -r requirements-linux.txt; fi
+        uv pip install --system flake8
+        if [ -f requirements-linux.txt ]; then uv pip install --system -r requirements-linux.txt; fi
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
