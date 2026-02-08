@@ -11,3 +11,17 @@ tracks:
      pit_out_direction: "SE"
      hidden: "true"
      reversed: "true"
+
+  -  name: "Sector Test Track"
+     code: "sect1"
+     start_finish_coords: "(37.926223,-122.295029),(37.926291,-122.294879)"
+     start_finish_direction: "SE"
+     pit_entry_coords: "(37.928483,-122.297005),(37.928385,-122.297129)"
+     pit_entry_direction: "NW"
+     sectors:
+       - S1:
+           sector_gate_coords: "(37.927000,-122.296000),(37.927100,-122.296100)"
+       - S2:
+           sector_gate_coords: "(37.928000,-122.297000),(37.928100,-122.297100)"
+           sector_gate_direction: "NW"
+       - S3:

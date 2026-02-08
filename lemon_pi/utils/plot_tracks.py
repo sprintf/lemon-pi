@@ -6,7 +6,6 @@ import sys
 import zlib
 import urllib
 
-from lemon_pi.car.drs_controller import DrsDataLoader, DrsGate
 from lemon_pi.car.track import read_tracks, TrackLocation
 
 
@@ -26,8 +25,6 @@ def _calc_mid(track:TrackLocation):
 
 def run():
     tracks = read_tracks()
-    loader = DrsDataLoader()
-    loader.read_file("resources/drs_zones.json")
 
     for track in tracks:
         if track.hidden:
@@ -63,13 +60,13 @@ def run():
             gmap.polygon(*pit_out, color='blue', edge_width=20)
             gmap.text(*po.lat_long1, '   pit out')
 
-        drs_zones: [DrsGate] = loader.get_drs_activation_zones(track.code)
-        if drs_zones:
-            for gate in drs_zones:
-                message = "on" if gate.activation else "off"
-                drs_gate_lat_longs = zip(*[gate.target.lat_long1, gate.target.lat_long2])
-                gmap.polygon(*drs_gate_lat_longs, color='yellow', edge_width=6)
-                gmap.text(gate.target.lat_long1[0], gate.target.lat_long1[1], f'DRS {message}')
+        for sector, target in track.get_sector_targets():
+            sector_line = zip(*[
+                target.lat_long1,
+                target.lat_long2
+            ])
+            gmap.polygon(*sector_line, color='yellow', edge_width=20)
+            gmap.text(*target.lat_long1, f'   {sector.name}')
 
         gmap.draw("tracks/{}.html".format(track.name.lower().replace(' ', '-')))
 
@@ -91,21 +88,10 @@ if __name__ == "__main__":
     except HTTPError:
         pass
 
-    drs_zones = open("resources/drs_zones.json")
-    drs_check = zlib.crc32(drs_zones.read().encode("utf-8"))
-
-    drs_check2 = 0
-    url = "https://storage.googleapis.com/perplexus/public/drs_zones.json"
-    try:
-        file = urllib.request.urlopen(url)
-        drs_check2 = zlib.crc32(file.read())
-    except HTTPError:
-        pass
-
     force = len(sys.argv) == 2 and sys.argv[1] == '-f'
 
     # don't do anything if the files are the same
-    if check == check2 and drs_check == drs_check2 and not force:
+    if check == check2 and not force:
         print("no update needed")
         sys.exit(1)
 
