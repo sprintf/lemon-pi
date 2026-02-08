@@ -1,7 +1,7 @@
 import re
 import unittest
 from lemon_pi.car.track import read_tracks, TrackLocation, swap_direction, do_read_tracks, START_FINISH, PIT_OUT, \
-    PIT_ENTRY
+    PIT_ENTRY, Sector
 from haversine import haversine, Unit
 
 
@@ -54,6 +54,52 @@ class TrackTestCase(unittest.TestCase):
             self.assertTrue(pit_to_sf2 < 1)
 
         thunderhill = next(filter(lambda track: track.name == "Thunderhill", tracks), None)
+
+    def test_track_without_sectors(self):
+        tracks = do_read_tracks("resources/test/test-tracks.yaml")
+        arlington = next(filter(lambda t: t.name == "Arlington Test Track", tracks), None)
+        self.assertFalse(arlington.has_sectors())
+        self.assertEqual(0, len(arlington.sectors))
+
+    def test_track_with_sectors(self):
+        tracks = do_read_tracks("resources/test/test-tracks.yaml")
+        track = next(filter(lambda t: t.name == "Sector Test Track", tracks), None)
+        self.assertIsNotNone(track)
+        self.assertTrue(track.has_sectors())
+        self.assertEqual(3, len(track.sectors))
+
+        # S1 - has gate coords
+        self.assertEqual("S1", track.sectors[0].name)
+        self.assertEqual(1, track.sectors[0].number)
+        self.assertIsNotNone(track.sectors[0].target_meta_data)
+
+        # S2 - has gate coords and direction
+        self.assertEqual("S2", track.sectors[1].name)
+        self.assertEqual(2, track.sectors[1].number)
+        self.assertIsNotNone(track.sectors[1].target_meta_data)
+
+        # S3 - last sector, no gate coords
+        self.assertEqual("S3", track.sectors[2].name)
+        self.assertEqual(3, track.sectors[2].number)
+        self.assertIsNone(track.sectors[2].target_meta_data)
+
+    def test_sector_targets(self):
+        tracks = do_read_tracks("resources/test/test-tracks.yaml")
+        track = next(filter(lambda t: t.name == "Sector Test Track", tracks), None)
+
+        sector_targets = track.get_sector_targets()
+        self.assertEqual(2, len(sector_targets))
+
+        # S1 target
+        sector, target = sector_targets[0]
+        self.assertEqual("S1", sector.name)
+        self.assertEqual("S1", target.name)
+        self.assertAlmostEqual(37.927000, target.lat_long1[0], places=5)
+
+        # S2 target with direction
+        sector, target = sector_targets[1]
+        self.assertEqual("S2", sector.name)
+        self.assertNotEqual(0, target.target_heading)  # direction was parsed
 
 if __name__ == '__main__':
     unittest.main()

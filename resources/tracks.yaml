@@ -17,6 +17,12 @@ tracks:
      pit_entry_direction: "S"
      pit_out_coords: "(38.161335,-122.454918),(38.161462, -122.454790)"
      pit_out_direction: "NW"
+     sectors:
+       - S1:
+           sector_gate_coords: "(38.163440,-122.460258),(38.163500,-122.460099)"
+       - S2:
+           sector_gate_coords: "(38.164257,-122.457098),(38.164354,-122.457006)"
+       - S3:
 
   -  name: "Thunderhill"
      code: "thil"
@@ -26,6 +32,12 @@ tracks:
      pit_entry_direction: "SW"
      pit_out_coords: "(39.538775, -122.331361),(39.538782, -122.331244)"
      pit_out_direction: "S"
+     sectors:
+       - S1:
+           sector_gate_coords: "(39.542475,-122.329498),(39.542358,-122.329387)"
+       - S2:
+           sector_gate_coords: "(39.540854,-122.335819),(39.540846,-122.335518)"
+       - S3:
 
   -  name: "Thunderhill West"
      code: "thilw"
@@ -35,6 +47,12 @@ tracks:
      pit_entry_direction: "E"
      pit_out_coords: "(39.538090, -122.338785), (39.538096, -122.338641)"
      pit_out_direction: "N"
+     sectors:
+       - S1:
+           sector_gate_coords: "(39.538936,-122.342306),(39.538797,-122.342110)"
+       - S2:
+           sector_gate_coords: "(39.533122,-122.338959),(39.532946,-122.338988)"
+       - S3:
 
   -  name: "Laguna Seca"
      code: "lgna"
@@ -44,6 +62,12 @@ tracks:
      pit_entry_direction: "NW"
      pit_out_coords: "(36.585962,-121.756935),(36.585903,-121.756816)"
      pit_out_direction: "SW"
+     sectors:
+       - S1:
+           sector_gate_coords: "(36.583248,-121.753782),(36.583255,-121.753616)"
+       - S2:
+           sector_gate_coords: "(36.584442,-121.749207),(36.584386,-121.749025)"
+       - S3:
 
   -  name: "Buttonwillow"
      code: "btnw"
@@ -53,6 +77,12 @@ tracks:
      pit_entry_direction: "SE"
      pit_out_coords: "(35.489142,-119.542091),(35.489052,-119.542085)"
      pit_out_direction: "E"
+     sectors:
+       - S1:
+           sector_gate_coords: "(35.486919,-119.542753),(35.487050,-119.542595)"
+       - S2:
+           sector_gate_coords: "(35.492335,-119.549995),(35.492301,-119.549893)"
+       - S3:
 
   -  name: "Oregon Raceway Park"
      code: "orp"
@@ -62,6 +92,12 @@ tracks:
      pit_entry_direction: "SW"
      pit_out_coords: "(45.362999, -120.744368),(45.363009, -120.744228)"
      pit_out_direction: "S"
+     sectors:
+       - S1:
+           sector_gate_coords: "(45.365675,-120.746820),(45.365526,-120.746659)"
+       - S2:
+           sector_gate_coords: "(45.371482,-120.743711),(45.371654,-120.743537)"
+       - S3:
 
   -  name: "The Ridge"
      code: "rdg"
@@ -71,6 +107,12 @@ tracks:
      pit_entry_direction: "E"
      pit_out_coords: "(47.254646, -123.192476),(47.254539, -123.192458)"
      pit_out_direction: "E"
+     sectors:
+       - S1:
+           sector_gate_coords: "(47.258041,-123.187358),(47.257855,-123.187358)"
+       - S2:
+           sector_gate_coords: "(47.257002,-123.192116),(47.257079,-123.191867)"
+       - S3:
 
   -  name: "Willow Springs"
      code: "wlws"
@@ -78,6 +120,12 @@ tracks:
      start_finish_direction: "NW"
      pit_entry_coords: "(34.870017,-118.261156),(34.869861,-118.261210)"
      pit_entry_direction: "E"
+     sectors:
+       - S1:
+           sector_gate_coords: "(34.874039,-118.268762),(34.873859,-118.268647)"
+       - S2:
+           sector_gate_coords: "(34.874248,-118.261258),(34.874074,-118.261325)"
+       - S3:
 
   -  name: "Nola Motorsports Park"
      code: "nmp"
@@ -85,6 +133,12 @@ tracks:
      start_finish_direction: "SW"
      pit_entry_coords: "(29.888531, -90.196961),(29.888506, -90.196854)"
      pit_entry_direction: "N"
+     sectors:
+       - S1:
+           sector_gate_coords: "(29.880681,-90.207411),(29.880467,-90.207314)"
+       - S2:
+           sector_gate_coords: "(29.886773,-90.199882),(29.886579,-90.199791)"
+       - S3:
 
   -  name: "Pittsburg International Race Complex"
      code: "pir"
@@ -99,6 +153,12 @@ tracks:
      start_finish_direction: "SE"
      pit_entry_coords: "(34.150441,-83.816277),(34.150359,-83.816274)"
      pit_entry_direction: "E"
+     sectors:
+       - S1:
+           sector_gate_coords: "(34.142829,-83.814181),(34.142696,-83.814001)"
+       - S2:
+           sector_gate_coords: "(34.142662,-83.818853),(34.142662,-83.818348)"
+       - S3:
 
   - name: "Road America"
     code: "rdam"
@@ -108,6 +168,12 @@ tracks:
     pit_entry_direction: "S"
     pit_out_coords: "(43.794422, -87.989665),(43.794421, -87.989601)"
     pit_out_direction: "S"
+    sectors:
+      - S1:
+          sector_gate_coords: "(43.798896,-87.993370),(43.798851,-87.993142)"
+      - S2:
+          sector_gate_coords: "(43.800300,-88.001190),(43.800149,-88.000965)"
+      - S3:
 
   -  name: "MSR Houston"
      code: "msrh"
@@ -117,6 +183,12 @@ tracks:
      pit_entry_direction: "SW"
      pit_out_coords: "(29.279540, -95.425442),(29.279547, -95.425354)"
      pit_out_direction: "N"
+     sectors:
+       - S1:
+           sector_gate_coords: "(29.281140,-95.419284),(29.280878,-95.419257)"
+       - S2:
+           sector_gate_coords: "(29.275235,-95.422880),(29.275473,-95.422934)"
+       - S3:
 
   -  name: "New Hampshire Motor Speedway"
      code: "nhms"
@@ -135,6 +207,12 @@ tracks:
      pit_entry_direction: "W"
      pit_out_coords: "(42.409446, -86.140760), (42.409447, -86.140654)"
      pit_out_direction: "N"
+     sectors:
+       - S1:
+           sector_gate_coords: "(42.410333,-86.138852),(42.410210,-86.138594)"
+       - S2:
+           sector_gate_coords: "(42.407061,-86.135358),(42.407199,-86.135218)"
+       - S3:
 
   -  name: "High Plains Raceway"
      code: "hpr"
@@ -144,6 +222,12 @@ tracks:
      pit_entry_direction: "E"
      pit_out_coords: "(39.734942, -103.892095),(39.734862, -103.892041)"
      pit_out_direction: "NE"
+     sectors:
+       - S1:
+           sector_gate_coords: "(39.734780,-103.901310),(39.734865,-103.901161)"
+       - S2:
+           sector_gate_coords: "(39.738045,-103.900279),(39.738090,-103.900075)"
+       - S3:
 
   -  name: "Autobahn Country Club Joliet"
      code: "abhn"
@@ -171,6 +255,12 @@ tracks:
     pit_entry_direction: "W"
     pit_out_coords: "(47.321353, -122.149638),(47.321290, -122.149641)"
     pit_out_direction: "W"
+    sectors:
+      - S1:
+          sector_gate_coords: "(47.319854,-122.149468),(47.319695,-122.149481)"
+      - S2:
+          sector_gate_coords: "(47.319518,-122.138788),(47.319212,-122.138552)"
+      - S3:
 
   - name: "Sebring"
     code: "sbrg"
@@ -198,6 +288,12 @@ tracks:
     pit_entry_direction: "NE"
     pit_out_coords: "(33.534235, -86.618257),(33.534242, -86.618184)"
     pit_out_direction: "N"
+    sectors:
+      - S1:
+          sector_gate_coords: "(33.532121,-86.619748),(33.531935,-86.619608)"
+      - S2:
+          sector_gate_coords: "(33.531026,-86.619153),(33.530801,-86.619080)"
+      - S3:
 
   - name: "Mid Ohio Sports Car Course"
     code: "mdoh"
@@ -207,6 +303,12 @@ tracks:
     pit_entry_direction: "W"
     pit_out_coords: "(40.689027, -82.639062),(40.689011, -82.638998)"
     pit_out_direction: "S"
+    sectors:
+      - S1:
+          sector_gate_coords: "(40.688433,-82.640358),(40.688399,-82.640106)"
+      - S2:
+          sector_gate_coords: "(40.693840,-82.632192),(40.693820,-82.631881)"
+      - S3:
 
   - name: "Carolina Motorsports Park"
     code: "crna"
@@ -216,6 +318,12 @@ tracks:
     pit_entry_direction: "SE"
     pit_out_coords: "(34.4866873, -80.595595),(34.486713, -80.595531)"
     pit_out_direction: "SE"
+    sectors:
+      - S1:
+          sector_gate_coords: "(34.490254,-80.590180),(34.490254,-80.589922)"
+      - S2:
+          sector_gate_coords: "(34.487344,-80.598167),(34.487468,-80.597926)"
+      - S3:
 
   - name: "Hallett Motor Racing Circuit"
     code: "hlt"
@@ -234,6 +342,12 @@ tracks:
     pit_entry_direction: "S"
     pit_out_coords: "(41.3060064, -81.0141997),(41.3060184, -81.014125)"
     pit_out_direction: "S"
+    sectors:
+      - S1:
+          sector_gate_coords: "(41.305654,-81.020158),(41.305501,-81.020008)"
+      - S2:
+          sector_gate_coords: "(41.307557,-81.019104),(41.307467,-81.018978)"
+      - S3:
 
   - name: "Summit Point Motorsports Park"
     code: "smpt"
@@ -243,6 +357,12 @@ tracks:
     pit_entry_direction: "SE"
     pit_out_coords: "(39.236498, -77.968830),(39.236540, -77.968609)"
     pit_out_direction: "S"
+    sectors:
+      - S1:
+          sector_gate_coords: "(39.234383,-77.970804),(39.234362,-77.970630)"
+      - S2:
+          sector_gate_coords: "(39.240921,-77.972759),(39.241073,-77.972735)"
+      - S3:
 
   - name: "New Jersey Motorsports Park"
     code: "njmp"
@@ -252,6 +372,12 @@ tracks:
     pit_entry_direction: "W"
     pit_out_coords: "(39.362958, -75.077191),(39.362943, -75.077116)"
     pit_out_direction: "N"
+    sectors:
+      - S1:
+          sector_gate_coords: "(39.363229,-75.071038),(39.363345,-75.070926)"
+      - S2:
+          sector_gate_coords: "(39.358950,-75.065546),(39.358715,-75.065498)"
+      - S3:
 
 # this is a local test track, used for testing and other things.
   -  name: "Arlington Test Track"
@@ -260,6 +386,13 @@ tracks:
      start_finish_direction: "SE"
      pit_entry_coords: "(37.928483,-122.297005),(37.928385,-122.297129)"
      pit_entry_direction: "NW"
+     sectors:
+       - S1:
+           sector_gate_coords: "(37.925309,-122.295215),(37.925390,-122.295145)"
+       - S2:
+           sector_gate_coords: "(37.926768,-122.296527),(37.926783,-122.296390)"
+       - S3:
+
      hidden: "true"
 
 # this is a test track, for the donut pass me team.
