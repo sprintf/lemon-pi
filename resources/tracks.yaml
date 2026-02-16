@@ -198,6 +198,12 @@ tracks:
      pit_entry_direction: "S"
      pit_out_coords: "(43.361208, -71.462747),(43.361151, -71.462511)"
      pit_out_direction: "S"
+     sectors:
+       - S1:
+           sector_gate_coords: "(43.362884,-71.458413),(43.362724,-71.458504)"
+       - S2:
+           sector_gate_coords: "(43.362888,-71.458206),(43.363048,-71.458115)"
+       - S3:
 
   -  name: "Gingerman Raceway"
      code: "gngr"
@@ -237,6 +243,12 @@ tracks:
      pit_entry_direction: "E"
      pit_out_coords: "(41.455295, -88.126820),(41.455408, -88.126731)"
      pit_out_direction: "SE"
+     sectors:
+       - S1:
+           sector_gate_coords: "(41.452940,-88.131385),(41.452932,-88.131100)"
+       - S2:
+           sector_gate_coords: "(41.451894,-88.132366),(41.451882,-88.131969)"
+       - S3:
 
   -  name: "NCM Motorsports Park"
      code: "ncmp"
@@ -246,6 +258,12 @@ tracks:
      pit_entry_direction: "SW"
      pit_out_coords: "(37.000059, -86.370473),(36.999969, -86.370431)"
      pit_out_direction: "SW"
+     sectors:
+       - S1:
+           sector_gate_coords: "(37.003248,-86.367108),(37.003094,-86.366944)"
+       - S2:
+           sector_gate_coords: "(37.006242,-86.361284),(37.006516,-86.361124)"
+       - S3:
 
   - name: "Pacific Raceway"
     code: "prw"
@@ -279,6 +297,12 @@ tracks:
     pit_entry_direction: "NW"
     pit_out_coords: "(41.980412, -71.828208),(41.980336, -71.828249)"
     pit_out_direction: "W"
+    sectors:
+      - S1:
+          sector_gate_coords: "(41.982422,-71.827504),(41.982362,-71.827255)"
+      - S2:
+          sector_gate_coords: "(41.981849,-71.824054),(41.981823,-71.823777)"
+      - S3:
 
   - name: "Barber Motorsports Park"
     code: "brbr"
@@ -305,9 +329,9 @@ tracks:
     pit_out_direction: "S"
     sectors:
       - S1:
-          sector_gate_coords: "(40.688433,-82.640358),(40.688399,-82.640106)"
+          sector_gate_coords: "(40.688958,-82.640193),(40.688912,-82.639962)"
       - S2:
-          sector_gate_coords: "(40.693840,-82.632192),(40.693820,-82.631881)"
+          sector_gate_coords: "(40.693529,-82.632148),(40.693522,-82.631896)"
       - S3:
 
   - name: "Carolina Motorsports Park"
@@ -333,6 +357,12 @@ tracks:
     pit_entry_direction: "SE"
     pit_out_coords: "(36.220510, -96.590612),(36.220470, -96.590501)"
     pit_out_direction: "NE"
+    sectors:
+      - S1:
+          sector_gate_coords: "(36.221892,-96.595120),(36.221907,-96.594931)"
+      - S2:
+          sector_gate_coords: "(36.221570,-96.593594),(36.221483,-96.593403)"
+      - S3:
 
   - name: "Nelson Ledges Race Course"
     code: "nell"
@@ -344,9 +374,9 @@ tracks:
     pit_out_direction: "S"
     sectors:
       - S1:
-          sector_gate_coords: "(41.305654,-81.020158),(41.305501,-81.020008)"
+          sector_gate_coords: "(41.304019,-81.020286),(41.304087,-81.020058)"
       - S2:
-          sector_gate_coords: "(41.307557,-81.019104),(41.307467,-81.018978)"
+          sector_gate_coords: "(41.308174,-81.017336),(41.308054,-81.017275)"
       - S3:
 
   - name: "Summit Point Motorsports Park"
