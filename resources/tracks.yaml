@@ -133,6 +133,8 @@ tracks:
      start_finish_direction: "SW"
      pit_entry_coords: "(29.888531, -90.196961),(29.888506, -90.196854)"
      pit_entry_direction: "N"
+     pit_out_coords: "(29.885106, -90.199527),(29.885037, -90.199469)"
+     pit_out_direction: "SW"
      sectors:
        - S1:
            sector_gate_coords: "(29.880681,-90.207411),(29.880467,-90.207314)"
