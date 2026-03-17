@@ -424,7 +424,6 @@ tracks:
        - S2:
            sector_gate_coords: "(37.926768,-122.296527),(37.926783,-122.296390)"
        - S3:
-
      hidden: "true"
 
 # this is a test track, for the donut pass me team.
