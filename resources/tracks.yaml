@@ -325,8 +325,8 @@ tracks:
     code: "mdoh"
     start_finish_coords: "(40.689542, -82.635267),(40.689313, -82.635276)"
     start_finish_direction: "W"
-    pit_entry_coords: "(40.688711, -82.633204),(40.688785, -82.633192)"
-    pit_entry_direction: "W"
+    pit_entry_coords: "(40.688826, -82.633545),(40.688869, -82.633465)"
+    pit_entry_direction: "NW"
     pit_out_coords: "(40.689027, -82.639062),(40.689011, -82.638998)"
     pit_out_direction: "S"
     sectors:
