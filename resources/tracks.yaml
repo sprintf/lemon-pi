@@ -355,7 +355,7 @@ tracks:
     code: "hlt"
     start_finish_coords: "(36.220693, -96.590541),(36.220712, -96.590317)"
     start_finish_direction: "N"
-    pit_entry_coords: "(36.218805, -96.591294),(36.218868, -96.591206)"
+    pit_entry_coords: "(36.218724, -96.591173),(36.218788, -96.591103)"
     pit_entry_direction: "SE"
     pit_out_coords: "(36.220510, -96.590612),(36.220470, -96.590501)"
     pit_out_direction: "NE"
