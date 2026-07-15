@@ -243,7 +243,7 @@ tracks:
      start_finish_direction: "SE"
      pit_entry_coords: "(41.456434, -88.12861),(41.456528, -88.128561)"
      pit_entry_direction: "E"
-     pit_out_coords: "(41.455295, -88.126820),(41.455408, -88.126731)"
+     pit_out_coords: "(41.454959, -88.126088),(41.455027, -88.125936)"
      pit_out_direction: "SE"
      sectors:
        - S1:
