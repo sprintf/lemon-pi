@@ -254,7 +254,7 @@ tracks:
 
   -  name: "NCM Motorsports Park"
      code: "ncmp"
-     start_finish_coords: "(37.001100, -86.368613),(37.000978, -86.368536)"
+     start_finish_coords: "(37.001097,-86.368599),(37.000963,-86.368503)"
      start_finish_direction: "SW"
      pit_entry_coords: "(37.002003, -86.366165),(37.001941, -86.366134)"
      pit_entry_direction: "SW"
