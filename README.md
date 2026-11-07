@@ -2,6 +2,13 @@
 
 # Lemon-Pi
 
+> [!IMPORTANT]
+> **This project is obsolete and no longer maintained.**
+>
+> The new, maintained version lives at **[citrus-racer.com](https://citrus-racer.com)**. It's still
+> free, and it now installs on Android and iOS phones and tablets, so you no longer need a
+> Raspberry Pi in the car.
+
 <img src="https://24hoursoflemons.com/wp-content/uploads/2017/04/24hours_logo.png" alt="drawing" width="128"/> meets <img src="https://www.raspberrypi.org/wp-content/uploads/2011/10/Raspi-PGB001.png" alt="drawing" width="128"/>
 
 A Raspberry-Pi based dashboard display for endurance car racers.
