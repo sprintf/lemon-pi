@@ -181,10 +181,10 @@ tracks:
      code: "msrh"
      start_finish_coords: "(29.279136,-95.422390),(29.278962,-95.422432)"
      start_finish_direction: "E"
-     pit_entry_coords: "(29.278953,-95.420712),(29.278887,-95.420603)"
-     pit_entry_direction: "NE"
-     pit_out_coords: "(29.279540, -95.425442),(29.279547, -95.425354)"
-     pit_out_direction: "S"
+     pit_entry_coords: "(29.279540, -95.425442),(29.279547, -95.425354)"
+     pit_entry_direction: "S"
+     pit_out_coords: "(29.278953,-95.420712),(29.278887,-95.420603)"
+     pit_out_direction: "NE"
      sectors:
        - S1:
            sector_gate_coords: "(29.275235,-95.422880),(29.275473,-95.422934)"
