@@ -187,9 +187,9 @@ tracks:
      pit_out_direction: "N"
      sectors:
        - S1:
-           sector_gate_coords: "(29.281140,-95.419284),(29.280878,-95.419257)"
-       - S2:
            sector_gate_coords: "(29.275235,-95.422880),(29.275473,-95.422934)"
+       - S2:
+           sector_gate_coords: "(29.281140,-95.419284),(29.280878,-95.419257)"
        - S3:
 
   -  name: "New Hampshire Motor Speedway"
