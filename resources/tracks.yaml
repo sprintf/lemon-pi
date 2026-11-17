@@ -153,8 +153,10 @@ tracks:
      code: "rdatl"
      start_finish_coords: "(34.150442,-83.814164),(34.150312,-83.814269)"
      start_finish_direction: "SE"
-     pit_entry_coords: "(34.150441,-83.816277),(34.150359,-83.816274)"
-     pit_entry_direction: "E"
+     pit_entry_coords: "(34.1508783, -83.816736),(34.150768, -83.816602)"
+     pit_entry_direction: "NE"
+     pit_out_coords: "(34.1490123, -83.811397),(34.149088, -83.811322)"
+     pit_out_direction: "SE"
      sectors:
        - S1:
            sector_gate_coords: "(34.142829,-83.814181),(34.142696,-83.814001)"
